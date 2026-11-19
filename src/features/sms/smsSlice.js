@@ -14,7 +14,7 @@ export const smsSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Template", "smsBundles"],
+  tagTypes: ["Template", "smsBundles", "VoiceAccount", "VoicePayments"],
   endpoints: (builder) => ({
     // ✅ SMS Send
     postSMSSend: builder.mutation({
@@ -31,6 +31,53 @@ export const smsSlice = createApi({
         body.append("audio", audio);
         return { url: "voice/upload", method: "POST", body };
       },
+    }),
+
+    // ======================================================
+    // ✅ Voice SMS API (backend: routes/voiceSms.js)
+    // ======================================================
+    getVoiceAccount: builder.query({
+      query: () => "voice/account",
+      providesTags: ["VoiceAccount"],
+    }),
+    // Admin প্যানেল: যেকোনো প্রতিষ্ঠানের Voice SMS অ্যাকাউন্ট (backend: routes/Admin/voiceSms.js)
+    getAdminVoiceAccount: builder.query({
+      query: (databaseName) => `${API_URL}/api/admin/voice-sms/account/${encodeURIComponent(databaseName)}`,
+      providesTags: (_result, _error, databaseName) => [{ type: "VoiceAccount", id: databaseName }],
+    }),
+    getAdminVoiceAccounts: builder.query({
+      query: () => `${API_URL}/api/admin/voice-sms/accounts`,
+      providesTags: [{ type: "VoiceAccount", id: "ADMIN_LIST" }],
+    }),
+    createAdminVoiceAccount: builder.mutation({
+      query: ({ databaseName, ...data }) => ({
+        url: `${API_URL}/api/admin/voice-sms/account/${encodeURIComponent(databaseName)}`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: (_result, _error, { databaseName }) => [
+        { type: "VoiceAccount", id: databaseName },
+        { type: "VoiceAccount", id: "ADMIN_LIST" },
+      ],
+    }),
+    getVoicePackages: builder.query({
+      query: () => "voice/packages",
+    }),
+    startVoiceDeposit: builder.mutation({
+      query: (data) => ({ url: "voice/deposit", method: "POST", body: data }),
+      invalidatesTags: ["VoicePayments"],
+    }),
+    getVoicePayments: builder.query({
+      query: () => "voice/payments",
+      providesTags: ["VoicePayments"],
+    }),
+    checkVoicePayment: builder.mutation({
+      query: (transactionId) => ({ url: `voice/payment/${encodeURIComponent(transactionId)}` }),
+      invalidatesTags: ["VoicePayments", "VoiceAccount"],
+    }),
+    sendVoiceSMS: builder.mutation({
+      query: (data) => ({ url: "voice/send", method: "POST", body: data }),
+      invalidatesTags: ["VoiceAccount"],
     }),
 
     // ✅ Update Template (id আলাদা করে নিন, body তে বাকি ডাটা)
@@ -104,5 +151,14 @@ export const {
   usePostSMSTemplateMutation,
   useUpdateSMSTemplateMutation,
   useDeleteSMSTemplateMutation,
-  useSendPublishedResultMutation
+  useSendPublishedResultMutation,
+  useGetVoiceAccountQuery,
+  useGetAdminVoiceAccountQuery,
+  useGetAdminVoiceAccountsQuery,
+  useCreateAdminVoiceAccountMutation,
+  useGetVoicePackagesQuery,
+  useStartVoiceDepositMutation,
+  useGetVoicePaymentsQuery,
+  useCheckVoicePaymentMutation,
+  useSendVoiceSMSMutation,
 } = smsSlice;

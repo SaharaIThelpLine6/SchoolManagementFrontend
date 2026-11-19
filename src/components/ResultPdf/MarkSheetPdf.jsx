@@ -3,6 +3,17 @@ import QRCode from "react-qr-code";
 
 import { useGetLabelNameListsQuery } from '../../features/result/resultSilce';
 import { bufferToDataUrl } from '../../utils/bufferDataURL';
+import {
+  toLangCode,
+  pickLang,
+  getInstitutionAddress,
+  getInstitutionName,
+  getLangValue,
+  getMarkSheetDir,
+  getMarkSheetText,
+  getPrintDate,
+  toLangDigit,
+} from '../../Data/MarkSheetConfig';
 
 // ==========================================
 // Print CSS — templateId অনুযায়ী accent color
@@ -49,13 +60,32 @@ const getDensity = (totalSubjects) => {
   return { cap: Infinity, pad: 4 };
 };
 
+/**
+ * Prefix every selector in a stylesheet so the rules apply inside one
+ * element only. Used for the template miniatures, where a dozen sheets are
+ * on screen together and each one needs its own type sizes.
+ * The stylesheet handed in holds plain rules only — no at-rules — because
+ * the caller keeps @page and the print block out of it.
+ */
+const scopeSelectors = (css, prefix) =>
+  css.replace(/(^|\n)([^@\n{}][^{}]*?)\s*\{/g, (whole, lead, selector) => {
+    const scoped = selector
+      .split(',')
+      .map((one) => `${prefix} ${one.trim()}`)
+      .join(',\n');
+    return `${lead}${scoped} {`;
+  });
+
 const getPrintCss = (paperSize, orientation, templateId, sizes = {}) => {
   const pageHeight = getPageHeightMm(paperSize, orientation);
 
   // ---- Size settings -------------------------------------------------
   // Each one is a percentage. At 100 nothing is emitted at all, so an
   // untouched sheet renders exactly as its template designed it.
-  const { headerScale = 100, contentFontScale = 100, rowGapScale = 100, totalSubjects = 0 } = sizes;
+  const {
+    headerScale = 100, contentFontScale = 100, rowGapScale = 100,
+    totalSubjects = 0, scopeId = null,
+  } = sizes;
   const m = TYPE_METRICS[templateId] || TYPE_METRICS['template-1'];
   const density = getDensity(totalSubjects);
 
@@ -134,8 +164,32 @@ ${tableSel} thead th { font-size: ${px(m.head * fontPct)} !important; }
   };
   const p = palette[templateId] || { th: '#0f766e', thBorder: '#0f766e', alt: '#f0fdfa' };
 
-  return `
-@page { size: ${paperSize} ${orientation}; margin: ${PAGE_MARGIN_MM}mm; }
+  // Header text colour follows its own background.
+  //
+  // The print rule below used to say color:#ffffff whatever the header was.
+  // That is right for the dark headers, but template 8's header is white —
+  // so its heading row printed white on white and came out completely
+  // blank. Reading the background's luminance keeps every template right,
+  // including any pale header added later.
+  const readableOn = (hex) => {
+    const raw = String(hex || '').replace('#', '');
+    const full = raw.length === 3 ? raw.split('').map((c) => c + c).join('') : raw;
+    if (!/^[0-9a-fA-F]{6}$/.test(full)) return '#ffffff';
+
+    const channel = (i) => {
+      const v = parseInt(full.slice(i, i + 2), 16) / 255;
+      return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+    };
+    const luminance =
+      0.2126 * channel(0) + 0.7152 * channel(2) + 0.0722 * channel(4);
+
+    return luminance > 0.4 ? '#000000' : '#ffffff';
+  };
+  const thText = readableOn(p.th);
+
+  // Rules that describe the sheet. With a scopeId they are prefixed so
+  // they reach only that one preview, leaving the real sheet alone.
+  const sheetCss = `
 
 /* ---------------------------------------------------------------
    One page, one size.
@@ -220,7 +274,13 @@ ${headerCss}${contentFontCss}${tableFontCss}${rowGapCss}
 .marksheet-mode-bw .marksheet-rainbow {
   display: none !important;
 }
+`;
 
+  if (scopeId) return scopeSelectors(sheetCss, `#${scopeId}`);
+
+  return `
+@page { size: ${paperSize} ${orientation}; margin: ${PAGE_MARGIN_MM}mm; }
+${sheetCss}
 @media print {
   html, body {
     height: auto !important;
@@ -291,7 +351,7 @@ ${headerCss}${contentFontCss}${tableFontCss}${rowGapCss}
   .marksheet-page .marks-table-wrap thead th {
     background-color: ${p.th} !important;
     background-image: none !important;
-    color: #ffffff !important;
+    color: ${thText} !important;
     border-color: ${p.thBorder} !important;
   }
   .marksheet-page .marks-table-wrap tbody tr.row-alt td {
@@ -334,7 +394,7 @@ const TH_STYLE_ROYAL = { backgroundColor: '#0f5132', color: '#ffffff', ...EXACT 
 // ==========================================
 // শেয়ার্ড ডাটা ক্যালকুলেশন (৩টি টেমপ্লেটেই ব্যবহার)
 // ==========================================
-const computeMarkSheetData = ({ student, examSubjects, examConfig = {}, divisions = [] }) => {
+const computeMarkSheetData = ({ student, examSubjects, examConfig = {}, divisions = [], lang }) => {
   const studentSubjects = Array.isArray(student?.subjects) ? student.subjects : [];
 
   const findSubject = (subjectId) =>
@@ -355,7 +415,7 @@ const computeMarkSheetData = ({ student, examSubjects, examConfig = {}, division
 
   const subjects = examSubjects.map((s, i) => ({
     id: s?.ID ?? i + 1,
-    subject: pick(s?.SubjectName, s?.ArabicSubject, s?.EngSubjectName),
+    subject: pick(getLangValue(s, 'SubjectName', lang), s?.SubjectName),
     fullMark: pick(s?.MaxNumber),
     passMark: pick(s?.PassNumber),
     highestMark: getHighestMark(s?.SubjectID, s?.HighestMark),
@@ -379,7 +439,7 @@ const computeMarkSheetData = ({ student, examSubjects, examConfig = {}, division
       if (dId === null || dId === undefined || dId === '') continue;
       const found = divisions.find((d) => Number(d.ID) === Number(dId));
       if (!found) continue;
-      divisionRows.push({ name: found.DivisionNames, number: dNum ?? 0 });
+      divisionRows.push({ name: getLangValue(found, 'DivisionNames', lang), number: dNum ?? 0 });
     }
   } else {
     for (let i = 1; i <= 14; i++) {
@@ -388,7 +448,7 @@ const computeMarkSheetData = ({ student, examSubjects, examConfig = {}, division
       if (dId === null || dId === undefined || dId === '') continue;
       const found = divisions.find((d) => Number(d.ID) === Number(dId));
       if (!found) continue;
-      divisionRows.push({ name: found.DivisionNames, number: dNum ?? 0 });
+      divisionRows.push({ name: getLangValue(found, 'DivisionNames', lang), number: dNum ?? 0 });
     }
   }
 
@@ -398,7 +458,7 @@ const computeMarkSheetData = ({ student, examSubjects, examConfig = {}, division
   const birthDate = pick(student?.DateOfBirth, student?.DOB, student?.BirthDate);
   const rollNumber = pick(student?.AdmissionSerial);
   const registration = pick(student?.UserCode);
-  const divisionName = pick(student?.DivisionNames);
+  const divisionName = pick(getLangValue(student, 'DivisionNames', lang));
   const averageMark =
     examConfig?.AverageSubsonkha > 0 && student?.Total !== undefined && student?.Total !== null
       ? (Number(student.Total) / examConfig.AverageSubsonkha).toFixed(2)
@@ -465,14 +525,27 @@ const getPageHeightMm = (paperSize, orientation) => {
 const buildInfoItems = ({
   studentInfoFields = {}, labels = {},
   studentName, fatherName, motherName, birthDate, registration, rollNumber,
-}) => [
-  studentInfoFields.name && { key: 'name', label: 'নাম', enLabel: 'NAME', value: studentName },
-  studentInfoFields.fatherName && { key: 'fatherName', label: 'পিতার নাম', enLabel: 'FATHER', value: fatherName },
-  studentInfoFields.motherName && { key: 'motherName', label: 'মাতার নাম', enLabel: 'MOTHER', value: motherName },
-  studentInfoFields.dob && { key: 'dob', label: 'জন্ম তারিখ', enLabel: 'DATE OF BIRTH', value: birthDate },
-  studentInfoFields.registration && { key: 'registration', label: labels?.StudentIDLabel ?? 'দাখেলা', enLabel: labels?.StudentIDLabel ?? 'REGISTRATION', value: registration },
-  studentInfoFields.admission && { key: 'admission', label: labels?.AdmissionIDLabel ?? 'ভর্তি নং', enLabel: labels?.AdmissionIDLabel ?? 'ADMISSION', value: rollNumber },
-].filter(Boolean);
+  totalStudents, lang,
+}) => {
+  const ms = (key) => getMarkSheetText(key, lang);
+
+  return [
+    studentInfoFields.name && { key: 'name', label: ms('name'), enLabel: 'NAME', value: studentName },
+    studentInfoFields.fatherName && { key: 'fatherName', label: ms('fatherName'), enLabel: 'FATHER', value: fatherName },
+    studentInfoFields.motherName && { key: 'motherName', label: ms('motherName'), enLabel: 'MOTHER', value: motherName },
+    studentInfoFields.dob && { key: 'dob', label: ms('dob'), enLabel: 'DATE OF BIRTH', value: birthDate },
+    studentInfoFields.registration && { key: 'registration', label: labels?.StudentIDLabel ?? ms('registration'), enLabel: labels?.StudentIDLabel ?? 'REGISTRATION', value: registration },
+    studentInfoFields.admission && { key: 'admission', label: labels?.AdmissionIDLabel ?? ms('admission'), enLabel: labels?.AdmissionIDLabel ?? 'ADMISSION', value: rollNumber },
+  // Always shown, under the switchable rows above.
+  // { key: 'totalStudents', label: 'মোট পরীক্ষার্থীর সংখ্যা', enLabel: 'TOTAL EXAMINEES', value: totalStudents ?? '-' },
+    studentInfoFields.totalStudents !== false && {
+      key: 'totalStudents',
+      label: ms('totalStudents'),
+      enLabel: 'TOTAL EXAMINEES',
+      value: totalStudents ?? '-',
+    },
+  ].filter(Boolean);
+};
 
 /**
  * Column totals for the subject table.
@@ -499,12 +572,16 @@ const subjectPercent = (obtained, full) => {
 };
 
 /** The four summary values report 1 shows, reused by every template. */
-const buildSummaryItems = ({ divisionName, student, averageMark }) => [
-  { key: 'division', label: 'প্রাপ্ত বিভাগ', enLabel: 'DIVISION', value: divisionName },
-  { key: 'position', label: 'মেধা স্থান', enLabel: 'POSITION', value: student?.Positions ?? '-' },
-  { key: 'average', label: 'গড়', enLabel: 'AVERAGE', value: averageMark },
-  { key: 'total', label: 'মোট নম্বর', enLabel: 'TOTAL', value: student?.Total ?? '-' },
-];
+const buildSummaryItems = ({ divisionName, student, averageMark, lang }) => {
+  const ms = (key) => getMarkSheetText(key, lang);
+
+  return [
+    { key: 'division', label: ms('division'), enLabel: 'DIVISION', value: divisionName },
+    { key: 'position', label: ms('meritPosition'), enLabel: 'POSITION', value: student?.Positions ?? '-' },
+    { key: 'average', label: ms('average'), enLabel: 'AVERAGE', value: averageMark },
+    { key: 'total', label: ms('totalMark'), enLabel: 'TOTAL', value: student?.Total ?? '-' },
+  ];
+};
 
 // Decorative backgrounds, drawn as inline SVG so nothing has to be uploaded.
 const PATTERN_GEOMETRIC =
@@ -552,10 +629,10 @@ const SectionTitle = ({ icon, children, right, accent = 'emerald' }) => {
   );
 };
 
-const InfoRow = ({ label, value, labelW = 'w-[125px]' }) => (
+const InfoRow = ({ label, value, labelW = 'w-[125px]', lang }) => (
   <div className="flex border-b border-slate-200 py-2 print:py-1 text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14">
     <span className={`${labelW} print:w-[105px] shrink-0 text-black font-bold`}>{label}</span>
-    <span className="font-bold text-black">{toBn(value)}</span>
+    <span className="font-bold text-black">{toLangDigit(value, lang)}</span>
   </div>
 );
 
@@ -565,28 +642,43 @@ const InfoRow = ({ label, value, labelW = 'w-[125px]' }) => (
 const SingleMarkSheet = ({
   student, institution, imageSrc, signatureNajemSrc, signaturePrincipalSrc,
   session, classInfo, examSubjects, divisions = [], examConfig = {},
-  isLast = false, ExamID, SubClassID, ExamName,
+  isLast = false, ExamID, SubClassID, ExamName, lang = 'bn',
   showDate = true, showSignature = true, principalName = '', najemName = '',
+  najemShowSign = true, najemShowName = true, najemShowDate = true,
+  principalShowSign = true, principalShowName = true, principalShowDate = true,
   paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
   showClassTeacherSign = true, showGuardianSign = true,
+  totalStudents = 0,
 }) => {
   const {
     subjects, totalSubjects, divisionRows, rowPad, rowText,
     studentName, fatherName, motherName, birthDate, rollNumber,
     registration, divisionName, averageMark,
-  } = computeMarkSheetData({ student, examSubjects, examConfig, divisions });
+  } = computeMarkSheetData({ student, examSubjects, examConfig, divisions, lang });
+
+  // Every fixed word, digit and date on this sheet goes through the language.
+  // toBn keeps its name so no call site had to change; inside a template it
+  // now means "digits in the chosen language".
+  const ms = (key) => getMarkSheetText(key, lang);
+  const dir = getMarkSheetDir(lang);
+  const toBn = (value) => toLangDigit(value, lang);
+  const printDate = getPrintDate(new Date(), lang);
+  const instName = getInstitutionName(institution, lang);
+  const instAddress = getInstitutionAddress(institution, lang);
+  const sessionName = getLangValue(session, 'SessionName', lang);
 
   const { data } = useGetLabelNameListsQuery();
   const labels = data?.[0] || {};
   const previewWidth = getPreviewWidth(paperSize, orientation);
 
   const infoItems = buildInfoItems({
+    lang,
     studentInfoFields, labels, studentName, fatherName, motherName,
-    birthDate, registration, rollNumber,
+    birthDate, registration, rollNumber, totalStudents,
   });
 
   return (
-    <div className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-white shadow-xl rounded-xl border border-slate-200 text-slate-800 mb-10 print:mb-0 flex flex-col`}>
+    <div dir={dir} className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-white shadow-xl rounded-xl border border-slate-200 text-slate-800 mb-10 print:mb-0 flex flex-col`}>
       <div className="marksheet-header relative flex flex-col md:flex-row print:flex-row items-center justify-between bg-gradient-to-r from-teal-800 to-emerald-600 px-8 py-4 print:px-5 print:py-2 text-white shrink-0">
         <div className="flex items-center gap-4 print:gap-2.5 mb-3 md:mb-0 print:mb-0">
           <div className="h-[60px] w-[60px] print:h-[46px] print:w-[46px] overflow-hidden rounded-full border-[3px] border-emerald-300 print:border-0 bg-white shadow-md print:shadow-none shrink-0">
@@ -600,10 +692,10 @@ const SingleMarkSheet = ({
           </div>
           <div>
             <h1 className="marksheet-inst-name text-[27px] ms-fs-27 md:text-[29px] print:text-[21px] ms-pfs-21 font-bold leading-tight text-white drop-shadow-sm">
-              {toBn(institution?.InstitutionName || '-')}
+              {toBn(instName || '-')}
             </h1>
             <p className="marksheet-inst-address text-[14px] ms-fs-14 md:text-[15px] print:text-[13px] ms-pfs-13 text-emerald-100 mt-0.5 print:mt-0">
-              {toBn(institution?.Address || '-')}
+              {toBn(instAddress || '-')}
             </p>
           </div>
         </div>
@@ -629,26 +721,26 @@ const SingleMarkSheet = ({
                 </span>
               }
             >
-              পরীক্ষার্থীর তথ্য
+              {ms('studentInfo')}
             </SectionTitle>
             <div className="bg-slate-50/50 rounded-lg p-3 print:p-2 border border-slate-100">
               {infoItems.map((f) => (
-                <InfoRow key={f.key} label={f.label} value={f.value} />
+                <InfoRow key={f.key} label={f.label} value={f.value} lang={lang} />
               ))}
             </div>
           </div>
 
           <div>
-            <SectionTitle icon="📝">নম্বর বিভাজন</SectionTitle>
+            <SectionTitle icon="📝">{ms('markDistribution')}</SectionTitle>
             <div className="w-full rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
               <div className="bg-slate-100 border-b border-slate-200 px-3 py-1.5 print:px-2 print:py-1 text-center">
                 <p className="text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold text-black">
-                  মোট বিভাগ - {toBn(divisionRows.length)} টি | মোট বিষয় {toBn(totalSubjects)} টি
+                  {ms('totalDivisions')} - {toBn(divisionRows.length)} {ms('items')} | {ms('totalSubjects')} {toBn(totalSubjects)} {ms('items')}
                 </p>
               </div>
               <div className="p-2 print:p-1">
                 {divisionRows.length === 0 ? (
-                  <div className="text-center text-slate-400 text-[15px] ms-fs-15 print:text-[14px] ms-pfs-14 py-2 print:py-1">কোনো বিভাগ পাওয়া যায়নি</div>
+                  <div className="text-center text-slate-400 text-[15px] ms-fs-15 print:text-[14px] ms-pfs-14 py-2 print:py-1">{ms('noDivision')}</div>
                 ) : (
                   divisionRows.map((item, index) => (
                     <div key={index} className="flex justify-between items-center py-1 print:py-0.5 px-2 text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold text-black border-b border-dashed border-slate-200 last:border-0">
@@ -671,17 +763,17 @@ const SingleMarkSheet = ({
         </div>
 
         <div className="mt-8 print:mt-1 shrink-0">
-          <SectionTitle icon="📊">বিষয়ভিত্তিক ফলাফল</SectionTitle>
+          <SectionTitle icon="📊">{ms('subjectResult')}</SectionTitle>
           <div className="marks-table-wrap w-full overflow-x-auto print:overflow-visible rounded-lg border border-slate-200 shadow-sm">
             <table className="w-full min-w-[700px] print:min-w-0 border-collapse bg-white text-black">
               <thead>
                 <tr className="text-center">
-                  <th style={TH_STYLE} className="border-b border-teal-700 px-3 py-3 print:px-2 print:py-1 text-[17px] ms-fs-17 print:text-[14.5px] ms-pfs-14_5 font-bold">ক্রমিক</th>
-                  <th style={TH_STYLE} className="border-b border-teal-700 px-4 py-3 print:px-2 print:py-1 text-[17px] ms-fs-17 print:text-[14.5px] ms-pfs-14_5 font-bold text-left">বিষয়</th>
-                  <th style={TH_STYLE} className="border-b border-teal-700 px-3 py-3 print:px-2 print:py-1 text-[17px] ms-fs-17 print:text-[14.5px] ms-pfs-14_5 font-bold">পূর্ণমান</th>
-                  <th style={TH_STYLE} className="border-b border-teal-700 px-3 py-3 print:px-2 print:py-1 text-[17px] ms-fs-17 print:text-[14.5px] ms-pfs-14_5 font-bold">পাশমার্ক</th>
-                  <th style={TH_STYLE} className="border-b border-teal-700 px-3 py-3 print:px-2 print:py-1 text-[17px] ms-fs-17 print:text-[14.5px] ms-pfs-14_5 font-bold whitespace-nowrap">সর্বোচ্চ প্রাপ্ত</th>
-                  <th style={TH_STYLE} className="border-b border-teal-700 px-3 py-3 print:px-2 print:py-1 text-[17px] ms-fs-17 print:text-[14.5px] ms-pfs-14_5 font-bold">প্রাপ্ত নম্বর</th>
+                  <th style={TH_STYLE} className="border-b border-teal-700 px-3 py-3 print:px-2 print:py-1 text-[17px] ms-fs-17 print:text-[14.5px] ms-pfs-14_5 font-bold">{ms('serial')}</th>
+                  <th style={TH_STYLE} className="border-b border-teal-700 px-4 py-3 print:px-2 print:py-1 text-[17px] ms-fs-17 print:text-[14.5px] ms-pfs-14_5 font-bold text-left">{ms('subject')}</th>
+                  <th style={TH_STYLE} className="border-b border-teal-700 px-3 py-3 print:px-2 print:py-1 text-[17px] ms-fs-17 print:text-[14.5px] ms-pfs-14_5 font-bold">{ms('fullMark')}</th>
+                  <th style={TH_STYLE} className="border-b border-teal-700 px-3 py-3 print:px-2 print:py-1 text-[17px] ms-fs-17 print:text-[14.5px] ms-pfs-14_5 font-bold">{ms('passMark')}</th>
+                  <th style={TH_STYLE} className="border-b border-teal-700 px-3 py-3 print:px-2 print:py-1 text-[17px] ms-fs-17 print:text-[14.5px] ms-pfs-14_5 font-bold whitespace-nowrap">{ms('highestMark')}</th>
+                  <th style={TH_STYLE} className="border-b border-teal-700 px-3 py-3 print:px-2 print:py-1 text-[17px] ms-fs-17 print:text-[14.5px] ms-pfs-14_5 font-bold">{ms('obtainedMark')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -705,22 +797,22 @@ const SingleMarkSheet = ({
         </div>
 
         <div className="mt-6 print:mt-1 shrink-0">
-          <SectionTitle icon="🏆">সারসংক্ষেপ</SectionTitle>
+          <SectionTitle icon="🏆">{ms('summary')}</SectionTitle>
           <div className="grid grid-cols-2 md:grid-cols-4 print:grid-cols-4 gap-3 print:gap-1.5 mt-2 print:mt-0.5">
             <div className="flex flex-col items-center justify-center gap-0.5 rounded-lg border border-emerald-200 bg-emerald-50 p-2.5 print:p-1 shadow-sm">
-              <p className="text-[14px] ms-fs-14 print:text-[12.5px] ms-pfs-12_5 font-bold text-emerald-600">প্রাপ্ত বিভাগ</p>
+              <p className="text-[14px] ms-fs-14 print:text-[12.5px] ms-pfs-12_5 font-bold text-emerald-600">{ms('division')}</p>
               <p className="text-[20px] ms-fs-20 print:text-[16px] ms-pfs-16 font-bold text-emerald-800 leading-tight">{toBn(divisionName)}</p>
             </div>
             <div className="flex flex-col items-center justify-center gap-0.5 rounded-lg border border-blue-200 bg-blue-50 p-2.5 print:p-1 shadow-sm">
-              <p className="text-[14px] ms-fs-14 print:text-[12.5px] ms-pfs-12_5 font-bold text-blue-600">মেধা স্থান</p>
+              <p className="text-[14px] ms-fs-14 print:text-[12.5px] ms-pfs-12_5 font-bold text-blue-600">{ms('meritPosition')}</p>
               <p className="text-[20px] ms-fs-20 print:text-[16px] ms-pfs-16 font-bold text-blue-800 leading-tight">{toBn(student?.Positions ?? '-')}</p>
             </div>
             <div className="flex flex-col items-center justify-center gap-0.5 rounded-lg border border-purple-200 bg-purple-50 p-2.5 print:p-1 shadow-sm">
-              <p className="text-[14px] ms-fs-14 print:text-[12.5px] ms-pfs-12_5 font-bold text-purple-600">গড়</p>
+              <p className="text-[14px] ms-fs-14 print:text-[12.5px] ms-pfs-12_5 font-bold text-purple-600">{ms('average')}</p>
               <p className="text-[20px] ms-fs-20 print:text-[16px] ms-pfs-16 font-bold text-purple-800 leading-tight">{toBn(averageMark)}</p>
             </div>
             <div className="flex flex-col items-center justify-center gap-0.5 rounded-lg border border-amber-200 bg-amber-50 p-2.5 print:p-1 shadow-sm">
-              <p className="text-[14px] ms-fs-14 print:text-[12.5px] ms-pfs-12_5 font-bold text-amber-600">মোট নম্বর</p>
+              <p className="text-[14px] ms-fs-14 print:text-[12.5px] ms-pfs-12_5 font-bold text-amber-600">{ms('totalMark')}</p>
               <p className="text-[20px] ms-fs-20 print:text-[16px] ms-pfs-16 font-bold text-amber-800 leading-tight">{toBn(student?.Total ?? '-')}</p>
             </div>
           </div>
@@ -731,13 +823,13 @@ const SingleMarkSheet = ({
           <div className="flex flex-col md:flex-row print:flex-row gap-6 print:gap-3 flex-1 min-h-0">
             {showClassTeacherSign && (
             <div className="flex-1 rounded-xl border border-slate-200 bg-slate-50 p-5 print:p-3 min-h-[120px] print:min-h-[85px] flex flex-col">
-              <p className="text-black font-bold text-[17px] ms-fs-17 print:text-[14px] ms-pfs-14">শ্রেণী শিক্ষক/শিক্ষিকার মন্তব্য ও স্বাক্ষর :</p>
+              <p className="text-black font-bold text-[17px] ms-fs-17 print:text-[14px] ms-pfs-14">{ms('classTeacherCommentSign')} :</p>
               <div className="border-b border-dashed border-slate-400 w-2/3 mt-2 print:mt-1.5 text-[16px] ms-fs-16 print:text-[13.5px] ms-pfs-13_5 text-black">{student?.Note ?? ''}</div>
             </div>
             )}
             {showGuardianSign && (
             <div className="flex-1 rounded-xl border border-slate-200 bg-slate-50 p-5 print:p-3 min-h-[120px] print:min-h-[85px] flex flex-col">
-              <p className="text-black font-bold text-[17px] ms-fs-17 print:text-[14px] ms-pfs-14">অভিভাবকের মন্তব্য ও স্বাক্ষর :</p>
+              <p className="text-black font-bold text-[17px] ms-fs-17 print:text-[14px] ms-pfs-14">{ms('guardianCommentSign')} :</p>
               <div className="border-b border-dashed border-slate-400 w-2/3 mt-2 print:mt-1.5"></div>
             </div>
             )}
@@ -754,27 +846,35 @@ const SingleMarkSheet = ({
               viewBox="0 0 256 256" />
           </div>
           <div className="mt-3 text-center print:mt-0.5">
-            <p className="text-[17px] ms-fs-17 text-black font-bold print:text-[12.5px] ms-pfs-12_5">যাচাই করুন</p>
+            <p className="text-[17px] ms-fs-17 text-black font-bold print:text-[12.5px] ms-pfs-12_5">{ms('verify')}</p>
           </div>
         </div>
         <div className="col-span-2 flex w-full flex-col items-center">
           <div className="h-16 w-full flex items-end justify-center print:h-8">
-            {showSignature && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="Signature Principal" className="max-h-16 max-w-full object-contain print:max-h-8" />}
+            {showSignature && principalShowSign && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="Signature Principal" className="max-h-16 max-w-full object-contain print:max-h-8" />}
           </div>
+          {principalShowName && (
           <div className="mt-2 w-full border-t-2 border-dashed border-slate-400 print:mt-0.5"></div>
+          )}
           <div className="mt-3 space-y-1 text-center print:mt-0.5 print:space-y-0">
-            <p className="text-[20px] ms-fs-20 font-bold text-black print:text-[14px] ms-pfs-14">{principalName || institution?.PrincipalName}</p>
-            {showDate && <p className="text-[15px] ms-fs-15 text-black font-bold print:text-[12.5px] ms-pfs-12_5">তারিখ : {toBn(new Date().toLocaleDateString('bn-BD'))}</p>}
+            {principalShowName && (
+            <p className="text-[20px] ms-fs-20 font-bold text-black print:text-[14px] ms-pfs-14">{principalName || institution?.PrincipalName || ms('principal')}</p>
+            )}
+            {showDate && principalShowDate && <p className="text-[15px] ms-fs-15 text-black font-bold print:text-[12.5px] ms-pfs-12_5">{ms('date')} : {printDate}</p>}
           </div>
         </div>
         <div className="col-span-2 flex w-full flex-col items-center">
           <div className="h-16 w-full flex items-end justify-center print:h-8">
-            {showSignature && signatureNajemSrc && <img src={signatureNajemSrc} alt="Signature Najem" className="max-h-16 max-w-full object-contain print:max-h-8" />}
+            {showSignature && najemShowSign && signatureNajemSrc && <img src={signatureNajemSrc} alt="Signature Najem" className="max-h-16 max-w-full object-contain print:max-h-8" />}
           </div>
+          {najemShowName && (
           <div className="mt-2 w-full border-t-2 border-dashed border-slate-400 print:mt-0.5"></div>
+          )}
           <div className="mt-3 space-y-1 text-center print:mt-0.5 print:space-y-0">
-            <p className="text-[20px] ms-fs-20 font-bold text-black print:text-[14px] ms-pfs-14">{najemName || institution?.NajemName}</p>
-            {showDate && <p className="text-[15px] ms-fs-15 text-black font-bold print:text-[12.5px] ms-pfs-12_5">তারিখ : {toBn(new Date().toLocaleDateString('bn-BD'))}</p>}
+            {najemShowName && (
+            <p className="text-[20px] ms-fs-20 font-bold text-black print:text-[14px] ms-pfs-14">{najemName || institution?.NajemName || ms('najem')}</p>
+            )}
+            {showDate && najemShowDate && <p className="text-[15px] ms-fs-15 text-black font-bold print:text-[12.5px] ms-pfs-12_5">{ms('date')} : {printDate}</p>}
           </div>
         </div>
       </div>
@@ -794,35 +894,50 @@ const SingleMarkSheet = ({
 const SingleMarkSheetModern = ({
   student, institution, imageSrc, signatureNajemSrc, signaturePrincipalSrc,
   session, classInfo, examSubjects, divisions = [], examConfig = {},
-  isLast = false, ExamID, SubClassID, ExamName,
+  isLast = false, ExamID, SubClassID, ExamName, lang = 'bn',
   showDate = true, showSignature = true, principalName = '', najemName = '',
+  najemShowSign = true, najemShowName = true, najemShowDate = true,
+  principalShowSign = true, principalShowName = true, principalShowDate = true,
   paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
   showClassTeacherSign = true, showGuardianSign = true,
+  totalStudents = 0,
 }) => {
   const {
     subjects, totalSubjects, divisionRows, rowPad, rowText,
     studentName, fatherName, motherName, birthDate, rollNumber,
     registration, divisionName, averageMark,
-  } = computeMarkSheetData({ student, examSubjects, examConfig, divisions });
+  } = computeMarkSheetData({ student, examSubjects, examConfig, divisions, lang });
+
+  // Every fixed word, digit and date on this sheet goes through the language.
+  // toBn keeps its name so no call site had to change; inside a template it
+  // now means "digits in the chosen language".
+  const ms = (key) => getMarkSheetText(key, lang);
+  const dir = getMarkSheetDir(lang);
+  const toBn = (value) => toLangDigit(value, lang);
+  const printDate = getPrintDate(new Date(), lang);
+  const instName = getInstitutionName(institution, lang);
+  const instAddress = getInstitutionAddress(institution, lang);
+  const sessionName = getLangValue(session, 'SessionName', lang);
 
   const { data } = useGetLabelNameListsQuery();
   const labels = data?.[0] || {};
   const previewWidth = getPreviewWidth(paperSize, orientation);
 
   const infoItems = buildInfoItems({
+    lang,
     studentInfoFields, labels, studentName, fatherName, motherName,
-    birthDate, registration, rollNumber,
+    birthDate, registration, rollNumber, totalStudents,
   });
 
   const summaryItems = [
-    { label: 'প্রাপ্ত বিভাগ', value: divisionName, from: 'from-violet-500', to: 'to-indigo-500', icon: '🏅' },
-    { label: 'মেধা স্থান', value: student?.Positions ?? '-', from: 'from-indigo-500', to: 'to-blue-500', icon: '🎯' },
-    { label: 'গড়', value: averageMark, from: 'from-fuchsia-500', to: 'to-pink-500', icon: '📈' },
-    { label: 'মোট নম্বর', value: student?.Total ?? '-', from: 'from-purple-500', to: 'to-violet-500', icon: '⭐' },
+    { label: ms('division'), value: divisionName, from: 'from-violet-500', to: 'to-indigo-500', icon: '🏅' },
+    { label: ms('meritPosition'), value: student?.Positions ?? '-', from: 'from-indigo-500', to: 'to-blue-500', icon: '🎯' },
+    { label: ms('average'), value: averageMark, from: 'from-fuchsia-500', to: 'to-pink-500', icon: '📈' },
+    { label: ms('totalMark'), value: student?.Total ?? '-', from: 'from-purple-500', to: 'to-violet-500', icon: '⭐' },
   ];
 
   return (
-    <div className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-gradient-to-br from-slate-50 to-violet-50/40 shadow-2xl rounded-3xl border-2 border-violet-200 text-slate-800 mb-10 print:mb-0 flex flex-col`}>
+    <div dir={dir} className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-gradient-to-br from-slate-50 to-violet-50/40 shadow-2xl rounded-3xl border-2 border-violet-200 text-slate-800 mb-10 print:mb-0 flex flex-col`}>
       {/* Header */}
       <div className="marksheet-header relative m-3 print:m-2 rounded-2xl overflow-hidden bg-gradient-to-br from-indigo-900 via-purple-700 to-fuchsia-600 px-6 py-5 print:px-4 print:py-2 text-white shadow-lg">
         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 20% 20%, white 0, transparent 40%), radial-gradient(circle at 80% 80%, white 0, transparent 35%)' }} />
@@ -837,9 +952,9 @@ const SingleMarkSheetModern = ({
             </div>
             <div>
               <h1 className="marksheet-inst-name text-[24px] ms-fs-24 md:text-[26px] print:text-[19px] ms-pfs-19 font-bold leading-tight text-white">
-                {toBn(institution?.InstitutionName || '-')}
+                {toBn(instName || '-')}
               </h1>
-              <p className="marksheet-inst-address text-[13px] ms-fs-13 print:text-[12px] ms-pfs-12 text-violet-100 mt-0.5">{toBn(institution?.Address || '-')}</p>
+              <p className="marksheet-inst-address text-[13px] ms-fs-13 print:text-[12px] ms-pfs-12 text-violet-100 mt-0.5">{toBn(instAddress || '-')}</p>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2 shrink-0">
@@ -868,27 +983,27 @@ const SingleMarkSheetModern = ({
                 </span>
               }
             >
-              পরীক্ষার্থীর তথ্য
+              {ms('studentInfo')}
             </SectionTitle>
             <div className="rounded-xl bg-white border-l-4 border-violet-500 shadow-sm p-3 print:p-2 border-r border-t border-b border-violet-100">
               {infoItems.map((f) => (
-                <InfoRow key={f.key} label={f.label} value={f.value} />
+                <InfoRow key={f.key} label={f.label} value={f.value} lang={lang} />
               ))}
             </div>
           </div>
 
           {/* Division */}
           <div>
-            <SectionTitle icon="📝" accent="violet">নম্বর বিভাজন</SectionTitle>
+            <SectionTitle icon="📝" accent="violet">{ms('markDistribution')}</SectionTitle>
             <div className="rounded-xl overflow-hidden border border-violet-200 bg-white shadow-sm">
               <div className="bg-gradient-to-r from-violet-500 to-indigo-500 px-3 py-1.5 print:py-1 text-center">
                 <p className="text-[15px] ms-fs-15 print:text-[13px] ms-pfs-13 font-bold text-white">
-                  মোট বিভাগ - {toBn(divisionRows.length)} টি | মোট বিষয় {toBn(totalSubjects)} টি
+                  {ms('totalDivisions')} - {toBn(divisionRows.length)} {ms('items')} | {ms('totalSubjects')} {toBn(totalSubjects)} {ms('items')}
                 </p>
               </div>
               <div className="p-2 print:p-1">
                 {divisionRows.length === 0 ? (
-                  <div className="text-center text-slate-400 text-[14px] ms-fs-14 py-2">কোনো বিভাগ পাওয়া যায়নি</div>
+                  <div className="text-center text-slate-400 text-[14px] ms-fs-14 py-2">{ms('noDivision')}</div>
                 ) : (
                   divisionRows.map((item, index) => (
                     <div key={index} className="flex justify-between items-center py-1 print:py-0.5 px-2 text-[15px] ms-fs-15 print:text-[13px] ms-pfs-13 font-bold text-slate-800 border-b border-dashed border-violet-100 last:border-0">
@@ -907,17 +1022,17 @@ const SingleMarkSheetModern = ({
 
         {/* Table */}
         <div className="mt-6 print:mt-1 shrink-0">
-          <SectionTitle icon="📊" accent="violet">বিষয়ভিত্তিক ফলাফল</SectionTitle>
+          <SectionTitle icon="📊" accent="violet">{ms('subjectResult')}</SectionTitle>
           <div className="marks-table-wrap w-full overflow-x-auto print:overflow-visible rounded-xl border border-violet-200 shadow-sm">
             <table className="w-full min-w-[700px] print:min-w-0 border-collapse bg-white text-black">
               <thead>
                 <tr className="text-center">
-                  <th style={TH_STYLE_MODERN} className="border-b border-violet-700 px-3 py-3 print:px-2 print:py-1 text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold">ক্রমিক</th>
-                  <th style={TH_STYLE_MODERN} className="border-b border-violet-700 px-4 py-3 print:px-2 print:py-1 text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold text-left">বিষয়</th>
-                  <th style={TH_STYLE_MODERN} className="border-b border-violet-700 px-3 py-3 print:px-2 print:py-1 text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold">পূর্ণমান</th>
-                  <th style={TH_STYLE_MODERN} className="border-b border-violet-700 px-3 py-3 print:px-2 print:py-1 text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold">পাশমার্ক</th>
-                  <th style={TH_STYLE_MODERN} className="border-b border-violet-700 px-3 py-3 print:px-2 print:py-1 text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold whitespace-nowrap">সর্বোচ্চ প্রাপ্ত</th>
-                  <th style={TH_STYLE_MODERN} className="border-b border-violet-700 px-3 py-3 print:px-2 print:py-1 text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold">প্রাপ্ত নম্বর</th>
+                  <th style={TH_STYLE_MODERN} className="border-b border-violet-700 px-3 py-3 print:px-2 print:py-1 text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold">{ms('serial')}</th>
+                  <th style={TH_STYLE_MODERN} className="border-b border-violet-700 px-4 py-3 print:px-2 print:py-1 text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold text-left">{ms('subject')}</th>
+                  <th style={TH_STYLE_MODERN} className="border-b border-violet-700 px-3 py-3 print:px-2 print:py-1 text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold">{ms('fullMark')}</th>
+                  <th style={TH_STYLE_MODERN} className="border-b border-violet-700 px-3 py-3 print:px-2 print:py-1 text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold">{ms('passMark')}</th>
+                  <th style={TH_STYLE_MODERN} className="border-b border-violet-700 px-3 py-3 print:px-2 print:py-1 text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold whitespace-nowrap">{ms('highestMark')}</th>
+                  <th style={TH_STYLE_MODERN} className="border-b border-violet-700 px-3 py-3 print:px-2 print:py-1 text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold">{ms('obtainedMark')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -942,7 +1057,7 @@ const SingleMarkSheetModern = ({
 
         {/* Summary */}
         <div className="mt-5 print:mt-1 shrink-0">
-          <SectionTitle icon="🏆" accent="violet">সারসংক্ষেপ</SectionTitle>
+          <SectionTitle icon="🏆" accent="violet">{ms('summary')}</SectionTitle>
           <div className="grid grid-cols-2 md:grid-cols-4 print:grid-cols-4 gap-3 print:gap-1.5 mt-2 print:mt-0.5">
             {summaryItems.map((item, i) => (
               <div key={i} className={`rounded-xl bg-gradient-to-br ${item.from} ${item.to} p-2.5 print:p-1 shadow-md text-white flex flex-col items-center justify-center gap-0.5`}>
@@ -960,13 +1075,13 @@ const SingleMarkSheetModern = ({
           <div className="flex flex-col md:flex-row print:flex-row gap-4 print:gap-3 flex-1 min-h-0">
             {showClassTeacherSign && (
             <div className="flex-1 rounded-xl border border-violet-200 bg-white p-4 print:p-3 min-h-[100px] print:min-h-[80px] flex flex-col shadow-sm">
-              <p className="text-violet-800 font-bold text-[15px] ms-fs-15 print:text-[13.5px] ms-pfs-13_5">শ্রেণী শিক্ষক/শিক্ষিকার মন্তব্য ও স্বাক্ষর :</p>
+              <p className="text-violet-800 font-bold text-[15px] ms-fs-15 print:text-[13.5px] ms-pfs-13_5">{ms('classTeacherCommentSign')} :</p>
               <div className="border-b border-dashed border-violet-300 w-2/3 mt-2 print:mt-1.5 text-[15px] ms-fs-15 print:text-[13px] ms-pfs-13 text-slate-700">{student?.Note ?? ''}</div>
             </div>
             )}
             {showGuardianSign && (
             <div className="flex-1 rounded-xl border border-violet-200 bg-white p-4 print:p-3 min-h-[100px] print:min-h-[80px] flex flex-col shadow-sm">
-              <p className="text-violet-800 font-bold text-[15px] ms-fs-15 print:text-[13.5px] ms-pfs-13_5">অভিভাবকের মন্তব্য ও স্বাক্ষর :</p>
+              <p className="text-violet-800 font-bold text-[15px] ms-fs-15 print:text-[13.5px] ms-pfs-13_5">{ms('guardianCommentSign')} :</p>
               <div className="border-b border-dashed border-violet-300 w-2/3 mt-2 print:mt-1.5"></div>
             </div>
             )}
@@ -984,27 +1099,35 @@ const SingleMarkSheetModern = ({
               viewBox="0 0 256 256" />
           </div>
           <div className="mt-2 text-center">
-            <p className="text-[13px] ms-fs-13 text-violet-700 font-bold print:text-[11.5px] ms-pfs-11_5">যাচাই করুন</p>
+            <p className="text-[13px] ms-fs-13 text-violet-700 font-bold print:text-[11.5px] ms-pfs-11_5">{ms('verify')}</p>
           </div>
         </div>
         <div className="col-span-2 flex w-full flex-col items-center">
           <div className="h-16 w-full flex items-end justify-center print:h-8">
-            {showSignature && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="Signature Principal" className="max-h-16 max-w-full object-contain print:max-h-8" />}
+            {showSignature && principalShowSign && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="Signature Principal" className="max-h-16 max-w-full object-contain print:max-h-8" />}
           </div>
+          {principalShowName && (
           <div className="mt-2 w-full border-t-2 border-violet-300 print:mt-0.5"></div>
+          )}
           <div className="mt-3 space-y-1 text-center print:mt-0.5 print:space-y-0">
-            <p className="text-[18px] ms-fs-18 font-bold text-violet-900 print:text-[13.5px] ms-pfs-13_5">{principalName || institution?.PrincipalName}</p>
-            {showDate && <p className="text-[13px] ms-fs-13 text-slate-600 font-semibold print:text-[12px] ms-pfs-12">তারিখ : {toBn(new Date().toLocaleDateString('bn-BD'))}</p>}
+            {principalShowName && (
+            <p className="text-[18px] ms-fs-18 font-bold text-violet-900 print:text-[13.5px] ms-pfs-13_5">{principalName || institution?.PrincipalName || ms('principal')}</p>
+            )}
+            {showDate && principalShowDate && <p className="text-[13px] ms-fs-13 text-slate-600 font-semibold print:text-[12px] ms-pfs-12">{ms('date')} : {printDate}</p>}
           </div>
         </div>
         <div className="col-span-2 flex w-full flex-col items-center">
           <div className="h-16 w-full flex items-end justify-center print:h-8">
-            {showSignature && signatureNajemSrc && <img src={signatureNajemSrc} alt="Signature Najem" className="max-h-16 max-w-full object-contain print:max-h-8" />}
+            {showSignature && najemShowSign && signatureNajemSrc && <img src={signatureNajemSrc} alt="Signature Najem" className="max-h-16 max-w-full object-contain print:max-h-8" />}
           </div>
+          {najemShowName && (
           <div className="mt-2 w-full border-t-2 border-violet-300 print:mt-0.5"></div>
+          )}
           <div className="mt-3 space-y-1 text-center print:mt-0.5 print:space-y-0">
-            <p className="text-[18px] ms-fs-18 font-bold text-violet-900 print:text-[13.5px] ms-pfs-13_5">{najemName || institution?.NajemName}</p>
-            {showDate && <p className="text-[13px] ms-fs-13 text-slate-600 font-semibold print:text-[12px] ms-pfs-12">তারিখ : {toBn(new Date().toLocaleDateString('bn-BD'))}</p>}
+            {najemShowName && (
+            <p className="text-[18px] ms-fs-18 font-bold text-violet-900 print:text-[13.5px] ms-pfs-13_5">{najemName || institution?.NajemName || ms('najem')}</p>
+            )}
+            {showDate && najemShowDate && <p className="text-[13px] ms-fs-13 text-slate-600 font-semibold print:text-[12px] ms-pfs-12">{ms('date')} : {printDate}</p>}
           </div>
         </div>
       </div>
@@ -1024,35 +1147,50 @@ const SingleMarkSheetModern = ({
 const SingleMarkSheetElegant = ({
   student, institution, imageSrc, signatureNajemSrc, signaturePrincipalSrc,
   session, classInfo, examSubjects, divisions = [], examConfig = {},
-  isLast = false, ExamID, SubClassID, ExamName,
+  isLast = false, ExamID, SubClassID, ExamName, lang = 'bn',
   showDate = true, showSignature = true, principalName = '', najemName = '',
+  najemShowSign = true, najemShowName = true, najemShowDate = true,
+  principalShowSign = true, principalShowName = true, principalShowDate = true,
   paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
   showClassTeacherSign = true, showGuardianSign = true,
+  totalStudents = 0,
 }) => {
   const {
     subjects, totalSubjects, divisionRows, rowPad, rowText,
     studentName, fatherName, motherName, birthDate, rollNumber,
     registration, divisionName, averageMark,
-  } = computeMarkSheetData({ student, examSubjects, examConfig, divisions });
+  } = computeMarkSheetData({ student, examSubjects, examConfig, divisions, lang });
+
+  // Every fixed word, digit and date on this sheet goes through the language.
+  // toBn keeps its name so no call site had to change; inside a template it
+  // now means "digits in the chosen language".
+  const ms = (key) => getMarkSheetText(key, lang);
+  const dir = getMarkSheetDir(lang);
+  const toBn = (value) => toLangDigit(value, lang);
+  const printDate = getPrintDate(new Date(), lang);
+  const instName = getInstitutionName(institution, lang);
+  const instAddress = getInstitutionAddress(institution, lang);
+  const sessionName = getLangValue(session, 'SessionName', lang);
 
   const { data } = useGetLabelNameListsQuery();
   const labels = data?.[0] || {};
   const previewWidth = getPreviewWidth(paperSize, orientation);
 
   const infoItems = buildInfoItems({
+    lang,
     studentInfoFields, labels, studentName, fatherName, motherName,
-    birthDate, registration, rollNumber,
+    birthDate, registration, rollNumber, totalStudents,
   });
 
   const summaryItems = [
-    { label: 'প্রাপ্ত বিভাগ', value: divisionName },
-    { label: 'মেধা স্থান', value: student?.Positions ?? '-' },
-    { label: 'গড়', value: averageMark },
-    { label: 'মোট নম্বর', value: student?.Total ?? '-' },
+    { label: ms('division'), value: divisionName },
+    { label: ms('meritPosition'), value: student?.Positions ?? '-' },
+    { label: ms('average'), value: averageMark },
+    { label: ms('totalMark'), value: student?.Total ?? '-' },
   ];
 
   return (
-    <div className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-[#fffdf7] shadow-xl rounded-lg text-slate-800 mb-10 print:mb-0 flex flex-col`}>
+    <div dir={dir} className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-[#fffdf7] shadow-xl rounded-lg text-slate-800 mb-10 print:mb-0 flex flex-col`}>
       {/* Elegant double gold border overlay */}
       <div className="pointer-events-none absolute inset-1.5 rounded-md border-2 border-amber-600/70" />
       <div className="pointer-events-none absolute inset-3 rounded-sm border border-amber-400/60" />
@@ -1070,22 +1208,22 @@ const SingleMarkSheetElegant = ({
             </div>
             <div>
               <h1 className="marksheet-inst-name text-[26px] ms-fs-26 md:text-[28px] print:text-[20px] ms-pfs-20 font-bold leading-tight text-amber-900 tracking-wide">
-                {toBn(institution?.InstitutionName || '-')}
+                {toBn(instName || '-')}
               </h1>
-              <p className="marksheet-inst-address text-[13px] ms-fs-13 print:text-[12px] ms-pfs-12 text-amber-700 italic mt-0.5">{toBn(institution?.Address || '-')}</p>
+              <p className="marksheet-inst-address text-[13px] ms-fs-13 print:text-[12px] ms-pfs-12 text-amber-700 italic mt-0.5">{toBn(instAddress || '-')}</p>
             </div>
             <div className="h-[2px] w-32 bg-gradient-to-r from-transparent via-amber-500 to-transparent print:w-24" />
             <div className="flex flex-wrap items-center justify-center gap-3 print:gap-2">
               <span className="text-[14px] ms-fs-14 print:text-[12.5px] ms-pfs-12_5 text-amber-800 font-semibold whitespace-nowrap">
-                সেশন: {toBn(session?.SessionName || '-')}
+                {ms('session')}: {toBn(sessionName || '-')}
               </span>
               <span className="text-amber-400">❖</span>
               <span className="text-[14px] ms-fs-14 print:text-[12.5px] ms-pfs-12_5 text-amber-800 font-semibold whitespace-nowrap">
-                পরীক্ষা: {toBn(ExamName || '-')}
+                {ms('exam')}: {toBn(ExamName || '-')}
               </span>
               <span className="text-amber-400">❖</span>
               <span className="text-[14px] ms-fs-14 print:text-[12.5px] ms-pfs-12_5 text-amber-800 font-semibold whitespace-nowrap">
-                শ্রেণী: {toBn(classInfo?.ClassName || '-')}
+                {ms('className')}: {toBn(classInfo?.ClassName || '-')}
               </span>
             </div>
           </div>
@@ -1097,26 +1235,26 @@ const SingleMarkSheetElegant = ({
           <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-5 print:gap-3 mt-2 print:mt-1 shrink-0">
             {/* Student info */}
             <div>
-              <SectionTitle icon="◆" accent="amber">পরীক্ষার্থীর তথ্য</SectionTitle>
+              <SectionTitle icon="◆" accent="amber">{ms('studentInfo')}</SectionTitle>
               <div className="rounded-md bg-white border border-amber-300 p-3 print:p-2">
               {infoItems.map((f) => (
-                <InfoRow key={f.key} label={f.label} value={f.value} />
+                <InfoRow key={f.key} label={f.label} value={f.value} lang={lang} />
               ))}
               </div>
             </div>
 
             {/* Division */}
             <div>
-              <SectionTitle icon="◆" accent="amber">নম্বর বিভাজন</SectionTitle>
+              <SectionTitle icon="◆" accent="amber">{ms('markDistribution')}</SectionTitle>
               <div className="rounded-md overflow-hidden border border-amber-300 bg-white">
                 <div className="bg-gradient-to-r from-amber-100 to-amber-200 border-b border-amber-300 px-3 py-1.5 print:py-1 text-center">
                   <p className="text-[15px] ms-fs-15 print:text-[13px] ms-pfs-13 font-bold text-amber-900">
-                    মোট বিভাগ - {toBn(divisionRows.length)} টি | মোট বিষয় {toBn(totalSubjects)} টি
+                    {ms('totalDivisions')} - {toBn(divisionRows.length)} {ms('items')} | {ms('totalSubjects')} {toBn(totalSubjects)} {ms('items')}
                   </p>
                 </div>
                 <div className="p-2 print:p-1">
                   {divisionRows.length === 0 ? (
-                    <div className="text-center text-amber-400 text-[14px] ms-fs-14 py-2">কোনো বিভাগ পাওয়া যায়নি</div>
+                    <div className="text-center text-amber-400 text-[14px] ms-fs-14 py-2">{ms('noDivision')}</div>
                   ) : (
                     divisionRows.map((item, index) => (
                       <div key={index} className="flex justify-between items-center py-1 print:py-0.5 px-2 text-[15px] ms-fs-15 print:text-[13px] ms-pfs-13 font-semibold text-amber-900 border-b border-dotted border-amber-300 last:border-0">
@@ -1136,17 +1274,17 @@ const SingleMarkSheetElegant = ({
 
           {/* Table */}
           <div className="mt-5 print:mt-1 shrink-0">
-            <SectionTitle icon="◆" accent="amber">বিষয়ভিত্তিক ফলাফল</SectionTitle>
+            <SectionTitle icon="◆" accent="amber">{ms('subjectResult')}</SectionTitle>
             <div className="marks-table-wrap w-full overflow-x-auto print:overflow-visible rounded-md border-2 border-amber-600 shadow-sm">
               <table className="w-full min-w-[700px] print:min-w-0 border-collapse bg-white text-black">
                 <thead>
                   <tr className="text-center">
-                    <th style={TH_STYLE_ELEGANT} className="border-b border-amber-800 px-3 py-3 print:px-2 print:py-1 text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold tracking-wide">ক্রমিক</th>
-                    <th style={TH_STYLE_ELEGANT} className="border-b border-amber-800 px-4 py-3 print:px-2 print:py-1 text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold tracking-wide text-left">বিষয়</th>
-                    <th style={TH_STYLE_ELEGANT} className="border-b border-amber-800 px-3 py-3 print:px-2 print:py-1 text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold tracking-wide">পূর্ণমান</th>
-                    <th style={TH_STYLE_ELEGANT} className="border-b border-amber-800 px-3 py-3 print:px-2 print:py-1 text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold tracking-wide">পাশমার্ক</th>
-                    <th style={TH_STYLE_ELEGANT} className="border-b border-amber-800 px-3 py-3 print:px-2 print:py-1 text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold tracking-wide whitespace-nowrap">সর্বোচ্চ প্রাপ্ত</th>
-                    <th style={TH_STYLE_ELEGANT} className="border-b border-amber-800 px-3 py-3 print:px-2 print:py-1 text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold tracking-wide">প্রাপ্ত নম্বর</th>
+                    <th style={TH_STYLE_ELEGANT} className="border-b border-amber-800 px-3 py-3 print:px-2 print:py-1 text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold tracking-wide">{ms('serial')}</th>
+                    <th style={TH_STYLE_ELEGANT} className="border-b border-amber-800 px-4 py-3 print:px-2 print:py-1 text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold tracking-wide text-left">{ms('subject')}</th>
+                    <th style={TH_STYLE_ELEGANT} className="border-b border-amber-800 px-3 py-3 print:px-2 print:py-1 text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold tracking-wide">{ms('fullMark')}</th>
+                    <th style={TH_STYLE_ELEGANT} className="border-b border-amber-800 px-3 py-3 print:px-2 print:py-1 text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold tracking-wide">{ms('passMark')}</th>
+                    <th style={TH_STYLE_ELEGANT} className="border-b border-amber-800 px-3 py-3 print:px-2 print:py-1 text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold tracking-wide whitespace-nowrap">{ms('highestMark')}</th>
+                    <th style={TH_STYLE_ELEGANT} className="border-b border-amber-800 px-3 py-3 print:px-2 print:py-1 text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold tracking-wide">{ms('obtainedMark')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1171,7 +1309,7 @@ const SingleMarkSheetElegant = ({
 
           {/* Summary */}
           <div className="mt-5 print:mt-1 shrink-0">
-            <SectionTitle icon="◆" accent="amber">সারসংক্ষেপ</SectionTitle>
+            <SectionTitle icon="◆" accent="amber">{ms('summary')}</SectionTitle>
             <div className="grid grid-cols-2 md:grid-cols-4 print:grid-cols-4 gap-3 print:gap-1.5 mt-2 print:mt-0.5">
               {summaryItems.map((item, i) => (
                 <div key={i} className="flex flex-col items-center justify-center gap-0.5 rounded-md border-2 border-amber-300 bg-gradient-to-b from-amber-50 to-white p-2.5 print:p-1 shadow-sm">
@@ -1188,13 +1326,13 @@ const SingleMarkSheetElegant = ({
             <div className="flex flex-col md:flex-row print:flex-row gap-4 print:gap-3 flex-1 min-h-0">
               {showClassTeacherSign && (
               <div className="flex-1 rounded-md border border-amber-300 bg-white p-4 print:p-3 min-h-[100px] print:min-h-[80px] flex flex-col">
-                <p className="text-amber-900 font-bold text-[15px] ms-fs-15 print:text-[13.5px] ms-pfs-13_5">শ্রেণী শিক্ষক/শিক্ষিকার মন্তব্য ও স্বাক্ষর :</p>
+                <p className="text-amber-900 font-bold text-[15px] ms-fs-15 print:text-[13.5px] ms-pfs-13_5">{ms('classTeacherCommentSign')} :</p>
                 <div className="border-b border-dotted border-amber-400 w-2/3 mt-2 print:mt-1.5 text-[15px] ms-fs-15 print:text-[13px] ms-pfs-13 text-slate-700">{student?.Note ?? ''}</div>
               </div>
               )}
               {showGuardianSign && (
               <div className="flex-1 rounded-md border border-amber-300 bg-white p-4 print:p-3 min-h-[100px] print:min-h-[80px] flex flex-col">
-                <p className="text-amber-900 font-bold text-[15px] ms-fs-15 print:text-[13.5px] ms-pfs-13_5">অভিভাবকের মন্তব্য ও স্বাক্ষর :</p>
+                <p className="text-amber-900 font-bold text-[15px] ms-fs-15 print:text-[13.5px] ms-pfs-13_5">{ms('guardianCommentSign')} :</p>
                 <div className="border-b border-dotted border-amber-400 w-2/3 mt-2 print:mt-1.5"></div>
               </div>
               )}
@@ -1212,27 +1350,35 @@ const SingleMarkSheetElegant = ({
                 viewBox="0 0 256 256" />
             </div>
             <div className="mt-2 text-center">
-              <p className="text-[12px] ms-fs-12 text-amber-800 font-bold print:text-[11px] ms-pfs-11">যাচাই করুন</p>
+              <p className="text-[12px] ms-fs-12 text-amber-800 font-bold print:text-[11px] ms-pfs-11">{ms('verify')}</p>
             </div>
           </div>
           <div className="col-span-2 flex w-full flex-col items-center">
             <div className="h-16 w-full flex items-end justify-center print:h-8">
-              {showSignature && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="Signature Principal" className="max-h-16 max-w-full object-contain print:max-h-8" />}
+              {showSignature && principalShowSign && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="Signature Principal" className="max-h-16 max-w-full object-contain print:max-h-8" />}
             </div>
+            {principalShowName && (
             <div className="mt-2 w-full border-t-2 border-double border-amber-600 print:mt-0.5"></div>
+            )}
             <div className="mt-3 space-y-1 text-center print:mt-0.5 print:space-y-0">
-              <p className="text-[18px] ms-fs-18 font-bold text-amber-900 print:text-[13.5px] ms-pfs-13_5">{principalName || institution?.PrincipalName}</p>
-              {showDate && <p className="text-[13px] ms-fs-13 text-amber-700 font-semibold print:text-[12px] ms-pfs-12">তারিখ : {toBn(new Date().toLocaleDateString('bn-BD'))}</p>}
+              {principalShowName && (
+              <p className="text-[18px] ms-fs-18 font-bold text-amber-900 print:text-[13.5px] ms-pfs-13_5">{principalName || institution?.PrincipalName || ms('principal')}</p>
+              )}
+              {showDate && principalShowDate && <p className="text-[13px] ms-fs-13 text-amber-700 font-semibold print:text-[12px] ms-pfs-12">{ms('date')} : {printDate}</p>}
             </div>
           </div>
           <div className="col-span-2 flex w-full flex-col items-center">
             <div className="h-16 w-full flex items-end justify-center print:h-8">
-              {showSignature && signatureNajemSrc && <img src={signatureNajemSrc} alt="Signature Najem" className="max-h-16 max-w-full object-contain print:max-h-8" />}
+              {showSignature && najemShowSign && signatureNajemSrc && <img src={signatureNajemSrc} alt="Signature Najem" className="max-h-16 max-w-full object-contain print:max-h-8" />}
             </div>
+            {najemShowName && (
             <div className="mt-2 w-full border-t-2 border-double border-amber-600 print:mt-0.5"></div>
+            )}
             <div className="mt-3 space-y-1 text-center print:mt-0.5 print:space-y-0">
-              <p className="text-[18px] ms-fs-18 font-bold text-amber-900 print:text-[13.5px] ms-pfs-13_5">{najemName || institution?.NajemName}</p>
-              {showDate && <p className="text-[13px] ms-fs-13 text-amber-700 font-semibold print:text-[12px] ms-pfs-12">তারিখ : {toBn(new Date().toLocaleDateString('bn-BD'))}</p>}
+              {najemShowName && (
+              <p className="text-[18px] ms-fs-18 font-bold text-amber-900 print:text-[13.5px] ms-pfs-13_5">{najemName || institution?.NajemName || ms('najem')}</p>
+              )}
+              {showDate && najemShowDate && <p className="text-[13px] ms-fs-13 text-amber-700 font-semibold print:text-[12px] ms-pfs-12">{ms('date')} : {printDate}</p>}
             </div>
           </div>
         </div>
@@ -1253,27 +1399,42 @@ const SingleMarkSheetElegant = ({
 const SingleMarkSheetMinimal = ({
   student, institution, imageSrc, signatureNajemSrc, signaturePrincipalSrc,
   session, classInfo, examSubjects, divisions = [], examConfig = {},
-  isLast = false, ExamID, SubClassID, ExamName,
+  isLast = false, ExamID, SubClassID, ExamName, lang = 'bn',
   showDate = true, showSignature = true, principalName = '', najemName = '',
+  najemShowSign = true, najemShowName = true, najemShowDate = true,
+  principalShowSign = true, principalShowName = true, principalShowDate = true,
   paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
   showClassTeacherSign = true, showGuardianSign = true,
+  totalStudents = 0,
 }) => {
   const {
     subjects, rowPad, studentName, fatherName, motherName, birthDate,
     rollNumber, registration, divisionName, averageMark, divisionRows, totalSubjects,
-  } = computeMarkSheetData({ student, examSubjects, examConfig, divisions });
+  } = computeMarkSheetData({ student, examSubjects, examConfig, divisions, lang });
+
+  // Every fixed word, digit and date on this sheet goes through the language.
+  // toBn keeps its name so no call site had to change; inside a template it
+  // now means "digits in the chosen language".
+  const ms = (key) => getMarkSheetText(key, lang);
+  const dir = getMarkSheetDir(lang);
+  const toBn = (value) => toLangDigit(value, lang);
+  const printDate = getPrintDate(new Date(), lang);
+  const instName = getInstitutionName(institution, lang);
+  const instAddress = getInstitutionAddress(institution, lang);
+  const sessionName = getLangValue(session, 'SessionName', lang);
 
   const { data } = useGetLabelNameListsQuery();
   const labels = data?.[0] || {};
   const previewWidth = getPreviewWidth(paperSize, orientation);
 
   const infoItems = buildInfoItems({
+    lang,
     studentInfoFields, labels, studentName, fatherName, motherName,
-    birthDate, registration, rollNumber,
+    birthDate, registration, rollNumber, totalStudents,
   });
 
   return (
-    <div className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-white text-black border border-black mb-10 print:mb-0 flex flex-col`}>
+    <div dir={dir} className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-white text-black border border-black mb-10 print:mb-0 flex flex-col`}>
       {/* ── Header: uppercase, thin */}
       <div className="marksheet-header flex flex-col md:flex-row print:flex-row items-start justify-between gap-4 px-8 py-5 print:px-5 print:py-2 border-b border-black">
         <div className="flex items-center gap-4">
@@ -1284,10 +1445,10 @@ const SingleMarkSheetMinimal = ({
           </div>
           <div>
             <h1 className="marksheet-inst-name text-[22px] ms-fs-22 print:text-[17px] ms-pfs-17 font-bold uppercase tracking-[0.08em] leading-none">
-              {toBn(institution?.InstitutionName || '-')}
+              {toBn(instName || '-')}
             </h1>
             <p className="marksheet-inst-address text-[10px] ms-fs-10 print:text-[9.5px] ms-pfs-9_5 text-zinc-500 uppercase tracking-[0.25em] mt-1.5">
-              {toBn(institution?.Address || '-')}
+              {toBn(instAddress || '-')}
             </p>
           </div>
         </div>
@@ -1307,12 +1468,12 @@ const SingleMarkSheetMinimal = ({
         <div className="grid grid-cols-2 md:grid-cols-3 print:grid-cols-3 gap-x-6 gap-y-2.5 print:gap-y-1.5 shrink-0">
           {infoItems.map((f, i) => (
             <div key={i} className="border-b border-zinc-300 pb-1 print:pb-0.5">
-              <div className="text-[8.5px] ms-fs-8_5 print:text-[8px] ms-pfs-8 uppercase tracking-[0.22em] text-zinc-500">{f.enLabel}</div>
+              <div className="text-[8.5px] ms-fs-8_5 print:text-[8px] ms-pfs-8 uppercase tracking-[0.22em] text-zinc-500">{f.label}</div>
               <div className="text-[13.5px] ms-fs-13_5 print:text-[12px] ms-pfs-12 font-semibold truncate">{toBn(f.value)}</div>
             </div>
           ))}
           <div className="border-b border-zinc-300 pb-1 print:pb-0.5">
-            <div className="text-[8.5px] ms-fs-8_5 print:text-[8px] ms-pfs-8 uppercase tracking-[0.22em] text-zinc-500">CLASS</div>
+            <div className="text-[8.5px] ms-fs-8_5 print:text-[8px] ms-pfs-8 uppercase tracking-[0.22em] text-zinc-500">{ms('className')}</div>
             <div className="text-[13.5px] ms-fs-13_5 print:text-[12px] ms-pfs-12 font-semibold">{toBn(classInfo?.ClassName || '-')}</div>
           </div>
         </div>
@@ -1320,7 +1481,7 @@ const SingleMarkSheetMinimal = ({
         {/* ── Divisions: compact inline grid */}
         <div className="mt-4 print:mt-2 shrink-0">
           <div className="flex items-center gap-2 mb-1.5 print:mb-1">
-            <span className="text-[9px] ms-fs-9 print:text-[8.5px] ms-pfs-8_5 uppercase tracking-[0.25em] text-zinc-500">DIVISION BREAKDOWN</span>
+            <span className="text-[9px] ms-fs-9 print:text-[8.5px] ms-pfs-8_5 uppercase tracking-[0.25em] text-zinc-500">{ms('markDistribution')}</span>
             <div className="flex-1 h-px bg-zinc-300" />
             <span className="text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 text-zinc-500">{toBn(divisionRows.length)} divisions · {toBn(totalSubjects)} subjects</span>
           </div>
@@ -1339,7 +1500,7 @@ const SingleMarkSheetMinimal = ({
         {/* ── Table: pure black border, uppercase head */}
         <div className="mt-4 print:mt-2 shrink-0">
           <div className="flex items-center gap-2 mb-1.5 print:mb-1">
-            <span className="text-[9px] ms-fs-9 print:text-[8.5px] ms-pfs-8_5 uppercase tracking-[0.25em] text-zinc-500">SUBJECT-WISE RESULT</span>
+            <span className="text-[9px] ms-fs-9 print:text-[8.5px] ms-pfs-8_5 uppercase tracking-[0.25em] text-zinc-500">{ms('subjectResult')}</span>
             <div className="flex-1 h-px bg-zinc-300" />
           </div>
           <div className="marks-table-wrap w-full overflow-x-auto print:overflow-visible border border-black">
@@ -1347,11 +1508,11 @@ const SingleMarkSheetMinimal = ({
               <thead>
                 <tr>
                   <th style={TH_STYLE_MONO} className="border-b border-black px-3 py-2 print:px-2 print:py-1 text-[10px] ms-fs-10 print:text-[9.5px] ms-pfs-9_5 font-bold uppercase tracking-[0.15em] text-left w-12">SL</th>
-                  <th style={TH_STYLE_MONO} className="border-b border-black px-3 py-2 print:px-2 print:py-1 text-[10px] ms-fs-10 print:text-[9.5px] ms-pfs-9_5 font-bold uppercase tracking-[0.15em] text-left">SUBJECT</th>
-                  <th style={TH_STYLE_MONO} className="border-b border-black px-2 py-2 print:px-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9.5px] ms-pfs-9_5 font-bold uppercase tracking-[0.15em] text-center">FULL</th>
-                  <th style={TH_STYLE_MONO} className="border-b border-black px-2 py-2 print:px-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9.5px] ms-pfs-9_5 font-bold uppercase tracking-[0.15em] text-center">PASS</th>
-                  <th style={TH_STYLE_MONO} className="border-b border-black px-2 py-2 print:px-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9.5px] ms-pfs-9_5 font-bold uppercase tracking-[0.15em] text-center whitespace-nowrap">HIGH</th>
-                  <th style={TH_STYLE_MONO} className="border-b border-black px-3 py-2 print:px-2 print:py-1 text-[10px] ms-fs-10 print:text-[9.5px] ms-pfs-9_5 font-bold uppercase tracking-[0.15em] text-center">OBTAINED</th>
+                  <th style={TH_STYLE_MONO} className="border-b border-black px-3 py-2 print:px-2 print:py-1 text-[10px] ms-fs-10 print:text-[9.5px] ms-pfs-9_5 font-bold uppercase tracking-[0.15em] text-left">{ms('subject')}</th>
+                  <th style={TH_STYLE_MONO} className="border-b border-black px-2 py-2 print:px-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9.5px] ms-pfs-9_5 font-bold uppercase tracking-[0.15em] text-center">{ms('fullMarkShort')}</th>
+                  <th style={TH_STYLE_MONO} className="border-b border-black px-2 py-2 print:px-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9.5px] ms-pfs-9_5 font-bold uppercase tracking-[0.15em] text-center">{ms('passMarkShort')}</th>
+                  <th style={TH_STYLE_MONO} className="border-b border-black px-2 py-2 print:px-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9.5px] ms-pfs-9_5 font-bold uppercase tracking-[0.15em] text-center whitespace-nowrap">{ms('highestMarkShort')}</th>
+                  <th style={TH_STYLE_MONO} className="border-b border-black px-3 py-2 print:px-2 print:py-1 text-[10px] ms-fs-10 print:text-[9.5px] ms-pfs-9_5 font-bold uppercase tracking-[0.15em] text-center">{ms('obtainedMarkShort')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -1392,17 +1553,17 @@ const SingleMarkSheetMinimal = ({
           <div className="grid grid-cols-2 print:grid-cols-2 gap-8 print:gap-5">
             {showClassTeacherSign && (
             <div>
-              <div className="text-[9px] ms-fs-9 print:text-[8.5px] ms-pfs-8_5 uppercase tracking-[0.22em] text-zinc-500">CLASS TEACHER'S REMARK</div>
+              <div className="text-[9px] ms-fs-9 print:text-[8.5px] ms-pfs-8_5 uppercase tracking-[0.22em] text-zinc-500">{ms('classTeacherComment')}</div>
               <div className="h-10 print:h-7 border-b border-black flex items-end text-[12px] ms-fs-12 print:text-[11px] ms-pfs-11 pb-0.5">{student?.Note ?? ''}</div>
-              <div className="text-[9px] ms-fs-9 print:text-[8.5px] ms-pfs-8_5 uppercase tracking-[0.22em] text-zinc-500 mt-3 print:mt-2">SIGNATURE</div>
+              <div className="text-[9px] ms-fs-9 print:text-[8.5px] ms-pfs-8_5 uppercase tracking-[0.22em] text-zinc-500 mt-3 print:mt-2">{ms('classTeacherSign')}</div>
               <div className="border-b border-zinc-400 w-3/4 mt-4 print:mt-3"></div>
             </div>
             )}
             {showGuardianSign && (
             <div>
-              <div className="text-[9px] ms-fs-9 print:text-[8.5px] ms-pfs-8_5 uppercase tracking-[0.22em] text-zinc-500">GUARDIAN'S REMARK</div>
+              <div className="text-[9px] ms-fs-9 print:text-[8.5px] ms-pfs-8_5 uppercase tracking-[0.22em] text-zinc-500">{ms('guardianComment')}</div>
               <div className="h-10 print:h-7 border-b border-black"></div>
-              <div className="text-[9px] ms-fs-9 print:text-[8.5px] ms-pfs-8_5 uppercase tracking-[0.22em] text-zinc-500 mt-3 print:mt-2">SIGNATURE</div>
+              <div className="text-[9px] ms-fs-9 print:text-[8.5px] ms-pfs-8_5 uppercase tracking-[0.22em] text-zinc-500 mt-3 print:mt-2">{ms('classTeacherSign')}</div>
               <div className="border-b border-zinc-400 w-3/4 mt-4 print:mt-3"></div>
             </div>
             )}
@@ -1414,7 +1575,7 @@ const SingleMarkSheetMinimal = ({
       {/* ── Footer: 3 columns, minimal */}
       <div className="border-t border-black px-8 py-3 print:px-5 print:py-1 mt-auto shrink-0 grid grid-cols-3 items-end gap-4 print:gap-2">
         <div>
-          <div className="text-[9px] ms-fs-9 print:text-[8.5px] ms-pfs-8_5 uppercase tracking-[0.22em] text-zinc-500 mb-1">VERIFY ONLINE</div>
+          <div className="text-[9px] ms-fs-9 print:text-[8.5px] ms-pfs-8_5 uppercase tracking-[0.22em] text-zinc-500 mb-1">{ms('verify')}</div>
           {/* Fixed small frame — without it the QR stretched to the whole grid column */}
           <div className="w-[54px] print:w-[44px]">
           <QRCode size={54} style={{ height: 'auto', maxWidth: '100%', width: '100%' }}
@@ -1424,22 +1585,24 @@ const SingleMarkSheetMinimal = ({
         </div>
         <div className="text-center">
           <div className="h-10 print:h-7 flex items-end justify-center">
-            {showSignature && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-10 max-w-full object-contain print:max-h-7" />}
+            {showSignature && principalShowSign && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-10 max-w-full object-contain print:max-h-7" />}
           </div>
-          <div className="border-t border-black mt-1.5 pt-1.5">
-            <div className="text-[12px] ms-fs-12 print:text-[11px] ms-pfs-11 font-bold uppercase tracking-wide">{principalName || institution?.PrincipalName}</div>
-            <div className="text-[8.5px] ms-fs-8_5 print:text-[8px] ms-pfs-8 text-zinc-500 uppercase tracking-[0.2em] mt-0.5">Principal</div>
-            {showDate && <div className="text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 text-zinc-500 mt-0.5 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
+          <div style={principalShowName ? undefined : { borderTopWidth: 0 }} className="border-t border-black mt-1.5 pt-1.5">
+            {principalShowName && (
+            <div className="text-[12px] ms-fs-12 print:text-[11px] ms-pfs-11 font-bold uppercase tracking-wide">{principalName || institution?.PrincipalName || ms('principal')}</div>
+            )}
+            {showDate && principalShowDate && <div className="text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 text-zinc-500 mt-0.5 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
           </div>
         </div>
         <div className="text-center">
           <div className="h-10 print:h-7 flex items-end justify-center">
-            {showSignature && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-10 max-w-full object-contain print:max-h-7" />}
+            {showSignature && najemShowSign && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-10 max-w-full object-contain print:max-h-7" />}
           </div>
-          <div className="border-t border-black mt-1.5 pt-1.5">
-            <div className="text-[12px] ms-fs-12 print:text-[11px] ms-pfs-11 font-bold uppercase tracking-wide">{najemName || institution?.NajemName}</div>
-            <div className="text-[8.5px] ms-fs-8_5 print:text-[8px] ms-pfs-8 text-zinc-500 uppercase tracking-[0.2em] mt-0.5">Vice Principal</div>
-            {showDate && <div className="text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 text-zinc-500 mt-0.5 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
+          <div style={najemShowName ? undefined : { borderTopWidth: 0 }} className="border-t border-black mt-1.5 pt-1.5">
+            {najemShowName && (
+            <div className="text-[12px] ms-fs-12 print:text-[11px] ms-pfs-11 font-bold uppercase tracking-wide">{najemName || institution?.NajemName || ms('najem')}</div>
+            )}
+            {showDate && najemShowDate && <div className="text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 text-zinc-500 mt-0.5 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
           </div>
         </div>
       </div>
@@ -1457,34 +1620,49 @@ const SingleMarkSheetMinimal = ({
 const SingleMarkSheetSidebar = ({
   student, institution, imageSrc, signatureNajemSrc, signaturePrincipalSrc,
   session, classInfo, examSubjects, divisions = [], examConfig = {},
-  isLast = false, ExamID, SubClassID, ExamName,
+  isLast = false, ExamID, SubClassID, ExamName, lang = 'bn',
   showDate = true, showSignature = true, principalName = '', najemName = '',
+  najemShowSign = true, najemShowName = true, najemShowDate = true,
+  principalShowSign = true, principalShowName = true, principalShowDate = true,
   paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
   showClassTeacherSign = true, showGuardianSign = true,
+  totalStudents = 0,
 }) => {
   const {
     subjects, rowPad, studentName, fatherName, motherName, birthDate,
     rollNumber, registration, divisionName, averageMark, divisionRows,
-  } = computeMarkSheetData({ student, examSubjects, examConfig, divisions });
+  } = computeMarkSheetData({ student, examSubjects, examConfig, divisions, lang });
+
+  // Every fixed word, digit and date on this sheet goes through the language.
+  // toBn keeps its name so no call site had to change; inside a template it
+  // now means "digits in the chosen language".
+  const ms = (key) => getMarkSheetText(key, lang);
+  const dir = getMarkSheetDir(lang);
+  const toBn = (value) => toLangDigit(value, lang);
+  const printDate = getPrintDate(new Date(), lang);
+  const instName = getInstitutionName(institution, lang);
+  const instAddress = getInstitutionAddress(institution, lang);
+  const sessionName = getLangValue(session, 'SessionName', lang);
 
   const { data } = useGetLabelNameListsQuery();
   const labels = data?.[0] || {};
   const previewWidth = getPreviewWidth(paperSize, orientation);
 
   const infoItems = buildInfoItems({
+    lang,
     studentInfoFields, labels, studentName, fatherName, motherName,
-    birthDate, registration, rollNumber,
+    birthDate, registration, rollNumber, totalStudents,
   });
 
   const summaryItems = [
-    { label: 'বিভাগ', value: divisionName, tone: 'from-cyan-500 to-teal-500' },
-    { label: 'মেধা', value: student?.Positions ?? '-', tone: 'from-teal-500 to-emerald-500' },
-    { label: 'গড়', value: averageMark, tone: 'from-sky-500 to-cyan-500' },
-    { label: 'মোট', value: student?.Total ?? '-', tone: 'from-cyan-600 to-teal-600' },
+    { label: ms('divisionShort'), value: divisionName, tone: 'from-cyan-500 to-teal-500' },
+    { label: ms('meritPositionShort'), value: student?.Positions ?? '-', tone: 'from-teal-500 to-emerald-500' },
+    { label: ms('average'), value: averageMark, tone: 'from-sky-500 to-cyan-500' },
+    { label: ms('total'), value: student?.Total ?? '-', tone: 'from-cyan-600 to-teal-600' },
   ];
 
   return (
-    <div className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-white rounded-2xl shadow-2xl border border-cyan-200 mb-10 print:mb-0 flex flex-col`}>
+    <div dir={dir} className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-white rounded-2xl shadow-2xl border border-cyan-200 mb-10 print:mb-0 flex flex-col`}>
       {/* ── Main body: sidebar + content */}
       <div className="flex flex-col md:flex-row print:flex-row flex-1 min-h-0">
         {/* ═══ SIDEBAR (dark, 35%) ═══ */}
@@ -1497,10 +1675,10 @@ const SingleMarkSheetSidebar = ({
                 : <div className="h-full w-full bg-white/10 flex items-center justify-center text-[9px] ms-fs-9 text-white/50">LOGO</div>}
             </div>
             <h1 className="marksheet-inst-name text-[16px] ms-fs-16 print:text-[13.5px] ms-pfs-13_5 font-bold mt-2 print:mt-1 leading-tight text-white">
-              {toBn(institution?.InstitutionName || '-')}
+              {toBn(instName || '-')}
             </h1>
             <p className="marksheet-inst-address text-[9.5px] ms-fs-9_5 print:text-[8.5px] ms-pfs-8_5 text-cyan-300 mt-1 leading-snug">
-              {toBn(institution?.Address || '-')}
+              {toBn(instAddress || '-')}
             </p>
           </div>
 
@@ -1509,9 +1687,9 @@ const SingleMarkSheetSidebar = ({
           {/* Session/Exam/Class */}
           <div className="space-y-1.5 print:space-y-0.5">
             {[
-              ['সেশন', session?.SessionName],
-              ['পরীক্ষা', ExamName],
-              ['শ্রেণী', classInfo?.ClassName],
+              [ms('session'), sessionName],
+              [ms('exam'), ExamName],
+              [ms('className'), classInfo?.ClassName],
             ].map(([label, val], i) => (
               <div key={i}>
                 <div className="text-[8.5px] ms-fs-8_5 print:text-[8px] ms-pfs-8 uppercase tracking-[0.2em] text-cyan-400/80">{label}</div>
@@ -1524,7 +1702,7 @@ const SingleMarkSheetSidebar = ({
 
           {/* Student info */}
           <div>
-            <div className="text-[8.5px] ms-fs-8_5 print:text-[8px] ms-pfs-8 uppercase tracking-[0.2em] text-cyan-400/80 mb-1.5 print:mb-1">পরীক্ষার্থীর তথ্য</div>
+            <div className="text-[8.5px] ms-fs-8_5 print:text-[8px] ms-pfs-8 uppercase tracking-[0.2em] text-cyan-400/80 mb-1.5 print:mb-1">{ms('studentInfo')}</div>
             <div className="space-y-1.5 print:space-y-0.5">
               {infoItems.map((f, i) => (
                 <div key={i}>
@@ -1540,10 +1718,10 @@ const SingleMarkSheetSidebar = ({
           {/* Division */}
           <div>
             <div className="text-[8.5px] ms-fs-8_5 print:text-[8px] ms-pfs-8 uppercase tracking-[0.2em] text-cyan-400/80 mb-1.5 print:mb-1">
-              বিভাজন ({toBn(divisionRows.length)})
+              {ms('markDistribution')} ({toBn(divisionRows.length)})
             </div>
             {divisionRows.length === 0
-              ? <div className="text-[10px] ms-fs-10 text-white/40 italic">কোনো বিভাগ নেই</div>
+              ? <div className="text-[10px] ms-fs-10 text-white/40 italic">{ms('noDivisionShort')}</div>
               : <div className="space-y-0.5">
                   {divisionRows.map((item, i) => (
                     <div key={i} className="flex justify-between text-[10.5px] ms-fs-10_5 print:text-[9.5px] ms-pfs-9_5 py-0.5 border-b border-white/10 last:border-0">
@@ -1563,7 +1741,7 @@ const SingleMarkSheetSidebar = ({
                 value={`https://qmmsoft.com/${institution?.InstitutionCode}/students/${session?.SessionID}/${ExamID}/${SubClassID}/${student?.UserCode}`}
                 viewBox="0 0 256 256" />
             </div>
-            <p className="text-[9px] ms-fs-9 print:text-[8px] ms-pfs-8 text-cyan-300 mt-1 print:mt-0.5">যাচাই করুন</p>
+            <p className="text-[9px] ms-fs-9 print:text-[8px] ms-pfs-8 text-cyan-300 mt-1 print:mt-0.5">{ms('verify')}</p>
           </div>
         </div>
 
@@ -1571,7 +1749,7 @@ const SingleMarkSheetSidebar = ({
         <div className="marksheet-content md:flex-1 flex-1 flex flex-col p-5 print:p-3 bg-white min-w-0">
           {/* Table */}
           <div className="mb-1 flex items-center gap-2 print:mb-0.5">
-            <span className="text-[9px] ms-fs-9 print:text-[8px] ms-pfs-8 uppercase tracking-[0.2em] text-cyan-700 font-bold">বিষয়ভিত্তিক ফলাফল</span>
+            <span className="text-[9px] ms-fs-9 print:text-[8px] ms-pfs-8 uppercase tracking-[0.2em] text-cyan-700 font-bold">{ms('subjectResult')}</span>
             <div className="flex-1 h-px bg-cyan-200" />
           </div>
           <div className="marks-table-wrap w-full overflow-x-auto print:overflow-visible rounded-lg border border-cyan-200 shrink-0">
@@ -1579,11 +1757,11 @@ const SingleMarkSheetSidebar = ({
               <thead>
                 <tr>
                   <th style={TH_STYLE_SIDEBAR} className="border-b border-cyan-700 px-2 py-2 print:px-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9.5px] ms-pfs-9_5 font-bold text-center w-10">#</th>
-                  <th style={TH_STYLE_SIDEBAR} className="border-b border-cyan-700 px-2.5 py-2 print:px-2 print:py-1 text-[10px] ms-fs-10 print:text-[9.5px] ms-pfs-9_5 font-bold text-left">বিষয়</th>
-                  <th style={TH_STYLE_SIDEBAR} className="border-b border-cyan-700 px-1.5 py-2 print:px-1 print:py-1 text-[10px] ms-fs-10 print:text-[9.5px] ms-pfs-9_5 font-bold text-center">পূর্ণ</th>
-                  <th style={TH_STYLE_SIDEBAR} className="border-b border-cyan-700 px-1.5 py-2 print:px-1 print:py-1 text-[10px] ms-fs-10 print:text-[9.5px] ms-pfs-9_5 font-bold text-center">পাশ</th>
-                  <th style={TH_STYLE_SIDEBAR} className="border-b border-cyan-700 px-1.5 py-2 print:px-1 print:py-1 text-[10px] ms-fs-10 print:text-[9.5px] ms-pfs-9_5 font-bold text-center">সর্বোচ্চ</th>
-                  <th style={TH_STYLE_SIDEBAR} className="border-b border-cyan-700 px-2 py-2 print:px-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9.5px] ms-pfs-9_5 font-bold text-center">প্রাপ্ত</th>
+                  <th style={TH_STYLE_SIDEBAR} className="border-b border-cyan-700 px-2.5 py-2 print:px-2 print:py-1 text-[10px] ms-fs-10 print:text-[9.5px] ms-pfs-9_5 font-bold text-left">{ms('subject')}</th>
+                  <th style={TH_STYLE_SIDEBAR} className="border-b border-cyan-700 px-1.5 py-2 print:px-1 print:py-1 text-[10px] ms-fs-10 print:text-[9.5px] ms-pfs-9_5 font-bold text-center">{ms('fullMarkShort')}</th>
+                  <th style={TH_STYLE_SIDEBAR} className="border-b border-cyan-700 px-1.5 py-2 print:px-1 print:py-1 text-[10px] ms-fs-10 print:text-[9.5px] ms-pfs-9_5 font-bold text-center">{ms('passMarkShort')}</th>
+                  <th style={TH_STYLE_SIDEBAR} className="border-b border-cyan-700 px-1.5 py-2 print:px-1 print:py-1 text-[10px] ms-fs-10 print:text-[9.5px] ms-pfs-9_5 font-bold text-center">{ms('highestMarkShort')}</th>
+                  <th style={TH_STYLE_SIDEBAR} className="border-b border-cyan-700 px-2 py-2 print:px-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9.5px] ms-pfs-9_5 font-bold text-center">{ms('obtainedMarkShort')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -1620,13 +1798,13 @@ const SingleMarkSheetSidebar = ({
           <div className="marksheet-comments flex-1 mt-3 print:mt-1.5 grid grid-cols-2 print:grid-cols-2 gap-3 print:gap-2 min-h-0">
             {showClassTeacherSign && (
             <div className="rounded-lg border border-cyan-200 bg-cyan-50/30 p-3 print:p-2 flex flex-col min-h-[80px] print:min-h-[65px]">
-              <p className="text-cyan-800 font-bold text-[11px] ms-fs-11 print:text-[10px] ms-pfs-10 mb-1">শ্রেণী শিক্ষকের মন্তব্য</p>
+              <p className="text-cyan-800 font-bold text-[11px] ms-fs-11 print:text-[10px] ms-pfs-10 mb-1">{ms('classTeacherCommentShort')}</p>
               <div className="border-b border-dashed border-cyan-400 w-3/4 mt-1 text-[11px] ms-fs-11 print:text-[10px] ms-pfs-10 text-slate-700 flex-1">{student?.Note ?? ''}</div>
             </div>
             )}
             {showGuardianSign && (
             <div className="rounded-lg border border-cyan-200 bg-cyan-50/30 p-3 print:p-2 flex flex-col min-h-[80px] print:min-h-[65px]">
-              <p className="text-cyan-800 font-bold text-[11px] ms-fs-11 print:text-[10px] ms-pfs-10 mb-1">অভিভাবকের মন্তব্য</p>
+              <p className="text-cyan-800 font-bold text-[11px] ms-fs-11 print:text-[10px] ms-pfs-10 mb-1">{ms('guardianComment')}</p>
               <div className="border-b border-dashed border-cyan-400 w-3/4 mt-1 flex-1"></div>
             </div>
             )}
@@ -1640,21 +1818,27 @@ const SingleMarkSheetSidebar = ({
         <div className="grid grid-cols-2 gap-8 print:gap-6 max-w-xl mx-auto print:max-w-lg">
           <div className="flex flex-col items-center">
             <div className="h-12 print:h-8 flex items-end justify-center w-full">
-              {showSignature && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-12 max-w-full object-contain print:max-h-8" />}
+              {showSignature && principalShowSign && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-12 max-w-full object-contain print:max-h-8" />}
             </div>
+            {principalShowName && (
             <div className="border-t-2 border-cyan-700 mt-1.5 print:mt-1 w-full"></div>
-            <p className="text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold text-slate-800 mt-1.5 print:mt-1 text-center">{principalName || institution?.PrincipalName}</p>
-            <p className="text-[9px] ms-fs-9 print:text-[8px] ms-pfs-8 uppercase tracking-[0.2em] text-cyan-700">মুহতামিম</p>
-            {showDate && <p className="text-[9px] ms-fs-9 print:text-[8px] ms-pfs-8 text-slate-500 mt-0.5 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</p>}
+            )}
+            {principalShowName && (
+            <p className="text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold text-slate-800 mt-1.5 print:mt-1 text-center">{principalName || institution?.PrincipalName || ms('principal')}</p>
+            )}
+            {showDate && principalShowDate && <p className="text-[9px] ms-fs-9 print:text-[8px] ms-pfs-8 text-slate-500 mt-0.5 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</p>}
           </div>
           <div className="flex flex-col items-center">
             <div className="h-12 print:h-8 flex items-end justify-center w-full">
-              {showSignature && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-12 max-w-full object-contain print:max-h-8" />}
+              {showSignature && najemShowSign && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-12 max-w-full object-contain print:max-h-8" />}
             </div>
+            {najemShowName && (
             <div className="border-t-2 border-cyan-700 mt-1.5 print:mt-1 w-full"></div>
-            <p className="text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold text-slate-800 mt-1.5 print:mt-1 text-center">{najemName || institution?.NajemName}</p>
-            <p className="text-[9px] ms-fs-9 print:text-[8px] ms-pfs-8 uppercase tracking-[0.2em] text-cyan-700">নায়েবে তালিমাত</p>
-            {showDate && <p className="text-[9px] ms-fs-9 print:text-[8px] ms-pfs-8 text-slate-500 mt-0.5 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</p>}
+            )}
+            {najemShowName && (
+            <p className="text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold text-slate-800 mt-1.5 print:mt-1 text-center">{najemName || institution?.NajemName || ms('najem')}</p>
+            )}
+            {showDate && najemShowDate && <p className="text-[9px] ms-fs-9 print:text-[8px] ms-pfs-8 text-slate-500 mt-0.5 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</p>}
           </div>
         </div>
       </div>
@@ -1667,49 +1851,65 @@ const SingleMarkSheetSidebar = ({
 };
 
 // ==========================================
-// ⭐ NEW TEMPLATE 6: Vintage Gazette (newspaper style)
+// ⭐ NEW TEMPLATE 6: Vintage Gazette (newspaper style) — বাংলা
 // ==========================================
 const SingleMarkSheetGazette = ({
   student, institution, imageSrc, signatureNajemSrc, signaturePrincipalSrc,
   session, classInfo, examSubjects, divisions = [], examConfig = {},
-  isLast = false, ExamID, SubClassID, ExamName,
+  isLast = false, ExamID, SubClassID, ExamName, lang = 'bn',
   showDate = true, showSignature = true, principalName = '', najemName = '',
+  najemShowSign = true, najemShowName = true, najemShowDate = true,
+  principalShowSign = true, principalShowName = true, principalShowDate = true,
   paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
   showClassTeacherSign = true, showGuardianSign = true,
+  totalStudents = 0,
 }) => {
   const {
     subjects, totalSubjects, divisionRows, rowPad,
     studentName, fatherName, motherName, birthDate, rollNumber,
     registration, divisionName, averageMark,
-  } = computeMarkSheetData({ student, examSubjects, examConfig, divisions });
+  } = computeMarkSheetData({ student, examSubjects, examConfig, divisions, lang });
+
+  // Every fixed word, digit and date on this sheet goes through the language.
+  // toBn keeps its name so no call site had to change; inside a template it
+  // now means "digits in the chosen language".
+  const ms = (key) => getMarkSheetText(key, lang);
+  const dir = getMarkSheetDir(lang);
+  const toBn = (value) => toLangDigit(value, lang);
+  const printDate = getPrintDate(new Date(), lang);
+  const instName = getInstitutionName(institution, lang);
+  const instAddress = getInstitutionAddress(institution, lang);
+  const sessionName = getLangValue(session, 'SessionName', lang);
 
   const { data } = useGetLabelNameListsQuery();
   const labels = data?.[0] || {};
   const previewWidth = getPreviewWidth(paperSize, orientation);
 
   const infoItems = buildInfoItems({
+    lang,
     studentInfoFields, labels, studentName, fatherName, motherName,
-    birthDate, registration, rollNumber,
+    birthDate, registration, rollNumber, totalStudents,
   });
 
   return (
     <div
+      dir={dir}
       className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-[#f5f0e3] text-stone-900 mb-10 print:mb-0 flex flex-col shadow-xl`}
-      style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
+      style={{ fontFamily: 'Georgia, "Times New Roman", "Noto Serif Bengali", "SolaimanLipi", serif' }}
     >
       {/* ── MASTHEAD */}
       <div className="marksheet-header px-6 pt-4 pb-2 border-t-[3px] border-double border-t-[6px] border-stone-900 border-b-[3px] border-double border-b-[6px]">
         <div className="text-center">
-          <div className="text-[8.5px] ms-fs-8_5 print:text-[8px] ms-pfs-8 tracking-[0.5em] uppercase text-stone-600">
-            The Official Academic Record
+          <div className="text-[8.5px] ms-fs-8_5 print:text-[8px] ms-pfs-8 tracking-wider text-stone-600">
+            {ms('institutionalRecord')}
           </div>
-          <h1 className="text-[34px] ms-fs-34 print:text-[24px] ms-pfs-24 font-black leading-none tracking-[0.02em] my-1">
-            THE RESULT GAZETTE
+          <h1 className="text-[34px] ms-fs-34 print:text-[24px] ms-pfs-24 font-black leading-none tracking-wide my-1">
+            {ms('gazette')}
           </h1>
-          <div className="flex items-center justify-center gap-3 text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 uppercase tracking-wider text-stone-700">
-            <span>VOL. {toBn(session?.SessionName || '-')}</span>
+          <div className="flex items-center justify-center gap-3 text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 tracking-wide text-stone-700">
+            <span>{ms('volume')}: {toBn(sessionName || '-')}</span>
             <span>·</span>
-            <span>NO. {toBn(ExamName || '-')}</span>
+            <span>{ms('exam')}: {toBn(ExamName || '-')}</span>
             <span>·</span>
             <span>{showDate ? toBn(new Date().toLocaleDateString('bn-BD')) : ''}</span>
           </div>
@@ -1718,8 +1918,12 @@ const SingleMarkSheetGazette = ({
 
       {/* ── Institution name as secondary header */}
       <div className="text-center px-6 py-2 border-b border-stone-400">
-        <h2 className="marksheet-inst-name text-[18px] ms-fs-18 print:text-[15px] ms-pfs-15 font-bold italic">{toBn(institution?.InstitutionName || '-')}</h2>
-        <p className="marksheet-inst-address text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 text-stone-600">{toBn(institution?.Address || '-')}</p>
+        <h2 className="marksheet-inst-name text-[18px] ms-fs-18 print:text-[15px] ms-pfs-15 font-bold italic">
+          {toBn(instName || '-')}
+        </h2>
+        <p className="marksheet-inst-address text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 text-stone-600">
+          {toBn(instAddress || '-')}
+        </p>
       </div>
 
       {/* ── Body: 2-column */}
@@ -1728,17 +1932,23 @@ const SingleMarkSheetGazette = ({
         <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-5 print:gap-4 mb-3 print:mb-2 shrink-0">
           <div>
             <div className="border-b-2 border-stone-900 pb-0.5 mb-1.5">
-              <h3 className="text-[12px] ms-fs-12 print:text-[10.5px] ms-pfs-10_5 font-black uppercase tracking-wider">Student Profile</h3>
+              <h3 className="text-[12px] ms-fs-12 print:text-[10.5px] ms-pfs-10_5 font-black tracking-wide">
+                {ms('studentInfo')}
+              </h3>
             </div>
             <div className="space-y-1 text-[11.5px] ms-fs-11_5 print:text-[10.5px] ms-pfs-10_5">
               {infoItems.map((f, i) => (
                 <div key={i} className="flex items-baseline border-b border-dotted border-stone-400 pb-0.5">
-                  <span className="text-[8px] ms-fs-8 print:text-[7.5px] ms-pfs-7_5 font-bold uppercase tracking-wider text-stone-500 w-20 shrink-0">{f.enLabel}</span>
+                  <span className="text-[9px] ms-fs-9 print:text-[8.5px] ms-pfs-8_5 font-bold tracking-wide text-stone-500 w-24 shrink-0">
+                    {f.label}
+                  </span>
                   <span className="font-semibold truncate">{toBn(f.value)}</span>
                 </div>
               ))}
               <div className="flex items-baseline border-b border-dotted border-stone-400 pb-0.5">
-                <span className="text-[8px] ms-fs-8 print:text-[7.5px] ms-pfs-7_5 font-bold uppercase tracking-wider text-stone-500 w-20 shrink-0">CLASS</span>
+                <span className="text-[9px] ms-fs-9 print:text-[8.5px] ms-pfs-8_5 font-bold tracking-wide text-stone-500 w-24 shrink-0">
+                  {ms('className')}
+                </span>
                 <span className="font-semibold">{toBn(classInfo?.ClassName || '-')}</span>
               </div>
             </div>
@@ -1746,9 +1956,11 @@ const SingleMarkSheetGazette = ({
 
           <div>
             <div className="border-b-2 border-stone-900 pb-0.5 mb-1.5">
-              <h3 className="text-[12px] ms-fs-12 print:text-[10.5px] ms-pfs-10_5 font-black uppercase tracking-wider">
-                Division Breakdown
-                <span className="font-normal italic text-[9px] ms-fs-9 ml-2">({toBn(divisionRows.length)} div · {toBn(totalSubjects)} sub)</span>
+              <h3 className="text-[12px] ms-fs-12 print:text-[10.5px] ms-pfs-10_5 font-black tracking-wide">
+                {ms('markDistribution')}
+                <span className="font-normal italic text-[9px] ms-fs-9 ml-2">
+                  ({toBn(divisionRows.length)} {ms('divisionWord')} · {toBn(totalSubjects)} {ms('subjectWord')})
+                </span>
               </h3>
             </div>
             <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-[11px] ms-fs-11 print:text-[10px] ms-pfs-10">
@@ -1767,18 +1979,20 @@ const SingleMarkSheetGazette = ({
         {/* Table as "main story" */}
         <div className="mb-3 print:mb-2 shrink-0">
           <div className="border-y-2 border-stone-900 py-0.5 mb-1.5 text-center">
-            <h3 className="text-[14px] ms-fs-14 print:text-[12px] ms-pfs-12 font-black uppercase tracking-[0.2em]">— Academic Record —</h3>
+            <h3 className="text-[14px] ms-fs-14 print:text-[12px] ms-pfs-12 font-black tracking-wider">
+              — {ms('academicRecord')} —
+            </h3>
           </div>
           <div className="marks-table-wrap w-full overflow-x-auto print:overflow-visible border-2 border-stone-900">
             <table className="w-full min-w-[700px] print:min-w-0 border-collapse">
               <thead>
                 <tr>
-                  <th style={TH_STYLE_GAZETTE} className="px-2 py-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 font-black uppercase tracking-wider text-center w-10 border-r border-stone-700">#</th>
-                  <th style={TH_STYLE_GAZETTE} className="px-3 py-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 font-black uppercase tracking-wider text-left border-r border-stone-700">SUBJECT</th>
-                  <th style={TH_STYLE_GAZETTE} className="px-2 py-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 font-black uppercase tracking-wider text-center border-r border-stone-700">FULL</th>
-                  <th style={TH_STYLE_GAZETTE} className="px-2 py-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 font-black uppercase tracking-wider text-center border-r border-stone-700">PASS</th>
-                  <th style={TH_STYLE_GAZETTE} className="px-2 py-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 font-black uppercase tracking-wider text-center border-r border-stone-700">HIGH</th>
-                  <th style={TH_STYLE_GAZETTE} className="px-3 py-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 font-black uppercase tracking-wider text-center">OBTAINED</th>
+                  <th style={TH_STYLE_GAZETTE} className="px-1.5 py-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 font-black tracking-wide text-center w-10 border-r border-stone-700">{ms('serialShort')}</th>
+                  <th style={TH_STYLE_GAZETTE} className="px-3 py-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 font-black tracking-wide text-left border-r border-stone-700">{ms('subject')}</th>
+                  <th style={TH_STYLE_GAZETTE} className="px-2 py-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 font-black tracking-wide text-center border-r border-stone-700">{ms('fullMark')}</th>
+                  <th style={TH_STYLE_GAZETTE} className="px-2 py-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 font-black tracking-wide text-center border-r border-stone-700">{ms('passMark')}</th>
+                  <th style={TH_STYLE_GAZETTE} className="px-2 py-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 font-black tracking-wide text-center border-r border-stone-700 whitespace-nowrap">{ms('highestMark')}</th>
+                  <th style={TH_STYLE_GAZETTE} className="px-3 py-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 font-black tracking-wide text-center whitespace-nowrap">{ms('obtainedMark')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -1787,7 +2001,7 @@ const SingleMarkSheetGazette = ({
                   const cellStyle = { backgroundColor: isAlt ? '#ede7d5' : '#f5f0e3', ...EXACT };
                   return (
                     <tr key={item.id} className={`${isAlt ? 'row-alt' : 'row-plain'} text-center`}>
-                      <td style={cellStyle} className={`border-b border-r border-stone-300 px-2 ${rowPad} py-1 print:py-0.5 text-[11px] ms-fs-11 print:text-[10px] ms-pfs-10 italic`}>{toBn(index + 1)}</td>
+                      <td style={cellStyle} className={`border-b border-r border-stone-300 px-1.5 ${rowPad} py-1 print:py-0.5 text-[11px] ms-fs-11 print:text-[10px] ms-pfs-10 italic`}>{toBn(index + 1)}</td>
                       <td style={cellStyle} className={`border-b border-r border-stone-300 px-3 ${rowPad} py-1 print:py-0.5 text-left text-[11.5px] ms-fs-11_5 print:text-[10.5px] ms-pfs-10_5 font-semibold`}>{toBn(item.subject)}</td>
                       <td style={cellStyle} className={`border-b border-r border-stone-300 px-2 ${rowPad} py-1 print:py-0.5 text-[11px] ms-fs-11 print:text-[10px] ms-pfs-10`}>{toBn(item.fullMark)}</td>
                       <td style={cellStyle} className={`border-b border-r border-stone-300 px-2 ${rowPad} py-1 print:py-0.5 text-[11px] ms-fs-11 print:text-[10px] ms-pfs-10`}>{toBn(item.passMark)}</td>
@@ -1805,22 +2019,22 @@ const SingleMarkSheetGazette = ({
         <div className="border-y-2 border-stone-900 py-2 print:py-1 mb-3 print:mb-2 shrink-0">
           <div className="flex flex-wrap items-center justify-around gap-x-3 gap-y-1 text-[11px] ms-fs-11 print:text-[10px] ms-pfs-10">
             <div className="flex items-baseline gap-2">
-              <span className="text-[8.5px] ms-fs-8_5 uppercase tracking-wider text-stone-500 font-bold">DIVISION:</span>
+              <span className="text-[9px] ms-fs-9 tracking-wide text-stone-500 font-bold">{ms('division')}:</span>
               <span className="text-[15px] ms-fs-15 print:text-[13px] ms-pfs-13 font-black italic">{toBn(divisionName)}</span>
             </div>
             <span className="text-stone-400">|</span>
             <div className="flex items-baseline gap-2">
-              <span className="text-[8.5px] ms-fs-8_5 uppercase tracking-wider text-stone-500 font-bold">POSITION:</span>
+              <span className="text-[9px] ms-fs-9 tracking-wide text-stone-500 font-bold">{ms('meritPosition')}:</span>
               <span className="text-[15px] ms-fs-15 print:text-[13px] ms-pfs-13 font-black italic">{toBn(student?.Positions ?? '-')}</span>
             </div>
             <span className="text-stone-400">|</span>
             <div className="flex items-baseline gap-2">
-              <span className="text-[8.5px] ms-fs-8_5 uppercase tracking-wider text-stone-500 font-bold">AVERAGE:</span>
+              <span className="text-[9px] ms-fs-9 tracking-wide text-stone-500 font-bold">{ms('average')}:</span>
               <span className="text-[15px] ms-fs-15 print:text-[13px] ms-pfs-13 font-black italic">{toBn(averageMark)}</span>
             </div>
             <span className="text-stone-400">|</span>
             <div className="flex items-baseline gap-2">
-              <span className="text-[8.5px] ms-fs-8_5 uppercase tracking-wider text-stone-500 font-bold">TOTAL:</span>
+              <span className="text-[9px] ms-fs-9 tracking-wide text-stone-500 font-bold">{ms('totalMark')}:</span>
               <span className="text-[15px] ms-fs-15 print:text-[13px] ms-pfs-13 font-black italic">{toBn(student?.Total ?? '-')}</span>
             </div>
           </div>
@@ -1831,13 +2045,19 @@ const SingleMarkSheetGazette = ({
         <div className="marksheet-comments grid grid-cols-2 print:grid-cols-2 gap-4 print:gap-3 flex-1">
           {showClassTeacherSign && (
           <div>
-            <h4 className="text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 font-black uppercase tracking-wider italic text-stone-700 border-b border-stone-400 pb-0.5">From the Class Teacher</h4>
-            <div className="border-b border-dotted border-stone-500 min-h-[42px] print:min-h-[36px] mt-2 text-[11px] ms-fs-11 print:text-[10px] ms-pfs-10 italic pt-1">{student?.Note ?? ''}</div>
+            <h4 className="text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 font-black tracking-wide italic text-stone-700 border-b border-stone-400 pb-0.5">
+              {ms('fromClassTeacher')}
+            </h4>
+            <div className="border-b border-dotted border-stone-500 min-h-[42px] print:min-h-[36px] mt-2 text-[11px] ms-fs-11 print:text-[10px] ms-pfs-10 italic pt-1">
+              {student?.Note ?? ''}
+            </div>
           </div>
           )}
           {showGuardianSign && (
           <div>
-            <h4 className="text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 font-black uppercase tracking-wider italic text-stone-700 border-b border-stone-400 pb-0.5">From the Guardian</h4>
+            <h4 className="text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 font-black tracking-wide italic text-stone-700 border-b border-stone-400 pb-0.5">
+              {ms('fromGuardian')}
+            </h4>
             <div className="border-b border-dotted border-stone-500 min-h-[42px] print:min-h-[36px] mt-2"></div>
           </div>
           )}
@@ -1854,38 +2074,39 @@ const SingleMarkSheetGazette = ({
                 value={`https://qmmsoft.com/${institution?.InstitutionCode}/students/${session?.SessionID}/${ExamID}/${SubClassID}/${student?.UserCode}`}
                 viewBox="0 0 256 256" />
             </div>
-            <p className="text-[8px] ms-fs-8 print:text-[7.5px] ms-pfs-7_5 text-center italic mt-0.5">Verify</p>
+            <p className="text-[8px] ms-fs-8 print:text-[7.5px] ms-pfs-7_5 text-center italic mt-0.5">{ms('verify')}</p>
           </div>
           <div className="col-span-2 text-center">
             <div className="h-9 print:h-6 flex items-end justify-center">
-              {showSignature && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-9 max-w-full object-contain print:max-h-6" />}
+              {showSignature && principalShowSign && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-9 max-w-full object-contain print:max-h-6" />}
             </div>
-            <div className="border-t border-stone-900 mt-1 pt-1">
-              <div className="text-[11.5px] ms-fs-11_5 print:text-[10.5px] ms-pfs-10_5 font-bold italic">{principalName || institution?.PrincipalName}</div>
-              <div className="text-[8px] ms-fs-8 print:text-[7.5px] ms-pfs-7_5 uppercase tracking-wider text-stone-600">Principal</div>
-              {showDate && <div className="text-[9px] ms-fs-9 print:text-[8px] ms-pfs-8 italic mt-0.5">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
+            <div style={principalShowName ? undefined : { borderTopWidth: 0 }} className="border-t border-stone-900 mt-1 pt-1">
+              {principalShowName && (
+              <div className="text-[11.5px] ms-fs-11_5 print:text-[10.5px] ms-pfs-10_5 font-bold italic">{principalName || institution?.PrincipalName || ms('principal')}</div>
+              )}
+              {showDate && principalShowDate && <div className="text-[9px] ms-fs-9 print:text-[8px] ms-pfs-8 italic mt-0.5">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
             </div>
           </div>
           <div className="col-span-2 text-center">
             <div className="h-9 print:h-6 flex items-end justify-center">
-              {showSignature && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-9 max-w-full object-contain print:max-h-6" />}
+              {showSignature && najemShowSign && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-9 max-w-full object-contain print:max-h-6" />}
             </div>
-            <div className="border-t border-stone-900 mt-1 pt-1">
-              <div className="text-[11.5px] ms-fs-11_5 print:text-[10.5px] ms-pfs-10_5 font-bold italic">{najemName || institution?.NajemName}</div>
-              <div className="text-[8px] ms-fs-8 print:text-[7.5px] ms-pfs-7_5 uppercase tracking-wider text-stone-600">Vice Principal</div>
-              {showDate && <div className="text-[9px] ms-fs-9 print:text-[8px] ms-pfs-8 italic mt-0.5">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
+            <div style={najemShowName ? undefined : { borderTopWidth: 0 }} className="border-t border-stone-900 mt-1 pt-1">
+              {najemShowName && (
+              <div className="text-[11.5px] ms-fs-11_5 print:text-[10.5px] ms-pfs-10_5 font-bold italic">{najemName || institution?.NajemName || ms('najem')}</div>
+              )}
+              {showDate && najemShowDate && <div className="text-[9px] ms-fs-9 print:text-[8px] ms-pfs-8 italic mt-0.5">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
             </div>
           </div>
         </div>
       </div>
 
-      <div className="border-t border-stone-400 px-5 print:px-4 py-1 print:py-0.5 text-[8.5px] ms-fs-8_5 print:text-[7.5px] ms-pfs-7_5 uppercase tracking-[0.25em] text-stone-600 text-center">
-        Printed by SAHARAIT · The Result Gazette · All Rights Reserved
+      <div className="border-t border-stone-400 px-5 print:px-4 py-1 print:py-0.5 text-[9px] ms-fs-9 print:text-[8px] ms-pfs-8 tracking-wide text-stone-600 text-center">
+        SAHARAIT {ms('printedBy')} · {ms('gazette')} · {ms('allRightsReserved')}
       </div>
     </div>
   );
 };
-
 
 // ==========================================
 // ⭐ NEW TEMPLATE 7: Bauhaus Bold (poster style)
@@ -1893,24 +2114,39 @@ const SingleMarkSheetGazette = ({
 const SingleMarkSheetBauhaus = ({
   student, institution, imageSrc, signatureNajemSrc, signaturePrincipalSrc,
   session, classInfo, examSubjects, divisions = [], examConfig = {},
-  isLast = false, ExamID, SubClassID, ExamName,
+  isLast = false, ExamID, SubClassID, ExamName, lang = 'bn',
   showDate = true, showSignature = true, principalName = '', najemName = '',
+  najemShowSign = true, najemShowName = true, najemShowDate = true,
+  principalShowSign = true, principalShowName = true, principalShowDate = true,
   paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
   showClassTeacherSign = true, showGuardianSign = true,
+  totalStudents = 0,
 }) => {
   const {
     subjects, totalSubjects, divisionRows, rowPad,
     studentName, fatherName, motherName, birthDate, rollNumber,
     registration, divisionName, averageMark,
-  } = computeMarkSheetData({ student, examSubjects, examConfig, divisions });
+  } = computeMarkSheetData({ student, examSubjects, examConfig, divisions, lang });
+
+  // Every fixed word, digit and date on this sheet goes through the language.
+  // toBn keeps its name so no call site had to change; inside a template it
+  // now means "digits in the chosen language".
+  const ms = (key) => getMarkSheetText(key, lang);
+  const dir = getMarkSheetDir(lang);
+  const toBn = (value) => toLangDigit(value, lang);
+  const printDate = getPrintDate(new Date(), lang);
+  const instName = getInstitutionName(institution, lang);
+  const instAddress = getInstitutionAddress(institution, lang);
+  const sessionName = getLangValue(session, 'SessionName', lang);
 
   const { data } = useGetLabelNameListsQuery();
   const labels = data?.[0] || {};
   const previewWidth = getPreviewWidth(paperSize, orientation);
 
   const infoItems = buildInfoItems({
+    lang,
     studentInfoFields, labels, studentName, fatherName, motherName,
-    birthDate, registration, rollNumber,
+    birthDate, registration, rollNumber, totalStudents,
   });
 
   const summaryItems = [
@@ -1921,7 +2157,7 @@ const SingleMarkSheetBauhaus = ({
   ];
 
   return (
-    <div className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-white mb-10 print:mb-0 flex flex-col shadow-2xl`}>
+    <div dir={dir} className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-white mb-10 print:mb-0 flex flex-col shadow-2xl`}>
       {/* Inner border wrapper (survives print) */}
       <div className="marksheet-frame border-[6px] border-black flex flex-1 flex-col min-h-0">
 
@@ -1935,10 +2171,10 @@ const SingleMarkSheetBauhaus = ({
             </div>
             <div>
               <h1 className="marksheet-inst-name text-[22px] ms-fs-22 print:text-[17px] ms-pfs-17 font-black uppercase leading-none tracking-tight">
-                {toBn(institution?.InstitutionName || '-')}
+                {toBn(instName || '-')}
               </h1>
               <p className="marksheet-inst-address text-[9.5px] ms-fs-9_5 print:text-[8.5px] ms-pfs-8_5 mt-1 opacity-90 uppercase tracking-wider">
-                {toBn(institution?.Address || '-')}
+                {toBn(instAddress || '-')}
               </p>
             </div>
           </div>
@@ -1951,7 +2187,7 @@ const SingleMarkSheetBauhaus = ({
         {/* ── YELLOW BANNER (Exam + Class) */}
         <div className="marksheet-rainbow bg-yellow-400 text-black px-5 py-1.5 print:py-1 flex items-center justify-between border-b-[6px] border-black shrink-0">
           <span className="text-[12px] ms-fs-12 print:text-[10.5px] ms-pfs-10_5 font-black uppercase tracking-wider">★ {toBn(ExamName || '-')}</span>
-          <span className="text-[12px] ms-fs-12 print:text-[10.5px] ms-pfs-10_5 font-black uppercase tracking-wider">CLASS: {toBn(classInfo?.ClassName || '-')}</span>
+          <span className="text-[12px] ms-fs-12 print:text-[10.5px] ms-pfs-10_5 font-black uppercase tracking-wider">{ms('className')}: {toBn(classInfo?.ClassName || '-')}</span>
         </div>
 
         {/* ── BODY: split with red sidebar */}
@@ -1969,7 +2205,7 @@ const SingleMarkSheetBauhaus = ({
             <div className="bg-black text-white px-4 py-2.5 print:px-3 print:py-1.5 grid grid-cols-2 md:grid-cols-3 print:grid-cols-3 gap-x-4 gap-y-1.5 print:gap-y-1 border-b-[6px] border-black shrink-0">
               {infoItems.map((f, i) => (
                 <div key={i}>
-                  <div className="text-[7.5px] ms-fs-7_5 print:text-[7px] ms-pfs-7 uppercase tracking-[0.2em] font-black text-yellow-400">{f.enLabel}</div>
+                  <div className="text-[7.5px] ms-fs-7_5 print:text-[7px] ms-pfs-7 uppercase tracking-[0.2em] font-black text-yellow-400">{f.label}</div>
                   <div className="text-[11.5px] ms-fs-11_5 print:text-[10.5px] ms-pfs-10_5 font-bold truncate">{toBn(f.value)}</div>
                 </div>
               ))}
@@ -1978,7 +2214,7 @@ const SingleMarkSheetBauhaus = ({
             {/* ── Divisions in blue strip */}
             <div className="bg-blue-600 text-white px-4 py-1.5 print:px-3 print:py-1 border-b-[6px] border-black shrink-0">
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-                <span className="text-[9px] ms-fs-9 print:text-[8px] ms-pfs-8 font-black uppercase tracking-widest">DIVISIONS:</span>
+                <span className="text-[9px] ms-fs-9 print:text-[8px] ms-pfs-8 font-black uppercase tracking-widest">{ms('markDistribution')}:</span>
                 {divisionRows.length === 0
                   ? <span className="text-[10px] ms-fs-10 italic opacity-70">—</span>
                   : divisionRows.map((item, i) => (
@@ -1997,11 +2233,11 @@ const SingleMarkSheetBauhaus = ({
                   <thead>
                     <tr>
                       <th style={TH_STYLE_BAUHAUS} className="px-2 py-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 font-black uppercase tracking-wider text-center w-10 border-r-[3px] border-black">#</th>
-                      <th style={TH_STYLE_BAUHAUS} className="px-3 py-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 font-black uppercase tracking-wider text-left border-r-[3px] border-black">SUBJECT</th>
-                      <th style={TH_STYLE_BAUHAUS} className="px-2 py-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 font-black uppercase tracking-wider text-center border-r-[3px] border-black">FULL</th>
-                      <th style={TH_STYLE_BAUHAUS} className="px-2 py-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 font-black uppercase tracking-wider text-center border-r-[3px] border-black">PASS</th>
-                      <th style={TH_STYLE_BAUHAUS} className="px-2 py-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 font-black uppercase tracking-wider text-center border-r-[3px] border-black">HIGH</th>
-                      <th style={TH_STYLE_BAUHAUS} className="px-3 py-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 font-black uppercase tracking-wider text-center">OBTAINED</th>
+                      <th style={TH_STYLE_BAUHAUS} className="px-3 py-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 font-black uppercase tracking-wider text-left border-r-[3px] border-black">{ms('subject')}</th>
+                      <th style={TH_STYLE_BAUHAUS} className="px-2 py-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 font-black uppercase tracking-wider text-center border-r-[3px] border-black">{ms('fullMarkShort')}</th>
+                      <th style={TH_STYLE_BAUHAUS} className="px-2 py-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 font-black uppercase tracking-wider text-center border-r-[3px] border-black">{ms('passMarkShort')}</th>
+                      <th style={TH_STYLE_BAUHAUS} className="px-2 py-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 font-black uppercase tracking-wider text-center border-r-[3px] border-black">{ms('highestMarkShort')}</th>
+                      <th style={TH_STYLE_BAUHAUS} className="px-3 py-1.5 print:py-1 text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 font-black uppercase tracking-wider text-center">{ms('obtainedMarkShort')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -2043,13 +2279,13 @@ const SingleMarkSheetBauhaus = ({
             <div className="marksheet-comments grid grid-cols-2 gap-3 print:gap-2 p-3 print:p-2 bg-white flex-1">
               {showClassTeacherSign && (
               <div>
-                <div className="bg-blue-600 text-white px-2 py-0.5 text-[9px] ms-fs-9 print:text-[8px] ms-pfs-8 font-black uppercase tracking-widest">TEACHER</div>
+                <div className="bg-blue-600 text-white px-2 py-0.5 text-[9px] ms-fs-9 print:text-[8px] ms-pfs-8 font-black uppercase tracking-widest">{ms('classTeacher')}</div>
                 <div className="border-[3px] border-black min-h-[42px] print:min-h-[36px] p-1.5 text-[11px] ms-fs-11 print:text-[10px] ms-pfs-10">{student?.Note ?? ''}</div>
               </div>
               )}
               {showGuardianSign && (
               <div>
-                <div className="bg-red-600 text-white px-2 py-0.5 text-[9px] ms-fs-9 print:text-[8px] ms-pfs-8 font-black uppercase tracking-widest">GUARDIAN</div>
+                <div className="bg-red-600 text-white px-2 py-0.5 text-[9px] ms-fs-9 print:text-[8px] ms-pfs-8 font-black uppercase tracking-widest">{ms('fromGuardian')}</div>
                 <div className="border-[3px] border-black min-h-[42px] print:min-h-[36px] p-1.5"></div>
               </div>
               )}
@@ -2070,22 +2306,24 @@ const SingleMarkSheetBauhaus = ({
             </div>
             <div className="col-span-2 text-center">
               <div className="h-8 print:h-6 flex items-end justify-center">
-                {showSignature && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-8 max-w-full object-contain print:max-h-6" style={{ filter: 'invert(1)' }} />}
+                {showSignature && principalShowSign && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-8 max-w-full object-contain print:max-h-6" style={{ filter: 'invert(1)' }} />}
               </div>
-              <div className="border-t-2 border-yellow-400 mt-1 pt-1">
-                <div className="text-[11px] ms-fs-11 print:text-[10px] ms-pfs-10 font-black uppercase">{principalName || institution?.PrincipalName}</div>
-                <div className="text-[7.5px] ms-fs-7_5 print:text-[7px] ms-pfs-7 text-yellow-400 uppercase tracking-widest">Principal</div>
-                {showDate && <div className="text-[8px] ms-fs-8 print:text-[7.5px] ms-pfs-7_5 text-white/60 mt-0.5">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
+              <div style={principalShowName ? undefined : { borderTopWidth: 0 }} className="border-t-2 border-yellow-400 mt-1 pt-1">
+                {principalShowName && (
+                <div className="text-[11px] ms-fs-11 print:text-[10px] ms-pfs-10 font-black uppercase">{principalName || institution?.PrincipalName || ms('principal')}</div>
+                )}
+                {showDate && principalShowDate && <div className="text-[8px] ms-fs-8 print:text-[7.5px] ms-pfs-7_5 text-white/60 mt-0.5">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
               </div>
             </div>
             <div className="col-span-2 text-center">
               <div className="h-8 print:h-6 flex items-end justify-center">
-                {showSignature && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-8 max-w-full object-contain print:max-h-6" style={{ filter: 'invert(1)' }} />}
+                {showSignature && najemShowSign && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-8 max-w-full object-contain print:max-h-6" style={{ filter: 'invert(1)' }} />}
               </div>
-              <div className="border-t-2 border-yellow-400 mt-1 pt-1">
-                <div className="text-[11px] ms-fs-11 print:text-[10px] ms-pfs-10 font-black uppercase">{najemName || institution?.NajemName}</div>
-                <div className="text-[7.5px] ms-fs-7_5 print:text-[7px] ms-pfs-7 text-yellow-400 uppercase tracking-widest">Vice Principal</div>
-                {showDate && <div className="text-[8px] ms-fs-8 print:text-[7.5px] ms-pfs-7_5 text-white/60 mt-0.5">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
+              <div style={najemShowName ? undefined : { borderTopWidth: 0 }} className="border-t-2 border-yellow-400 mt-1 pt-1">
+                {najemShowName && (
+                <div className="text-[11px] ms-fs-11 print:text-[10px] ms-pfs-10 font-black uppercase">{najemName || institution?.NajemName || ms('najem')}</div>
+                )}
+                {showDate && najemShowDate && <div className="text-[8px] ms-fs-8 print:text-[7.5px] ms-pfs-7_5 text-white/60 mt-0.5">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
               </div>
             </div>
           </div>
@@ -2100,59 +2338,285 @@ const SingleMarkSheetBauhaus = ({
   );
 };
 
+// // ==========================================
+// // ⭐ NEW TEMPLATE 8: Classic Traditional (legacy black-border design)
+// // ==========================================
+// const SingleMarkSheetClassic = ({
+//   student, institution, imageSrc, signatureNajemSrc, signaturePrincipalSrc,
+//   session, classInfo, examSubjects, divisions = [], examConfig = {},
+//   isLast = false, ExamID, SubClassID, ExamName,
+//   showDate = true, showSignature = true, principalName = '', najemName = '',
+//   paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
+//   showClassTeacherSign = true, showGuardianSign = true,
+//   totalStudents = 0,
+// }) => {
+//   const {
+//     subjects, totalSubjects, divisionRows,
+//     studentName, fatherName, motherName, birthDate,
+//     rollNumber, registration, divisionName, averageMark,
+//   } = computeMarkSheetData({ student, examSubjects, examConfig, divisions });
+
+//   const { data } = useGetLabelNameListsQuery();
+//   const labels = data?.[0] || {};
+//   const previewWidth = getPreviewWidth(paperSize, orientation);
+
+//   // Header line of the division box: "মোট বিষয় ৬ টি- পূর্ণমান ১০০ * ৬ = ৬০০"
+//   const fullPerSubject = Number(subjects?.[0]?.fullMark) || 0;
+//   const totalFullMark = fullPerSubject * totalSubjects;
+
+//   const infoRows = [
+//     studentInfoFields.name && ['পরীক্ষার্থীর নাম', studentName],
+//     ['মারহালা/শ্রেণী', classInfo?.ClassName || '-'],
+//     studentInfoFields.registration && [labels?.StudentIDLabel ?? 'আইডি', registration],
+//     studentInfoFields.admission && [labels?.AdmissionIDLabel ?? 'ভর্তি নং', rollNumber],
+//     studentInfoFields.fatherName && ['পিতার নাম', fatherName],
+//     studentInfoFields.motherName && ['মাতার নাম', motherName],
+//     studentInfoFields.dob && ['জন্ম তারিখ', birthDate && birthDate !== '-' ? `${birthDate} ইং` : '-'],
+//     ['মোট পরীক্ষার্থীর সংখ্যা', totalStudents ?? '-'],
+//   ].filter(Boolean);
+
+//   return (
+//     <div dir={dir} className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-white text-black border-2 border-black mb-10 print:mb-0 flex flex-col`}>
+//       {/* ── Header: centered institution block, logo on the left */}
+//       <div className="marksheet-header relative text-center px-4 pt-3 pb-1 print:px-3 print:pt-2 print:pb-0.5 shrink-0">
+//         {imageSrc && (
+//           <img
+//             src={imageSrc}
+//             alt="Logo"
+//             className="absolute left-4 top-[52px] print:left-3 print:top-[42px] h-[62px] w-[62px] print:h-[50px] print:w-[50px] object-contain"
+//           />
+//         )}
+//         <h1 className="marksheet-inst-name text-[28px] ms-fs-28 print:text-[22px] ms-pfs-22 font-bold leading-tight">{toBn(instName || '-')}</h1>
+//         <p className="marksheet-inst-address text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-semibold leading-snug">{toBn(instAddress || '-')}</p>
+//         <p className="text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-semibold leading-snug">{ms('academicYear')} : {toBn(sessionName || '-')}</p>
+//         <p className="text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold leading-snug">{ms('exam')} : {toBn(ExamName || '-')}</p>
+//       </div>
+
+//       <div className="marksheet-body px-4 pb-2 print:px-3 print:pb-1 flex-1 flex flex-col min-h-0">
+//         {/* ── Student info (left) + division breakdown box (right) */}
+//         <div className="mt-1 flex items-start justify-between gap-4 print:gap-3 shrink-0">
+//           <div className="text-[15px] ms-fs-15 print:text-[13px] ms-pfs-13 leading-[1.8] print:leading-[1.6]">
+//             {infoRows.map(([label, value], i) => (
+//               <div key={i} className="flex">
+//                 <span className="w-[118px] print:w-[102px] font-bold shrink-0">{label}</span>
+//                 <span className="font-bold">: {toBn(value)}</span>
+//               </div>
+//             ))}
+//           </div>
+
+//           <div className="w-[300px] print:w-[255px] shrink-0 border-[1.5px] border-black">
+//             <div className="border-b-[1.5px] border-black px-2 py-0.5 text-center text-[14px] ms-fs-14 print:text-[12px] ms-pfs-12 font-bold whitespace-nowrap">
+//               {ms('totalSubjects')} {toBn(totalSubjects)} {ms('items')} - {ms('fullMark')} {toBn(fullPerSubject)} * {toBn(totalSubjects)} = {toBn(totalFullMark)}
+//             </div>
+//             {divisionRows.length === 0 ? (
+//               <div className="px-2 py-1 text-center text-[13px] ms-fs-13">{ms('noDivision')}</div>
+//             ) : (
+//               divisionRows.map((item, index) => (
+//                 <div key={index} className="flex border-b border-black last:border-b-0 text-[14px] ms-fs-14 print:text-[12px] ms-pfs-12 font-bold">
+//                   <span className="flex-1 border-r border-black px-2 py-0.5 truncate">{item.name}</span>
+//                   <span className="w-[132px] print:w-[114px] px-2 py-0.5 text-right whitespace-nowrap">
+//                     {toBn(item.number)} X {toBn(totalSubjects)} = {toBn((Number(item.number) || 0) * totalSubjects)}
+//                   </span>
+//                 </div>
+//               ))
+//             )}
+//           </div>
+//         </div>
+
+//         {/* ── Subject-wise result table (plain black borders) */}
+//         <div className="marks-table-wrap mt-2 print:mt-1.5 shrink-0 overflow-x-auto print:overflow-visible">
+//           <table className="w-full min-w-[640px] print:min-w-0 border-collapse border-[1.5px] border-black bg-white text-black text-center">
+//             <thead>
+//               <tr className="text-[15px] ms-fs-15 print:text-[13px] ms-pfs-13 font-bold">
+//                 <th className="border border-black px-2 py-1 print:py-0.5 w-16">{ms('serial')}</th>
+//                 <th className="border border-black px-3 py-1 print:py-0.5 text-left">{ms('subject')}</th>
+//                 <th className="border border-black px-2 py-1 print:py-0.5">{ms('fullMark')}</th>
+//                 <th className="border border-black px-2 py-1 print:py-0.5">{ms('passMarkAlt')}</th>
+//                 <th className="border border-black px-2 py-1 print:py-0.5">{ms('highestMarkAlt')}</th>
+//                 <th className="border border-black px-2 py-1 print:py-0.5">{ms('obtainedMark')}</th>
+//               </tr>
+//             </thead>
+//             <tbody>
+//               {subjects.map((item, index) => (
+//                 <tr key={item.id} className="text-[15px] ms-fs-15 print:text-[13px] ms-pfs-13 font-bold">
+//                   <td className="border border-black px-2 py-1 print:py-0.5">{toBn(index + 1)}</td>
+//                   <td className="border border-black px-3 py-1 print:py-0.5 text-left">{toBn(item.subject)}</td>
+//                   <td className="border border-black px-2 py-1 print:py-0.5">{toBn(item.fullMark)}</td>
+//                   <td className="border border-black px-2 py-1 print:py-0.5">{toBn(item.passMark)}</td>
+//                   <td className="border border-black px-2 py-1 print:py-0.5">{toBn(item.highestMark)}</td>
+//                   <td className="border border-black px-2 py-1 print:py-0.5">{toBn(item.obtainedMark)}</td>
+//                 </tr>
+//               ))}
+//             </tbody>
+//           </table>
+//         </div>
+
+//         {/* ── Summary strip */}
+//         <div className="mt-3 print:mt-2 border-[1.5px] border-black flex flex-wrap text-[15px] ms-fs-15 print:text-[13px] ms-pfs-13 font-bold shrink-0">
+//           <div className="flex-1 border-r border-black px-2 py-1 print:py-0.5 break-words">{ms('division')} : {toBn(divisionName)}</div>
+//           <div className="border-r border-black px-3 py-1 print:py-0.5 break-words">{ms('meritPosition')} : {toBn(student?.Positions ?? '-')}</div>
+//           <div className="border-r border-black px-3 py-1 print:py-0.5 break-words">{ms('average')} : {toBn(averageMark)}</div>
+//           <div className="px-3 py-1 print:py-0.5 break-words">{ms('totalMark')} : {toBn(student?.Total ?? '-')}</div>
+//         </div>
+
+//         {/* ── Comment boxes */}
+//         {(showClassTeacherSign || showGuardianSign) && (
+//           <div className="marksheet-comments mt-3 print:mt-2 flex gap-3 print:gap-2 flex-1 min-h-0">
+//             {showClassTeacherSign && (
+//               <div className="flex-1 border-[1.5px] border-black p-2 min-h-[95px] print:min-h-[70px]">
+//                 <p className="text-[14px] ms-fs-14 print:text-[12.5px] ms-pfs-12_5 font-bold">{ms('classTeacherCommentSign')} :</p>
+//                 <div className="text-[14px] ms-fs-14 print:text-[12.5px] ms-pfs-12_5 mt-1">{student?.Note ?? ''}</div>
+//               </div>
+//             )}
+//             {showGuardianSign && (
+//               <div className="flex-1 border-[1.5px] border-black p-2 min-h-[95px] print:min-h-[70px]">
+//                 <p className="text-[14px] ms-fs-14 print:text-[12.5px] ms-pfs-12_5 font-bold">{ms('guardianCommentSign')} :</p>
+//               </div>
+//             )}
+//           </div>
+//         )}
+//       </div>
+
+//       {/* ── Signatures: left and right, date underneath */}
+//       <div className="flex items-end justify-between px-10 print:px-8 pt-8 pb-3 print:pt-3 print:pb-2 mt-auto shrink-0">
+//         <div className="flex flex-col items-center">
+//           <div className="h-12 print:h-9 flex items-end justify-center">
+//             {showSignature && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="Signature Principal" className="max-h-12 max-w-[150px] object-contain print:max-h-9" />}
+//           </div>
+//           {showDate && <p className="text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold mt-1 print:mt-0.5">{ms('date')} : {printDate}</p>}
+//         </div>
+//         <div className="flex flex-col items-center">
+//           <div className="h-12 print:h-9 flex items-end justify-center">
+//             {showSignature && signatureNajemSrc && <img src={signatureNajemSrc} alt="Signature Najem" className="max-h-12 max-w-[150px] object-contain print:max-h-9" />}
+//           </div>
+//           {showDate && <p className="text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold mt-1 print:mt-0.5">{ms('date')} : {printDate}</p>}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
 // ==========================================
 // ⭐ NEW TEMPLATE 8: Classic Traditional (legacy black-border design)
 // ==========================================
 const SingleMarkSheetClassic = ({
   student, institution, imageSrc, signatureNajemSrc, signaturePrincipalSrc,
   session, classInfo, examSubjects, divisions = [], examConfig = {},
-  isLast = false, ExamID, SubClassID, ExamName,
+  isLast = false, ExamID, SubClassID, ExamName, lang = 'bn',
   showDate = true, showSignature = true, principalName = '', najemName = '',
+  najemShowSign = true, najemShowName = true, najemShowDate = true,
+  principalShowSign = true, principalShowName = true, principalShowDate = true,
   paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
   showClassTeacherSign = true, showGuardianSign = true,
+  totalStudents = 0,
+  // Printing onto a sheet a press has already printed
+  pressPrint = false, pressHidePreview = true,
+  pressExamOffset = 0, pressBodyOffset = 0, pressSignOffset = 0,
 }) => {
   const {
     subjects, totalSubjects, divisionRows,
     studentName, fatherName, motherName, birthDate,
     rollNumber, registration, divisionName, averageMark,
-  } = computeMarkSheetData({ student, examSubjects, examConfig, divisions });
+  } = computeMarkSheetData({ student, examSubjects, examConfig, divisions, lang });
+
+  // Every fixed word, digit and date on this sheet goes through the language.
+  // toBn keeps its name so no call site had to change; inside a template it
+  // now means "digits in the chosen language".
+  const ms = (key) => getMarkSheetText(key, lang);
+  const dir = getMarkSheetDir(lang);
+  const toBn = (value) => toLangDigit(value, lang);
+  const printDate = getPrintDate(new Date(), lang);
+  const instName = getInstitutionName(institution, lang);
+  const instAddress = getInstitutionAddress(institution, lang);
+  const sessionName = getLangValue(session, 'SessionName', lang);
 
   const { data } = useGetLabelNameListsQuery();
   const labels = data?.[0] || {};
   const previewWidth = getPreviewWidth(paperSize, orientation);
 
-  // Header line of the division box: "মোট বিষয় ৬ টি- পূর্ণমান ১০০ * ৬ = ৬০০"
   const fullPerSubject = Number(subjects?.[0]?.fullMark) || 0;
   const totalFullMark = fullPerSubject * totalSubjects;
 
+  // ---- Printing onto paper a press has already printed
+  //
+  // The institution block and the page border are already on the paper, so
+  // the app must not print over them.
+  //
+  // Hiding is done with opacity, not display and not visibility:
+  //   display:none would collapse the space and pull everything below it up
+  //   visibility is already taken — the print stylesheet uses
+  //     body * { visibility: hidden !important }
+  //     #marksheet-print-area * { visibility: visible !important }
+  //   to print this area alone, and that !important would win.
+  // opacity:0 keeps the block's exact height and no other rule touches it.
+  //
+  // It applies inside @media print only, so the institution block stays on
+  // screen while the three offsets are being lined up.
+  // pressHidePreview also takes the institution block off the screen, so the
+  // preview shows what the paper will actually look like and the three
+  // blocks can be lined up against the blank space the press leaves.
+  const hideOnScreen = pressPrint && pressHidePreview;
+  const pressHide = pressPrint ? (hideOnScreen ? ' opacity-0' : ' print:opacity-0') : '';
+
+  // Built whole rather than appended, because two border-colour utilities on
+  // one element are resolved by their order in the stylesheet, not in the
+  // class attribute — appending one would not reliably win.
+  const pageBorder = hideOnScreen
+    ? 'border-2 border-dashed border-slate-300 print:border-0'
+    : pressPrint
+      ? 'border-2 border-black print:border-0'
+      : 'border-2 border-black';
+
+  // Moves a block up or down without changing the space it takes
+  const shiftY = (value) => {
+    const px = Number(value) || 0;
+    return px ? { transform: `translateY(${px}px)` } : undefined;
+  };
+
   const infoRows = [
-    studentInfoFields.name && ['পরীক্ষার্থীর নাম', studentName],
-    ['মারহালা/শ্রেণী', classInfo?.ClassName || '-'],
-    studentInfoFields.registration && [labels?.StudentIDLabel ?? 'আইডি', registration],
-    studentInfoFields.admission && [labels?.AdmissionIDLabel ?? 'ভর্তি নং', rollNumber],
-    studentInfoFields.fatherName && ['পিতার নাম', fatherName],
-    studentInfoFields.motherName && ['মাতার নাম', motherName],
-    studentInfoFields.dob && ['জন্ম তারিখ', birthDate && birthDate !== '-' ? `${birthDate} ইং` : '-'],
+    studentInfoFields.name && [ms('studentName'), studentName],
+    [ms('classNameAlt'), classInfo?.ClassName || '-'],
+    studentInfoFields.registration && [labels?.StudentIDLabel ?? ms('registrationShort'), registration],
+    studentInfoFields.admission && [labels?.AdmissionIDLabel ?? ms('admission'), rollNumber],
+    studentInfoFields.fatherName && [ms('fatherName'), fatherName],
+    studentInfoFields.motherName && [ms('motherName'), motherName],
+    studentInfoFields.dob && [ms('dob'), birthDate && birthDate !== '-' ? `${birthDate} ${ms('ad')}` : '-'],
+    // ⭐ totalStudents now respects the toggle
+    studentInfoFields.totalStudents !== false && [ms('totalStudents'), totalStudents ?? '-'],
   ].filter(Boolean);
 
   return (
-    <div className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-white text-black border-2 border-black mb-10 print:mb-0 flex flex-col`}>
+    <div dir={dir} className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-white text-black ${pageBorder} mb-10 print:mb-0 flex flex-col`}>
       {/* ── Header: centered institution block, logo on the left */}
       <div className="marksheet-header relative text-center px-4 pt-3 pb-1 print:px-3 print:pt-2 print:pb-0.5 shrink-0">
-        {imageSrc && (
-          <img
-            src={imageSrc}
-            alt="Logo"
-            className="absolute left-4 top-[52px] print:left-3 print:top-[42px] h-[62px] w-[62px] print:h-[50px] print:w-[50px] object-contain"
-          />
-        )}
-        <h1 className="marksheet-inst-name text-[28px] ms-fs-28 print:text-[22px] ms-pfs-22 font-bold leading-tight">{toBn(institution?.InstitutionName || '-')}</h1>
-        <p className="marksheet-inst-address text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-semibold leading-snug">{toBn(institution?.Address || '-')}</p>
-        <p className="text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-semibold leading-snug">শিক্ষাবর্ষ : {toBn(session?.SessionName || '-')}</p>
-        <p className="text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold leading-snug">পরীক্ষা : {toBn(ExamName || '-')}</p>
+        {/* Already on the press-printed paper, so not printed again */}
+        <div className={`marksheet-press-head${pressHide}`}>
+          {imageSrc && (
+            <img
+              src={imageSrc}
+              alt="Logo"
+              className="absolute left-4 top-[52px] print:left-3 print:top-[42px] h-[62px] w-[62px] print:h-[50px] print:w-[50px] object-contain"
+            />
+          )}
+          <h1 className="marksheet-inst-name text-[28px] ms-fs-28 print:text-[22px] ms-pfs-22 font-bold leading-tight">{toBn(instName || '-')}</h1>
+          <p className="marksheet-inst-address text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-semibold leading-snug">{toBn(instAddress || '-')}</p>
+          <p className="text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-semibold leading-snug">{ms('academicYear')} : {toBn(sessionName || '-')}</p>
+        </div>
+
+        {/* Block 1 of 3 — the exam line */}
+        <p
+          className="marksheet-press-exam text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold leading-snug"
+          style={shiftY(pressExamOffset)}
+        >
+          {ms('exam')} : {toBn(ExamName || '-')}
+        </p>
       </div>
 
-      <div className="marksheet-body px-4 pb-2 print:px-3 print:pb-1 flex-1 flex flex-col min-h-0">
+      {/* Block 2 of 3 — the data block */}
+      <div
+        className="marksheet-body px-4 pb-2 print:px-3 print:pb-1 flex-1 flex flex-col min-h-0"
+        style={shiftY(pressBodyOffset)}
+      >
         {/* ── Student info (left) + division breakdown box (right) */}
         <div className="mt-1 flex items-start justify-between gap-4 print:gap-3 shrink-0">
           <div className="text-[15px] ms-fs-15 print:text-[13px] ms-pfs-13 leading-[1.8] print:leading-[1.6]">
@@ -2165,11 +2629,11 @@ const SingleMarkSheetClassic = ({
           </div>
 
           <div className="w-[300px] print:w-[255px] shrink-0 border-[1.5px] border-black">
-            <div className="border-b-[1.5px] border-black px-2 py-0.5 text-center text-[14px] ms-fs-14 print:text-[12px] ms-pfs-12 font-bold whitespace-nowrap">
-              মোট বিষয় {toBn(totalSubjects)} টি- পূর্ণমান {toBn(fullPerSubject)} * {toBn(totalSubjects)} = {toBn(totalFullMark)}
+            <div className="border-b-[1.5px] border-black px-2 py-0.5 text-center text-[14px] ms-fs-14 print:text-[12px] ms-pfs-12 font-bold leading-tight break-words">
+              {ms('totalSubjects')} {toBn(totalSubjects)} {ms('items')} - {ms('fullMark')} {toBn(fullPerSubject)} * {toBn(totalSubjects)} = {toBn(totalFullMark)}
             </div>
             {divisionRows.length === 0 ? (
-              <div className="px-2 py-1 text-center text-[13px] ms-fs-13">কোনো বিভাগ পাওয়া যায়নি</div>
+              <div className="px-2 py-1 text-center text-[13px] ms-fs-13">{ms('noDivision')}</div>
             ) : (
               divisionRows.map((item, index) => (
                 <div key={index} className="flex border-b border-black last:border-b-0 text-[14px] ms-fs-14 print:text-[12px] ms-pfs-12 font-bold">
@@ -2188,12 +2652,12 @@ const SingleMarkSheetClassic = ({
           <table className="w-full min-w-[640px] print:min-w-0 border-collapse border-[1.5px] border-black bg-white text-black text-center">
             <thead>
               <tr className="text-[15px] ms-fs-15 print:text-[13px] ms-pfs-13 font-bold">
-                <th className="border border-black px-2 py-1 print:py-0.5 w-16">ক্রমিক</th>
-                <th className="border border-black px-3 py-1 print:py-0.5 text-left">বিষয়</th>
-                <th className="border border-black px-2 py-1 print:py-0.5">পূর্ণমান</th>
-                <th className="border border-black px-2 py-1 print:py-0.5">পাশ নম্বর</th>
-                <th className="border border-black px-2 py-1 print:py-0.5">সর্বোচ্চ নম্বর</th>
-                <th className="border border-black px-2 py-1 print:py-0.5">প্রাপ্ত নম্বর</th>
+                <th className="border border-black px-2 py-1 print:py-0.5 w-16">{ms('serial')}</th>
+                <th className="border border-black px-3 py-1 print:py-0.5 text-left">{ms('subject')}</th>
+                <th className="border border-black px-2 py-1 print:py-0.5">{ms('fullMark')}</th>
+                <th className="border border-black px-2 py-1 print:py-0.5">{ms('passMarkAlt')}</th>
+                <th className="border border-black px-2 py-1 print:py-0.5">{ms('highestMarkAlt')}</th>
+                <th className="border border-black px-2 py-1 print:py-0.5">{ms('obtainedMark')}</th>
               </tr>
             </thead>
             <tbody>
@@ -2213,43 +2677,77 @@ const SingleMarkSheetClassic = ({
 
         {/* ── Summary strip */}
         <div className="mt-3 print:mt-2 border-[1.5px] border-black flex flex-wrap text-[15px] ms-fs-15 print:text-[13px] ms-pfs-13 font-bold shrink-0">
-          <div className="flex-1 border-r border-black px-2 py-1 print:py-0.5 whitespace-nowrap">প্রাপ্ত বিভাগ : {toBn(divisionName)}</div>
-          <div className="border-r border-black px-3 py-1 print:py-0.5 whitespace-nowrap">মেধা স্থান : {toBn(student?.Positions ?? '-')}</div>
-          <div className="border-r border-black px-3 py-1 print:py-0.5 whitespace-nowrap">গড় : {toBn(averageMark)}</div>
-          <div className="px-3 py-1 print:py-0.5 whitespace-nowrap">মোট নম্বর : {toBn(student?.Total ?? '-')}</div>
+          <div className="flex-1 border-r border-black px-2 py-1 print:py-0.5 break-words">{ms('division')} : {toBn(divisionName)}</div>
+          <div className="border-r border-black px-3 py-1 print:py-0.5 break-words">{ms('meritPosition')} : {toBn(student?.Positions ?? '-')}</div>
+          <div className="border-r border-black px-3 py-1 print:py-0.5 break-words">{ms('average')} : {toBn(averageMark)}</div>
+          <div className="px-3 py-1 print:py-0.5 break-words">{ms('totalMark')} : {toBn(student?.Total ?? '-')}</div>
         </div>
 
-        {/* ── Comment boxes */}
+        {/* ── Comment boxes: respect showClassTeacherSign / showGuardianSign */}
         {(showClassTeacherSign || showGuardianSign) && (
           <div className="marksheet-comments mt-3 print:mt-2 flex gap-3 print:gap-2 flex-1 min-h-0">
             {showClassTeacherSign && (
               <div className="flex-1 border-[1.5px] border-black p-2 min-h-[95px] print:min-h-[70px]">
-                <p className="text-[14px] ms-fs-14 print:text-[12.5px] ms-pfs-12_5 font-bold">শ্রেণী শিক্ষক/শিক্ষিকার মন্তব্য ও স্বাক্ষর :</p>
+                <p className="text-[14px] ms-fs-14 print:text-[12.5px] ms-pfs-12_5 font-bold">{ms('classTeacherCommentSign')} :</p>
                 <div className="text-[14px] ms-fs-14 print:text-[12.5px] ms-pfs-12_5 mt-1">{student?.Note ?? ''}</div>
               </div>
             )}
             {showGuardianSign && (
               <div className="flex-1 border-[1.5px] border-black p-2 min-h-[95px] print:min-h-[70px]">
-                <p className="text-[14px] ms-fs-14 print:text-[12.5px] ms-pfs-12_5 font-bold">অভিভাবকের মন্তব্য ও স্বাক্ষর :</p>
+                <p className="text-[14px] ms-fs-14 print:text-[12.5px] ms-pfs-12_5 font-bold">{ms('guardianCommentSign')} :</p>
               </div>
             )}
           </div>
         )}
       </div>
 
-      {/* ── Signatures: left and right, date underneath */}
-      <div className="flex items-end justify-between px-10 print:px-8 pt-8 pb-3 print:pt-3 print:pb-2 mt-auto shrink-0">
-        <div className="flex flex-col items-center">
-          <div className="h-12 print:h-9 flex items-end justify-center">
-            {showSignature && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="Signature Principal" className="max-h-12 max-w-[150px] object-contain print:max-h-9" />}
+      {/* Block 3 of 3 — the signature row */}
+      <div
+        className="marksheet-press-sign flex items-end justify-between px-10 print:px-8 pt-8 pb-3 print:pt-3 print:pb-2 mt-auto shrink-0"
+        style={shiftY(pressSignOffset)}
+      >
+        {/* Principal / মুহতামিম */}
+        <div className="flex flex-col items-center w-[180px] print:w-[150px]">
+          <div className="h-12 print:h-9 flex items-end justify-center w-full">
+            {showSignature && principalShowSign && signaturePrincipalSrc && (
+              <img src={signaturePrincipalSrc} alt="Signature Principal" className="max-h-12 max-w-[150px] object-contain print:max-h-9" />
+            )}
           </div>
-          {showDate && <p className="text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold mt-1 print:mt-0.5">তারিখ : {toBn(new Date().toLocaleDateString('bn-BD'))}</p>}
+          {principalShowName && (
+          <div className="w-full border-t-2 border-dashed border-black mt-1"></div>
+          )}
+          {principalShowName && (
+          <p className="text-[14px] ms-fs-14 print:text-[12px] ms-pfs-12 font-bold mt-1 text-center leading-tight">
+            {principalName || institution?.PrincipalName || ''}
+          </p>
+          )}
+          {showDate && principalShowDate && (
+            <p className="text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold mt-0.5">
+              {ms('date')} : {printDate}
+            </p>
+          )}
         </div>
-        <div className="flex flex-col items-center">
-          <div className="h-12 print:h-9 flex items-end justify-center">
-            {showSignature && signatureNajemSrc && <img src={signatureNajemSrc} alt="Signature Najem" className="max-h-12 max-w-[150px] object-contain print:max-h-9" />}
+
+        {/* Vice Principal / নায়েবে তালিমাত */}
+        <div className="flex flex-col items-center w-[180px] print:w-[150px]">
+          <div className="h-12 print:h-9 flex items-end justify-center w-full">
+            {showSignature && najemShowSign && signatureNajemSrc && (
+              <img src={signatureNajemSrc} alt="Signature Najem" className="max-h-12 max-w-[150px] object-contain print:max-h-9" />
+            )}
           </div>
-          {showDate && <p className="text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold mt-1 print:mt-0.5">তারিখ : {toBn(new Date().toLocaleDateString('bn-BD'))}</p>}
+          {najemShowName && (
+          <div className="w-full border-t-2 border-dashed border-black mt-1"></div>
+          )}
+          {najemShowName && (
+          <p className="text-[14px] ms-fs-14 print:text-[12px] ms-pfs-12 font-bold mt-1 text-center leading-tight">
+            {najemName || institution?.NajemName || ''}
+          </p>
+          )}
+          {showDate && najemShowDate && (
+            <p className="text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold mt-0.5">
+              {ms('date')} : {printDate}
+            </p>
+          )}
         </div>
       </div>
     </div>
@@ -2263,11 +2761,11 @@ const SingleMarkSheetClassic = ({
 // report data — the sheet never prints a sample institution, district or
 // any field that report 1 does not provide.
 // ==========================================
-const DottedValue = ({ label, value, width = 'w-32' }) => (
+const DottedValue = ({ label, value, width = 'w-32', lang }) => (
   <span className="inline-flex items-baseline gap-1.5 whitespace-nowrap">
     <span>{label}</span>
     <span className={`${width} print:w-24 inline-block border-b border-dotted border-[#1E3A8A] text-center`}>
-      {toBn(value ?? '')}
+      {toLangDigit(value ?? '', lang)}
     </span>
   </span>
 );
@@ -2275,29 +2773,44 @@ const DottedValue = ({ label, value, width = 'w-32' }) => (
 const SingleMarkSheetTraditional = ({
   student, institution, imageSrc, signatureNajemSrc, signaturePrincipalSrc,
   session, classInfo, examSubjects, divisions = [], examConfig = {},
-  isLast = false, ExamID, SubClassID, ExamName,
+  isLast = false, ExamID, SubClassID, ExamName, lang = 'bn',
   showDate = true, showSignature = true, principalName = '', najemName = '',
+  najemShowSign = true, najemShowName = true, najemShowDate = true,
+  principalShowSign = true, principalShowName = true, principalShowDate = true,
   paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
   showClassTeacherSign = true, showGuardianSign = true,
+  totalStudents = 0,
 }) => {
   const {
     subjects, totalSubjects, divisionRows, rowPad, rowText,
     studentName, fatherName, motherName, birthDate, rollNumber,
     registration, divisionName, averageMark,
-  } = computeMarkSheetData({ student, examSubjects, examConfig, divisions });
+  } = computeMarkSheetData({ student, examSubjects, examConfig, divisions, lang });
+
+  // Every fixed word, digit and date on this sheet goes through the language.
+  // toBn keeps its name so no call site had to change; inside a template it
+  // now means "digits in the chosen language".
+  const ms = (key) => getMarkSheetText(key, lang);
+  const dir = getMarkSheetDir(lang);
+  const toBn = (value) => toLangDigit(value, lang);
+  const printDate = getPrintDate(new Date(), lang);
+  const instName = getInstitutionName(institution, lang);
+  const instAddress = getInstitutionAddress(institution, lang);
+  const sessionName = getLangValue(session, 'SessionName', lang);
 
   const { data } = useGetLabelNameListsQuery();
   const labels = data?.[0] || {};
   const previewWidth = getPreviewWidth(paperSize, orientation);
 
   const infoItems = buildInfoItems({
+    lang,
     studentInfoFields, labels, studentName, fatherName, motherName,
-    birthDate, registration, rollNumber,
+    birthDate, registration, rollNumber, totalStudents,
   });
   const totals = sumSubjectMarks(subjects);
 
   return (
-    <div className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-[#FFFDF4] text-[#1E3A8A] shadow-xl mb-10 print:mb-0 print:shadow-none flex flex-col border-[7px] border-double border-[#C9A227] p-1.5 print:p-1`}>
+    <div dir={dir} className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-[#FFFDF4] text-[#1E3A8A] shadow-xl mb-10 print:mb-0 print:shadow-none flex flex-col border-[7px] border-double border-[#C9A227] p-1.5 print:p-1`}>
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.07]"
         style={{ backgroundImage: PATTERN_GEOMETRIC }}
@@ -2312,10 +2825,10 @@ const SingleMarkSheetTraditional = ({
         {/* Header — institution, logos and the exam ribbon */}
         <div className="marksheet-header text-center shrink-0">
           <h1 className="marksheet-inst-name text-[28px] ms-fs-28 md:text-[30px] print:text-[21px] ms-pfs-21 font-bold leading-tight">
-            {toBn(institution?.InstitutionName || '-')}
+            {toBn(instName || '-')}
           </h1>
           <p className="marksheet-inst-address text-[16px] ms-fs-16 print:text-[13px] ms-pfs-13 font-bold text-[#0f766e] mt-0.5">
-            {toBn(institution?.Address || '-')}
+            {toBn(instAddress || '-')}
           </p>
 
           <div className="mt-3 print:mt-1.5 flex items-center justify-between gap-3">
@@ -2336,13 +2849,11 @@ const SingleMarkSheetTraditional = ({
                   {toBn(ExamName || '-')}
                 </div>
               </div>
-              <div className="text-[21px] ms-fs-21 print:text-[15px] ms-pfs-15 font-bold mt-1 print:mt-0.5">নম্বর পত্র</div>
+              <div className="text-[21px] ms-fs-21 print:text-[15px] ms-pfs-15 font-bold mt-1 print:mt-0.5">{ms('markSheetAlt')}</div>
             </div>
 
-            <div className="h-[66px] w-[66px] print:h-[48px] print:w-[48px] shrink-0 overflow-hidden rounded-full border-2 border-[#1E3A8A] bg-white flex items-center justify-center">
-              {imageSrc
-                ? <img src={imageSrc} alt="Logo" className="h-full w-full object-cover" />
-                : <span className="text-[9px] ms-fs-9 text-slate-400">No Logo</span>}
+            {/* নম্বর পত্র midel e thakar jonno */}
+            <div className="h-[66px] w-[66px] print:h-[48px] print:w-[48px] shrink-0 overflow-hidden rounded-full flex items-center justify-center">
             </div>
           </div>
         </div>
@@ -2351,17 +2862,16 @@ const SingleMarkSheetTraditional = ({
 
           {/* Institution / session line */}
           <div className="mt-3 print:mt-1.5 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 text-[15px] ms-fs-15 print:text-[12px] ms-pfs-12 font-bold shrink-0">
-            <DottedValue label="প্রতিষ্ঠান কোড -" value={institution?.InstitutionCode || '-'} />
-            <DottedValue label="শ্রেণী -" value={classInfo?.ClassName || '-'} />
-            <DottedValue label="সেশন -" value={session?.SessionName || '-'} />
-            {showDate && <DottedValue label="তারিখ -" value={new Date().toLocaleDateString('bn-BD')} />}
+            <DottedValue label={`${ms('className')} -`} value={classInfo?.ClassName || '-'} lang={lang} />
+            <DottedValue label={`${ms('session')} -`} value={sessionName || '-'} lang={lang} />
+            {showDate && <DottedValue label={`${ms('date')} -`} value={printDate} lang={lang} />}
           </div>
 
           {/* Student information — same fields as report 1 */}
           <div className="mt-2.5 print:mt-1.5 space-y-2 print:space-y-1 text-[15px] ms-fs-15 print:text-[12.5px] ms-pfs-12_5 font-bold shrink-0">
             {infoItems.map((f) => (
               <div key={f.key}>
-                <DottedValue label={`${f.label} -`} value={f.value} width="w-[330px]" />
+                <DottedValue label={`${f.label} -`} value={f.value} width="w-[330px]" lang={lang} />
               </div>
             ))}
           </div>
@@ -2372,12 +2882,12 @@ const SingleMarkSheetTraditional = ({
               <table className="w-full min-w-[640px] print:min-w-0 border-collapse bg-white text-[14px] ms-fs-14 print:text-[12px] ms-pfs-12 font-bold text-[#1E3A8A]">
                 <thead>
                   <tr className="text-center">
-                    <th style={TH_STYLE_TRADITIONAL} className="border border-black px-2 py-1.5 print:py-1 w-[8%]">ক্রমিক</th>
-                    <th style={TH_STYLE_TRADITIONAL} className="border border-black px-2 py-1.5 print:py-1 text-left">বিষয়</th>
-                    <th style={TH_STYLE_TRADITIONAL} className="border border-black px-2 py-1.5 print:py-1">পূর্ণমান</th>
-                    <th style={TH_STYLE_TRADITIONAL} className="border border-black px-2 py-1.5 print:py-1">পাশমার্ক</th>
-                    <th style={TH_STYLE_TRADITIONAL} className="border border-black px-2 py-1.5 print:py-1 whitespace-nowrap">সর্বোচ্চ প্রাপ্ত</th>
-                    <th style={TH_STYLE_TRADITIONAL} className="border border-black px-2 py-1.5 print:py-1">প্রাপ্ত নম্বর</th>
+                    <th style={TH_STYLE_TRADITIONAL} className="border border-black px-2 py-1.5 print:py-1 w-[8%]">{ms('serial')}</th>
+                    <th style={TH_STYLE_TRADITIONAL} className="border border-black px-2 py-1.5 print:py-1 text-left">{ms('subject')}</th>
+                    <th style={TH_STYLE_TRADITIONAL} className="border border-black px-2 py-1.5 print:py-1">{ms('fullMark')}</th>
+                    <th style={TH_STYLE_TRADITIONAL} className="border border-black px-2 py-1.5 print:py-1">{ms('passMark')}</th>
+                    <th style={TH_STYLE_TRADITIONAL} className="border border-black px-2 py-1.5 print:py-1 whitespace-nowrap">{ms('highestMark')}</th>
+                    <th style={TH_STYLE_TRADITIONAL} className="border border-black px-2 py-1.5 print:py-1">{ms('obtainedMark')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2396,7 +2906,7 @@ const SingleMarkSheetTraditional = ({
                     );
                   })}
                   <tr className="text-center">
-                    <td style={TH_STYLE_TRADITIONAL} className="border border-black px-2 py-1.5 print:py-1" colSpan={2}>যোগ</td>
+                    <td style={TH_STYLE_TRADITIONAL} className="border border-black px-2 py-1.5 print:py-1" colSpan={2}>{ms('sum')}</td>
                     <td style={{ backgroundColor: '#f0fdfa', ...EXACT }} className="border border-black px-2 py-1.5 print:py-1">{toBn(totals.fullMark)}</td>
                     <td style={{ backgroundColor: '#f0fdfa', ...EXACT }} className="border border-black px-2 py-1.5 print:py-1">{toBn(totals.passMark)}</td>
                     <td style={{ backgroundColor: '#f0fdfa', ...EXACT }} className="border border-black px-2 py-1.5 print:py-1">{toBn(totals.highestMark)}</td>
@@ -2411,10 +2921,10 @@ const SingleMarkSheetTraditional = ({
           <div className="mt-2.5 print:mt-1.5 grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-4 print:gap-3 shrink-0">
             <div className="border border-[#C9A227] bg-white/70 p-2 print:p-1.5">
               <p className="text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold border-b border-dotted border-[#1E3A8A] pb-0.5 mb-1">
-                নম্বর বিভাজন — মোট বিভাগ {toBn(divisionRows.length)} টি | মোট বিষয় {toBn(totalSubjects)} টি
+                {ms('markDistribution')} — {ms('totalDivisions')} {toBn(divisionRows.length)} {ms('items')} | {ms('totalSubjects')} {toBn(totalSubjects)} {ms('items')}
               </p>
               {divisionRows.length === 0 ? (
-                <p className="text-[12px] ms-fs-12 print:text-[11px] ms-pfs-11 text-slate-400">কোনো বিভাগ পাওয়া যায়নি</p>
+                <p className="text-[12px] ms-fs-12 print:text-[11px] ms-pfs-11 text-slate-400">{ms('noDivision')}</p>
               ) : (
                 <div className="grid grid-cols-2 gap-x-3">
                   {divisionRows.map((item, i) => (
@@ -2428,10 +2938,10 @@ const SingleMarkSheetTraditional = ({
             </div>
 
             <div className="border border-[#C9A227] bg-white/70 p-2 print:p-1.5 grid grid-cols-2 gap-x-3 gap-y-1 text-[13.5px] ms-fs-13_5 print:text-[11.5px] ms-pfs-11_5 font-bold">
-              <DottedValue label="প্রাপ্ত বিভাগ -" value={divisionName} width="w-20" />
-              <DottedValue label="মেধা স্থান -" value={student?.Positions ?? '-'} width="w-20" />
-              <DottedValue label="গড় -" value={averageMark} width="w-20" />
-              <DottedValue label="মোট নম্বর -" value={student?.Total ?? '-'} width="w-20" />
+              <DottedValue label={`${ms('division')} -`} value={divisionName} width="w-20" lang={lang} />
+              <DottedValue label={`${ms('meritPosition')} -`} value={student?.Positions ?? '-'} width="w-20" lang={lang} />
+              <DottedValue label={`${ms('average')} -`} value={averageMark} width="w-20" lang={lang} />
+              <DottedValue label={`${ms('totalMark')} -`} value={student?.Total ?? '-'} width="w-20" lang={lang} />
             </div>
           </div>
 
@@ -2440,13 +2950,13 @@ const SingleMarkSheetTraditional = ({
             <div className="marksheet-comments mt-2.5 print:mt-1.5 grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-4 print:gap-3 flex-1 min-h-0">
               {showClassTeacherSign && (
                 <div className="border border-[#C9A227] bg-white/70 p-2.5 print:p-1.5 min-h-[70px] print:min-h-[55px]">
-                  <p className="text-[13.5px] ms-fs-13_5 print:text-[11.5px] ms-pfs-11_5 font-bold">শ্রেণী শিক্ষক/শিক্ষিকার মন্তব্য :</p>
+                  <p className="text-[13.5px] ms-fs-13_5 print:text-[11.5px] ms-pfs-11_5 font-bold">{ms('classTeacherComment')} :</p>
                   <div className="mt-1.5 border-b border-dotted border-[#1E3A8A] text-[13px] ms-fs-13 print:text-[11px] ms-pfs-11">{student?.Note ?? ''}</div>
                 </div>
               )}
               {showGuardianSign && (
                 <div className="border border-[#C9A227] bg-white/70 p-2.5 print:p-1.5 min-h-[70px] print:min-h-[55px]">
-                  <p className="text-[13.5px] ms-fs-13_5 print:text-[11.5px] ms-pfs-11_5 font-bold">অভিভাবকের মন্তব্য :</p>
+                  <p className="text-[13.5px] ms-fs-13_5 print:text-[11.5px] ms-pfs-11_5 font-bold">{ms('guardianComment')} :</p>
                   <div className="mt-1.5 border-b border-dotted border-[#1E3A8A]" />
                 </div>
               )}
@@ -2455,39 +2965,88 @@ const SingleMarkSheetTraditional = ({
         </div>
 
         {/* Signatures + verification */}
-        <div className="mt-auto pt-4 print:pt-2 shrink-0 grid grid-cols-4 items-end gap-4 print:gap-2">
+        <div
+          className={`mt-auto pt-4 print:pt-2 shrink-0 grid items-end gap-4 print:gap-2 ${
+            showClassTeacherSign ? 'grid-cols-4' : 'grid-cols-3'
+          }`}
+        >
+          {/* ── QR — always visible */}
           <div className="flex flex-col items-center">
             <div className="bg-white p-0.5 border border-[#C9A227] w-[62px] print:w-[46px]">
-              <QRCode size={62} style={{ height: 'auto', maxWidth: '100%', width: '100%' }}
+              <QRCode
+                size={62}
+                style={{ height: 'auto', maxWidth: '100%', width: '100%' }}
                 value={`https://qmmsoft.com/${institution?.InstitutionCode}/students/${session?.SessionID}/${ExamID}/${SubClassID}/${student?.UserCode}`}
-                viewBox="0 0 256 256" />
+                viewBox="0 0 256 256"
+              />
             </div>
-            <p className="text-[11px] ms-fs-11 print:text-[9px] ms-pfs-9 font-bold mt-1 print:mt-0.5">যাচাই করুন</p>
+            <p className="text-[11px] ms-fs-11 print:text-[9px] ms-pfs-9 font-bold mt-1 print:mt-0.5">
+              {ms('verify')}
+            </p>
           </div>
 
-          <div className="text-center">
-            <div className="h-10 print:h-6" />
-            <div className="border-t border-dotted border-[#1E3A8A] pt-1 text-[13.5px] ms-fs-13_5 print:text-[11px] ms-pfs-11 font-bold">
-              শ্রেণী শিক্ষকের স্বাক্ষর
+          {/* ── Class Teacher — only when enabled */}
+          {/* {showClassTeacherSign && (
+            <div className="text-center">
+              <div className="h-10 print:h-6" />
+              <div className="border-t border-dotted border-[#1E3A8A] pt-1 text-[13.5px] ms-fs-13_5 print:text-[11px] ms-pfs-11 font-bold">
+                {ms('classTeacherSign')}
+              </div>
+              <div className="text-[11px] ms-fs-11 print:text-[9.5px] ms-pfs-9_5 font-semibold text-stone-600">
+                {ms('classTeacher')}
+              </div>
+              {showDate && (
+                <div className="text-[11px] ms-fs-11 print:text-[9.5px] ms-pfs-9_5 font-semibold text-stone-600 mt-0.5">
+                  {ms('date')} : {printDate}
+                </div>
+              )}
             </div>
-          </div>
+          )} */}
 
+          {/* ── Vice Principal — name & designation always, image optional */}
           <div className="text-center">
             <div className="h-10 print:h-6 flex items-end justify-center">
-              {showSignature && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-10 max-w-full object-contain print:max-h-6" />}
+              {showSignature && najemShowSign && signatureNajemSrc && (
+                <img
+                  src={signatureNajemSrc}
+                  alt="Vice Principal signature"
+                  className="max-h-10 max-w-full object-contain print:max-h-6"
+                />
+              )}
             </div>
+            {najemShowName && (
             <div className="border-t border-dotted border-[#1E3A8A] pt-1 text-[13.5px] ms-fs-13_5 print:text-[11px] ms-pfs-11 font-bold">
-              {toBn(najemName || institution?.NajemName || 'নায়েবে তালিমাত')}
+              {toBn(najemName || institution?.NajemName || ms('najem'))}
             </div>
+            )}
+            {showDate && najemShowDate && (
+              <div className="text-[11px] ms-fs-11 print:text-[9.5px] ms-pfs-9_5 font-semibold text-stone-600 mt-0.5">
+                {ms('date')} : {printDate}
+              </div>
+            )}
           </div>
 
+          {/* ── Principal — name & designation always, image optional */}
           <div className="text-center">
             <div className="h-10 print:h-6 flex items-end justify-center">
-              {showSignature && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-10 max-w-full object-contain print:max-h-6" />}
+              {showSignature && principalShowSign && signaturePrincipalSrc && (
+                <img
+                  src={signaturePrincipalSrc}
+                  alt="Principal signature"
+                  className="max-h-10 max-w-full object-contain print:max-h-6"
+                />
+              )}
             </div>
+            {principalShowName && (
             <div className="border-t border-dotted border-[#1E3A8A] pt-1 text-[13.5px] ms-fs-13_5 print:text-[11px] ms-pfs-11 font-bold">
-              {toBn(principalName || institution?.PrincipalName || 'মুহতামিম')}
+              {toBn(principalName || institution?.PrincipalName || ms('principal'))}
             </div>
+            )}
+            {showDate && principalShowDate && (
+              <div className="text-[11px] ms-fs-11 print:text-[9.5px] ms-pfs-9_5 font-semibold text-stone-600 mt-0.5">
+                {ms('date')} : {printDate}
+              </div>
+            )}
           </div>
         </div>
 
@@ -2508,30 +3067,45 @@ const SingleMarkSheetTraditional = ({
 const SingleMarkSheetTranscript = ({
   student, institution, imageSrc, signatureNajemSrc, signaturePrincipalSrc,
   session, classInfo, examSubjects, divisions = [], examConfig = {},
-  isLast = false, ExamID, SubClassID, ExamName,
+  isLast = false, ExamID, SubClassID, ExamName, lang = 'bn',
   showDate = true, showSignature = true, principalName = '', najemName = '',
+  najemShowSign = true, najemShowName = true, najemShowDate = true,
+  principalShowSign = true, principalShowName = true, principalShowDate = true,
   paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
   showClassTeacherSign = true, showGuardianSign = true,
+  totalStudents = 0,
 }) => {
   const {
     subjects, totalSubjects, divisionRows, rowPad,
     studentName, fatherName, motherName, birthDate, rollNumber,
     registration, divisionName, averageMark,
-  } = computeMarkSheetData({ student, examSubjects, examConfig, divisions });
+  } = computeMarkSheetData({ student, examSubjects, examConfig, divisions, lang });
+
+  // Every fixed word, digit and date on this sheet goes through the language.
+  // toBn keeps its name so no call site had to change; inside a template it
+  // now means "digits in the chosen language".
+  const ms = (key) => getMarkSheetText(key, lang);
+  const dir = getMarkSheetDir(lang);
+  const toBn = (value) => toLangDigit(value, lang);
+  const printDate = getPrintDate(new Date(), lang);
+  const instName = getInstitutionName(institution, lang);
+  const instAddress = getInstitutionAddress(institution, lang);
+  const sessionName = getLangValue(session, 'SessionName', lang);
 
   const { data } = useGetLabelNameListsQuery();
   const labels = data?.[0] || {};
   const previewWidth = getPreviewWidth(paperSize, orientation);
 
   const infoItems = buildInfoItems({
+    lang,
     studentInfoFields, labels, studentName, fatherName, motherName,
-    birthDate, registration, rollNumber,
+    birthDate, registration, rollNumber, totalStudents,
   });
-  const summaryItems = buildSummaryItems({ divisionName, student, averageMark });
+  const summaryItems = buildSummaryItems({ divisionName, student, averageMark, lang });
   const totals = sumSubjectMarks(subjects);
 
   return (
-    <div className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-white text-slate-900 shadow-xl mb-10 print:mb-0 print:shadow-none flex flex-col border-[3px] border-[#1d4ed8] p-1.5 print:p-1`}>
+    <div dir={dir} className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-white text-slate-900 shadow-xl mb-10 print:mb-0 print:shadow-none flex flex-col border-[3px] border-[#1d4ed8] p-1.5 print:p-1`}>
       <div
         className="pointer-events-none absolute inset-0 opacity-[0.06]"
         style={{ backgroundImage: PATTERN_LATTICE }}
@@ -2548,16 +3122,16 @@ const SingleMarkSheetTranscript = ({
           </div>
           <div className="flex-1 text-center min-w-0">
             <h1 className="marksheet-inst-name text-[26px] ms-fs-26 md:text-[28px] print:text-[20px] ms-pfs-20 font-bold leading-tight text-[#1e3a8a]">
-              {toBn(institution?.InstitutionName || '-')}
+              {toBn(instName || '-')}
             </h1>
             <p className="marksheet-inst-address text-[14px] ms-fs-14 print:text-[12px] ms-pfs-12 font-semibold text-slate-600 mt-0.5">
-              {toBn(institution?.Address || '-')}
+              {toBn(instAddress || '-')}
             </p>
             <span
               className="mt-1.5 print:mt-1 inline-block rounded px-3 py-0.5 print:px-2.5 print:py-0 text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold text-white"
               style={{ backgroundColor: '#1d4ed8', ...EXACT }}
             >
-              {toBn(ExamName || '-')} — মার্কশিট
+              {toBn(ExamName || '-')} — {ms('markSheet')}
             </span>
           </div>
           <div className="h-[62px] w-[62px] print:h-[46px] print:w-[46px] shrink-0" />
@@ -2572,7 +3146,7 @@ const SingleMarkSheetTranscript = ({
                 className="px-2 py-1 print:py-0.5 text-center text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold text-white"
                 style={{ backgroundColor: '#1e3a8a', ...EXACT }}
               >
-                পরীক্ষার্থীর তথ্য
+                {ms('studentInfo')}
               </div>
               <table className="w-full border-collapse text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5">
                 <tbody>
@@ -2583,11 +3157,11 @@ const SingleMarkSheetTranscript = ({
                     </tr>
                   ))}
                   <tr>
-                    <td className="border border-slate-300 px-2 py-1 print:py-0.5 font-semibold text-slate-600">শ্রেণী</td>
+                    <td className="border border-slate-300 px-2 py-1 print:py-0.5 font-semibold text-slate-600">{ms('className')}</td>
                     <td className="border border-slate-300 px-2 py-1 print:py-0.5 font-bold">{toBn(classInfo?.ClassName || '-')}</td>
                   </tr>
                   <tr>
-                    <td className="border border-slate-300 px-2 py-1 print:py-0.5 font-semibold text-slate-600">সেশন</td>
+                    <td className="border border-slate-300 px-2 py-1 print:py-0.5 font-semibold text-slate-600">{ms('session')}</td>
                     <td className="border border-slate-300 px-2 py-1 print:py-0.5 font-bold">{toBn(session?.SessionName || '-')}</td>
                   </tr>
                 </tbody>
@@ -2599,10 +3173,10 @@ const SingleMarkSheetTranscript = ({
                 className="px-2 py-1 print:py-0.5 text-center text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold text-white"
                 style={{ backgroundColor: '#1e3a8a', ...EXACT }}
               >
-                নম্বর বিভাজন ({toBn(divisionRows.length)} টি | বিষয় {toBn(totalSubjects)} টি)
+                {ms('markDistribution')} ({toBn(divisionRows.length)} {ms('items')} | {ms('subject')} {toBn(totalSubjects)} {ms('items')})
               </div>
               {divisionRows.length === 0 ? (
-                <div className="px-2 py-2 text-center text-[12px] ms-fs-12 print:text-[11px] ms-pfs-11 text-slate-400">কোনো বিভাগ পাওয়া যায়নি</div>
+                <div className="px-2 py-2 text-center text-[12px] ms-fs-12 print:text-[11px] ms-pfs-11 text-slate-400">{ms('noDivision')}</div>
               ) : (
                 <table className="w-full border-collapse text-[12.5px] ms-fs-12_5 print:text-[11px] ms-pfs-11">
                   <tbody>
@@ -2627,12 +3201,12 @@ const SingleMarkSheetTranscript = ({
               <table className="w-full min-w-[640px] print:min-w-0 border-collapse bg-white">
                 <thead>
                   <tr className="text-center">
-                    <th style={TH_STYLE_TRANSCRIPT} className="border border-[#1e3a8a] px-2 py-1.5 print:py-1 text-[12.5px] ms-fs-12_5 print:text-[11px] ms-pfs-11 font-bold w-[8%]">ক্রমিক</th>
-                    <th style={TH_STYLE_TRANSCRIPT} className="border border-[#1e3a8a] px-2 py-1.5 print:py-1 text-[12.5px] ms-fs-12_5 print:text-[11px] ms-pfs-11 font-bold text-left">বিষয়</th>
-                    <th style={TH_STYLE_TRANSCRIPT} className="border border-[#1e3a8a] px-2 py-1.5 print:py-1 text-[12.5px] ms-fs-12_5 print:text-[11px] ms-pfs-11 font-bold">পূর্ণমান</th>
-                    <th style={TH_STYLE_TRANSCRIPT} className="border border-[#1e3a8a] px-2 py-1.5 print:py-1 text-[12.5px] ms-fs-12_5 print:text-[11px] ms-pfs-11 font-bold">পাশমার্ক</th>
-                    <th style={TH_STYLE_TRANSCRIPT} className="border border-[#1e3a8a] px-2 py-1.5 print:py-1 text-[12.5px] ms-fs-12_5 print:text-[11px] ms-pfs-11 font-bold whitespace-nowrap">সর্বোচ্চ প্রাপ্ত</th>
-                    <th style={TH_STYLE_TRANSCRIPT} className="border border-[#1e3a8a] px-2 py-1.5 print:py-1 text-[12.5px] ms-fs-12_5 print:text-[11px] ms-pfs-11 font-bold">প্রাপ্ত নম্বর</th>
+                    <th style={TH_STYLE_TRANSCRIPT} className="border border-[#1e3a8a] px-2 py-1.5 print:py-1 text-[12.5px] ms-fs-12_5 print:text-[11px] ms-pfs-11 font-bold w-[8%]">{ms('serial')}</th>
+                    <th style={TH_STYLE_TRANSCRIPT} className="border border-[#1e3a8a] px-2 py-1.5 print:py-1 text-[12.5px] ms-fs-12_5 print:text-[11px] ms-pfs-11 font-bold text-left">{ms('subject')}</th>
+                    <th style={TH_STYLE_TRANSCRIPT} className="border border-[#1e3a8a] px-2 py-1.5 print:py-1 text-[12.5px] ms-fs-12_5 print:text-[11px] ms-pfs-11 font-bold">{ms('fullMark')}</th>
+                    <th style={TH_STYLE_TRANSCRIPT} className="border border-[#1e3a8a] px-2 py-1.5 print:py-1 text-[12.5px] ms-fs-12_5 print:text-[11px] ms-pfs-11 font-bold">{ms('passMark')}</th>
+                    <th style={TH_STYLE_TRANSCRIPT} className="border border-[#1e3a8a] px-2 py-1.5 print:py-1 text-[12.5px] ms-fs-12_5 print:text-[11px] ms-pfs-11 font-bold whitespace-nowrap">{ms('highestMark')}</th>
+                    <th style={TH_STYLE_TRANSCRIPT} className="border border-[#1e3a8a] px-2 py-1.5 print:py-1 text-[12.5px] ms-fs-12_5 print:text-[11px] ms-pfs-11 font-bold">{ms('obtainedMark')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2651,7 +3225,7 @@ const SingleMarkSheetTranscript = ({
                     );
                   })}
                   <tr className="text-center text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold">
-                    <td style={TH_STYLE_TRANSCRIPT} className="border border-[#1e3a8a] px-2 py-1.5 print:py-1" colSpan={2}>সর্বমোট</td>
+                    <td style={TH_STYLE_TRANSCRIPT} className="border border-[#1e3a8a] px-2 py-1.5 print:py-1" colSpan={2}>{ms('grandTotal')}</td>
                     <td style={{ backgroundColor: '#dbeafe', ...EXACT }} className="border border-slate-300 px-2 py-1.5 print:py-1 tabular-nums">{toBn(totals.fullMark)}</td>
                     <td style={{ backgroundColor: '#dbeafe', ...EXACT }} className="border border-slate-300 px-2 py-1.5 print:py-1 tabular-nums">{toBn(totals.passMark)}</td>
                     <td style={{ backgroundColor: '#dbeafe', ...EXACT }} className="border border-slate-300 px-2 py-1.5 print:py-1 tabular-nums">{toBn(totals.highestMark)}</td>
@@ -2681,13 +3255,13 @@ const SingleMarkSheetTranscript = ({
               <div className="marksheet-comments md:col-span-3 print:col-span-3 border border-slate-400 p-2.5 print:p-1.5 flex flex-col gap-2 print:gap-1">
                 {showClassTeacherSign && (
                   <div>
-                    <p className="text-[12.5px] ms-fs-12_5 print:text-[11px] ms-pfs-11 font-bold text-slate-600">শ্রেণী শিক্ষক/শিক্ষিকার মন্তব্য :</p>
+                    <p className="text-[12.5px] ms-fs-12_5 print:text-[11px] ms-pfs-11 font-bold text-slate-600">{ms('classTeacherComment')} :</p>
                     <div className="mt-1 border-b border-dashed border-slate-400 text-[12.5px] ms-fs-12_5 print:text-[11px] ms-pfs-11 min-h-[22px] print:min-h-[16px]">{student?.Note ?? ''}</div>
                   </div>
                 )}
                 {showGuardianSign && (
                   <div>
-                    <p className="text-[12.5px] ms-fs-12_5 print:text-[11px] ms-pfs-11 font-bold text-slate-600">অভিভাবকের মন্তব্য :</p>
+                    <p className="text-[12.5px] ms-fs-12_5 print:text-[11px] ms-pfs-11 font-bold text-slate-600">{ms('guardianComment')} :</p>
                     <div className="mt-1 border-b border-dashed border-slate-400 min-h-[22px] print:min-h-[16px]" />
                   </div>
                 )}
@@ -2704,32 +3278,31 @@ const SingleMarkSheetTranscript = ({
                 value={`https://qmmsoft.com/${institution?.InstitutionCode}/students/${session?.SessionID}/${ExamID}/${SubClassID}/${student?.UserCode}`}
                 viewBox="0 0 256 256" />
             </div>
-            <p className="text-[10.5px] ms-fs-10_5 print:text-[9px] ms-pfs-9 font-bold text-slate-600 mt-1 print:mt-0.5">যাচাই করুন</p>
-          </div>
-
-          <div className="text-center">
-            <div className="h-10 print:h-6" />
-            <div className="border-t border-slate-500 pt-1 text-[12.5px] ms-fs-12_5 print:text-[11px] ms-pfs-11 font-bold">শ্রেণী শিক্ষক</div>
+            <p className="text-[10.5px] ms-fs-10_5 print:text-[9px] ms-pfs-9 font-bold text-slate-600 mt-1 print:mt-0.5">{ms('verify')}</p>
           </div>
 
           <div className="text-center">
             <div className="h-10 print:h-6 flex items-end justify-center">
-              {showSignature && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-10 max-w-full object-contain print:max-h-6" />}
+              {showSignature && najemShowSign && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-10 max-w-full object-contain print:max-h-6" />}
             </div>
+            {najemShowName && (
             <div className="border-t border-slate-500 pt-1 text-[12.5px] ms-fs-12_5 print:text-[11px] ms-pfs-11 font-bold">
-              {toBn(najemName || institution?.NajemName || 'নায়েবে তালিমাত')}
+              {toBn(najemName || institution?.NajemName || ms('najem'))}
             </div>
-            {showDate && <div className="text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 text-slate-500 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
+            )}
+            {showDate && najemShowDate && <div className="text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 text-slate-500 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
           </div>
 
           <div className="text-center">
             <div className="h-10 print:h-6 flex items-end justify-center">
-              {showSignature && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-10 max-w-full object-contain print:max-h-6" />}
+              {showSignature && principalShowSign && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-10 max-w-full object-contain print:max-h-6" />}
             </div>
+            {principalShowName && (
             <div className="border-t border-slate-500 pt-1 text-[12.5px] ms-fs-12_5 print:text-[11px] ms-pfs-11 font-bold">
-              {toBn(principalName || institution?.PrincipalName || 'মুহতামিম')}
+              {toBn(principalName || institution?.PrincipalName || ms('principal'))}
             </div>
-            {showDate && <div className="text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 text-slate-500 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
+            )}
+            {showDate && principalShowDate && <div className="text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 text-slate-500 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
           </div>
         </div>
 
@@ -2750,30 +3323,45 @@ const SingleMarkSheetTranscript = ({
 const SingleMarkSheetOrnate = ({
   student, institution, imageSrc, signatureNajemSrc, signaturePrincipalSrc,
   session, classInfo, examSubjects, divisions = [], examConfig = {},
-  isLast = false, ExamID, SubClassID, ExamName,
+  isLast = false, ExamID, SubClassID, ExamName, lang = 'bn',
   showDate = true, showSignature = true, principalName = '', najemName = '',
+  najemShowSign = true, najemShowName = true, najemShowDate = true,
+  principalShowSign = true, principalShowName = true, principalShowDate = true,
   paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
   showClassTeacherSign = true, showGuardianSign = true,
+  totalStudents = 0,
 }) => {
   const {
     subjects, totalSubjects, divisionRows, rowPad,
     studentName, fatherName, motherName, birthDate, rollNumber,
     registration, divisionName, averageMark,
-  } = computeMarkSheetData({ student, examSubjects, examConfig, divisions });
+  } = computeMarkSheetData({ student, examSubjects, examConfig, divisions, lang });
+
+  // Every fixed word, digit and date on this sheet goes through the language.
+  // toBn keeps its name so no call site had to change; inside a template it
+  // now means "digits in the chosen language".
+  const ms = (key) => getMarkSheetText(key, lang);
+  const dir = getMarkSheetDir(lang);
+  const toBn = (value) => toLangDigit(value, lang);
+  const printDate = getPrintDate(new Date(), lang);
+  const instName = getInstitutionName(institution, lang);
+  const instAddress = getInstitutionAddress(institution, lang);
+  const sessionName = getLangValue(session, 'SessionName', lang);
 
   const { data } = useGetLabelNameListsQuery();
   const labels = data?.[0] || {};
   const previewWidth = getPreviewWidth(paperSize, orientation);
 
   const infoItems = buildInfoItems({
+    lang,
     studentInfoFields, labels, studentName, fatherName, motherName,
-    birthDate, registration, rollNumber,
+    birthDate, registration, rollNumber, totalStudents,
   });
-  const summaryItems = buildSummaryItems({ divisionName, student, averageMark });
+  const summaryItems = buildSummaryItems({ divisionName, student, averageMark, lang });
   const totals = sumSubjectMarks(subjects);
 
   return (
-    <div className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-white text-slate-900 shadow-xl mb-10 print:mb-0 print:shadow-none flex flex-col`}>
+    <div dir={dir} className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-white text-slate-900 shadow-xl mb-10 print:mb-0 print:shadow-none flex flex-col`}>
       {/* Ornamental frame */}
       <div
         className="absolute inset-0"
@@ -2792,10 +3380,10 @@ const SingleMarkSheetOrnate = ({
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="marksheet-inst-name text-[30px] ms-fs-30 md:text-[32px] print:text-[22px] ms-pfs-22 font-bold leading-tight text-[#1d4ed8] tracking-wide">
-              {toBn(institution?.InstitutionName || '-')}
+              {toBn(instName || '-')}
             </h1>
             <p className="marksheet-inst-address text-[15px] ms-fs-15 print:text-[12.5px] ms-pfs-12_5 font-semibold text-[#2563eb] mt-0.5">
-              {toBn(institution?.Address || '-')}
+              {toBn(instAddress || '-')}
             </p>
           </div>
         </div>
@@ -2820,7 +3408,7 @@ const SingleMarkSheetOrnate = ({
                 </div>
               ))}
               <div className="text-[16px] ms-fs-16 print:text-[12.5px] ms-pfs-12_5 font-semibold">
-                শ্রেণী – <span className="font-bold">{toBn(classInfo?.ClassName || '-')}</span>
+                {ms('className')} – <span className="font-bold">{toBn(classInfo?.ClassName || '-')}</span>
               </div>
             </div>
           </div>
@@ -2831,12 +3419,12 @@ const SingleMarkSheetOrnate = ({
               <table className="w-full min-w-[640px] print:min-w-0 border-collapse bg-white">
                 <thead>
                   <tr className="text-center">
-                    <th style={TH_STYLE_ORNATE} className="border border-slate-800 px-3 py-2 print:py-1 text-[14px] ms-fs-14 print:text-[11.5px] ms-pfs-11_5 font-bold text-left">বিষয়</th>
-                    <th style={TH_STYLE_ORNATE} className="border border-slate-800 px-3 py-2 print:py-1 text-[14px] ms-fs-14 print:text-[11.5px] ms-pfs-11_5 font-bold">পূর্ণমান</th>
-                    <th style={TH_STYLE_ORNATE} className="border border-slate-800 px-3 py-2 print:py-1 text-[14px] ms-fs-14 print:text-[11.5px] ms-pfs-11_5 font-bold">পাশমার্ক</th>
-                    <th style={TH_STYLE_ORNATE} className="border border-slate-800 px-3 py-2 print:py-1 text-[14px] ms-fs-14 print:text-[11.5px] ms-pfs-11_5 font-bold whitespace-nowrap">সর্বোচ্চ প্রাপ্ত</th>
-                    <th style={TH_STYLE_ORNATE} className="border border-slate-800 px-3 py-2 print:py-1 text-[14px] ms-fs-14 print:text-[11.5px] ms-pfs-11_5 font-bold">প্রাপ্ত নম্বর</th>
-                    <th style={TH_STYLE_ORNATE} className="border border-slate-800 px-3 py-2 print:py-1 text-[14px] ms-fs-14 print:text-[11.5px] ms-pfs-11_5 font-bold">শতকরা</th>
+                    <th style={TH_STYLE_ORNATE} className="border border-slate-800 px-3 py-2 print:py-1 text-[14px] ms-fs-14 print:text-[11.5px] ms-pfs-11_5 font-bold text-left">{ms('subject')}</th>
+                    <th style={TH_STYLE_ORNATE} className="border border-slate-800 px-3 py-2 print:py-1 text-[14px] ms-fs-14 print:text-[11.5px] ms-pfs-11_5 font-bold">{ms('fullMark')}</th>
+                    <th style={TH_STYLE_ORNATE} className="border border-slate-800 px-3 py-2 print:py-1 text-[14px] ms-fs-14 print:text-[11.5px] ms-pfs-11_5 font-bold">{ms('passMark')}</th>
+                    <th style={TH_STYLE_ORNATE} className="border border-slate-800 px-3 py-2 print:py-1 text-[14px] ms-fs-14 print:text-[11.5px] ms-pfs-11_5 font-bold whitespace-nowrap">{ms('highestMark')}</th>
+                    <th style={TH_STYLE_ORNATE} className="border border-slate-800 px-3 py-2 print:py-1 text-[14px] ms-fs-14 print:text-[11.5px] ms-pfs-11_5 font-bold">{ms('obtainedMark')}</th>
+                    <th style={TH_STYLE_ORNATE} className="border border-slate-800 px-3 py-2 print:py-1 text-[14px] ms-fs-14 print:text-[11.5px] ms-pfs-11_5 font-bold">{ms('percentage')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2855,7 +3443,7 @@ const SingleMarkSheetOrnate = ({
                     );
                   })}
                   <tr className="text-center text-[14px] ms-fs-14 print:text-[11.5px] ms-pfs-11_5 font-bold">
-                    <td style={TH_STYLE_ORNATE} className="border border-slate-800 px-3 py-2 print:py-1 text-left">মোট</td>
+                    <td style={TH_STYLE_ORNATE} className="border border-slate-800 px-3 py-2 print:py-1 text-left">{ms('total')}</td>
                     <td style={{ backgroundColor: '#dbeafe', ...EXACT }} className="border border-slate-800 px-3 py-2 print:py-1 tabular-nums">{toBn(totals.fullMark)}</td>
                     <td style={{ backgroundColor: '#dbeafe', ...EXACT }} className="border border-slate-800 px-3 py-2 print:py-1 tabular-nums">{toBn(totals.passMark)}</td>
                     <td style={{ backgroundColor: '#dbeafe', ...EXACT }} className="border border-slate-800 px-3 py-2 print:py-1 tabular-nums">{toBn(totals.highestMark)}</td>
@@ -2880,9 +3468,9 @@ const SingleMarkSheetOrnate = ({
           </div>
 
           <div className="mt-3 print:mt-1.5 border border-slate-400 px-3 py-1.5 print:py-1 text-[12.5px] ms-fs-12_5 print:text-[11px] ms-pfs-11 shrink-0">
-            <span className="font-bold text-[#1d4ed8]">নম্বর বিভাজন :</span>{' '}
+            <span className="font-bold text-[#1d4ed8]">{ms('markDistribution')} :</span>{' '}
             {divisionRows.length === 0
-              ? <span className="text-slate-400">কোনো বিভাগ পাওয়া যায়নি</span>
+              ? <span className="text-slate-400">{ms('noDivision')}</span>
               : divisionRows.map((item, i) => (
                 <span key={i} className="mr-3 whitespace-nowrap">
                   {item.name} – {toBn(totalSubjects)} × {toBn(item.number)} = <span className="font-bold">{toBn(totalSubjects * (Number(item.number) || 0))}</span>
@@ -2895,13 +3483,13 @@ const SingleMarkSheetOrnate = ({
             <div className="marksheet-comments mt-3 print:mt-1.5 grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-4 print:gap-3 flex-1 min-h-0">
               {showClassTeacherSign && (
                 <div className="border border-slate-400 p-2.5 print:p-1.5 min-h-[70px] print:min-h-[55px]">
-                  <p className="text-[13px] ms-fs-13 print:text-[11px] ms-pfs-11 font-bold text-[#1d4ed8]">শ্রেণী শিক্ষক/শিক্ষিকার মন্তব্য :</p>
+                  <p className="text-[13px] ms-fs-13 print:text-[11px] ms-pfs-11 font-bold text-[#1d4ed8]">{ms('classTeacherComment')} :</p>
                   <div className="mt-1.5 border-b border-dashed border-slate-400 text-[12.5px] ms-fs-12_5 print:text-[11px] ms-pfs-11">{student?.Note ?? ''}</div>
                 </div>
               )}
               {showGuardianSign && (
                 <div className="border border-slate-400 p-2.5 print:p-1.5 min-h-[70px] print:min-h-[55px]">
-                  <p className="text-[13px] ms-fs-13 print:text-[11px] ms-pfs-11 font-bold text-[#1d4ed8]">অভিভাবকের মন্তব্য :</p>
+                  <p className="text-[13px] ms-fs-13 print:text-[11px] ms-pfs-11 font-bold text-[#1d4ed8]">{ms('guardianComment')} :</p>
                   <div className="mt-1.5 border-b border-dashed border-slate-400" />
                 </div>
               )}
@@ -2917,27 +3505,31 @@ const SingleMarkSheetOrnate = ({
                 value={`https://qmmsoft.com/${institution?.InstitutionCode}/students/${session?.SessionID}/${ExamID}/${SubClassID}/${student?.UserCode}`}
                 viewBox="0 0 256 256" />
             </div>
-            <p className="text-[10.5px] ms-fs-10_5 print:text-[9px] ms-pfs-9 font-bold text-[#2563eb] mt-1 print:mt-0.5">যাচাই করুন</p>
+            <p className="text-[10.5px] ms-fs-10_5 print:text-[9px] ms-pfs-9 font-bold text-[#2563eb] mt-1 print:mt-0.5">{ms('verify')}</p>
           </div>
 
           <div className="text-center">
             <div className="h-11 print:h-7 flex items-end justify-center">
-              {showSignature && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-11 max-w-full object-contain print:max-h-7" />}
+              {showSignature && najemShowSign && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-11 max-w-full object-contain print:max-h-7" />}
             </div>
+            {najemShowName && (
             <div className="border-t-2 border-slate-800 pt-1 text-[13.5px] ms-fs-13_5 print:text-[11.5px] ms-pfs-11_5 font-bold">
-              {toBn(najemName || institution?.NajemName || 'নায়েবে তালিমাত')}
+              {toBn(najemName || institution?.NajemName || ms('najem'))}
             </div>
-            {showDate && <div className="text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 text-slate-500 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
+            )}
+            {showDate && najemShowDate && <div className="text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 text-slate-500 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
           </div>
 
           <div className="text-center">
             <div className="h-11 print:h-7 flex items-end justify-center">
-              {showSignature && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-11 max-w-full object-contain print:max-h-7" />}
+              {showSignature && principalShowSign && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-11 max-w-full object-contain print:max-h-7" />}
             </div>
+            {principalShowName && (
             <div className="border-t-2 border-slate-800 pt-1 text-[13.5px] ms-fs-13_5 print:text-[11.5px] ms-pfs-11_5 font-bold">
-              {toBn(principalName || institution?.PrincipalName || 'মুহতামিম')}
+              {toBn(principalName || institution?.PrincipalName || ms('principal'))}
             </div>
-            {showDate && <div className="text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 text-slate-500 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
+            )}
+            {showDate && principalShowDate && <div className="text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 text-slate-500 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
           </div>
         </div>
 
@@ -2959,29 +3551,44 @@ const SingleMarkSheetOrnate = ({
 const SingleMarkSheetRoyal = ({
   student, institution, imageSrc, signatureNajemSrc, signaturePrincipalSrc,
   session, classInfo, examSubjects, divisions = [], examConfig = {},
-  isLast = false, ExamID, SubClassID, ExamName,
+  isLast = false, ExamID, SubClassID, ExamName, lang = 'bn',
   showDate = true, showSignature = true, principalName = '', najemName = '',
+  najemShowSign = true, najemShowName = true, najemShowDate = true,
+  principalShowSign = true, principalShowName = true, principalShowDate = true,
   paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
   showClassTeacherSign = true, showGuardianSign = true,
+  totalStudents = 0,
 }) => {
   const {
     subjects, totalSubjects, divisionRows, rowPad, rowText,
     studentName, fatherName, motherName, birthDate, rollNumber,
     registration, divisionName, averageMark,
-  } = computeMarkSheetData({ student, examSubjects, examConfig, divisions });
+  } = computeMarkSheetData({ student, examSubjects, examConfig, divisions, lang });
+
+  // Every fixed word, digit and date on this sheet goes through the language.
+  // toBn keeps its name so no call site had to change; inside a template it
+  // now means "digits in the chosen language".
+  const ms = (key) => getMarkSheetText(key, lang);
+  const dir = getMarkSheetDir(lang);
+  const toBn = (value) => toLangDigit(value, lang);
+  const printDate = getPrintDate(new Date(), lang);
+  const instName = getInstitutionName(institution, lang);
+  const instAddress = getInstitutionAddress(institution, lang);
+  const sessionName = getLangValue(session, 'SessionName', lang);
 
   const { data } = useGetLabelNameListsQuery();
   const labels = data?.[0] || {};
   const previewWidth = getPreviewWidth(paperSize, orientation);
 
   const infoItems = buildInfoItems({
+    lang,
     studentInfoFields, labels, studentName, fatherName, motherName,
-    birthDate, registration, rollNumber,
+    birthDate, registration, rollNumber, totalStudents,
   });
-  const summaryItems = buildSummaryItems({ divisionName, student, averageMark });
+  const summaryItems = buildSummaryItems({ divisionName, student, averageMark, lang });
 
   return (
-    <div className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden shadow-2xl mb-10 print:mb-0 print:shadow-none flex flex-col border-[3px] border-[#0b3d26] p-1.5 print:p-1`}
+    <div dir={dir} className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden shadow-2xl mb-10 print:mb-0 print:shadow-none flex flex-col border-[3px] border-[#0b3d26] p-1.5 print:p-1`}
       style={{ backgroundColor: '#0f5132', ...EXACT }}
     >
       <div
@@ -3012,10 +3619,10 @@ const SingleMarkSheetRoyal = ({
             </div>
             <div className="flex-1 text-center min-w-0">
               <h1 className="marksheet-inst-name text-[24px] ms-fs-24 md:text-[26px] print:text-[19px] ms-pfs-19 font-bold leading-tight">
-                {toBn(institution?.InstitutionName || '-')}
+                {toBn(instName || '-')}
               </h1>
               <p className="marksheet-inst-address text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 text-emerald-100 mt-0.5">
-                {toBn(institution?.Address || '-')}
+                {toBn(instAddress || '-')}
               </p>
             </div>
             <div className="shrink-0 flex flex-col items-end gap-1">
@@ -3044,7 +3651,7 @@ const SingleMarkSheetRoyal = ({
                 className="flex items-center justify-between px-3 py-1 print:py-0.5 text-white text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold"
                 style={{ backgroundColor: '#0f5132', ...EXACT }}
               >
-                <span>পরীক্ষার্থীর তথ্য</span>
+                <span>{ms('studentInfo')}</span>
                 <span
                   className="rounded-full px-2 py-0 text-[11px] ms-fs-11 print:text-[10px] ms-pfs-10 text-[#0b3d26]"
                   style={{ backgroundColor: '#c9a227', ...EXACT }}
@@ -3067,14 +3674,14 @@ const SingleMarkSheetRoyal = ({
                 className="px-3 py-1 print:py-0.5 text-center text-white text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold"
                 style={{ backgroundColor: '#0f5132', ...EXACT }}
               >
-                নম্বর বিভাজন
+                {ms('markDistribution')}
               </div>
               <div className="px-2 py-1 print:py-0.5 text-center text-[12px] ms-fs-12 print:text-[10.5px] ms-pfs-10_5 font-bold text-emerald-800 border-b border-emerald-100">
-                মোট বিভাগ - {toBn(divisionRows.length)} টি | মোট বিষয় {toBn(totalSubjects)} টি
+                {ms('totalDivisions')} - {toBn(divisionRows.length)} {ms('items')} | {ms('totalSubjects')} {toBn(totalSubjects)} {ms('items')}
               </div>
               <div className="p-2 print:p-1.5">
                 {divisionRows.length === 0 ? (
-                  <div className="text-center text-slate-400 text-[12px] ms-fs-12 print:text-[11px] ms-pfs-11 py-1">কোনো বিভাগ পাওয়া যায়নি</div>
+                  <div className="text-center text-slate-400 text-[12px] ms-fs-12 print:text-[11px] ms-pfs-11 py-1">{ms('noDivision')}</div>
                 ) : (
                   divisionRows.map((item, i) => (
                     <div key={i} className="flex justify-between items-center py-0.5 text-[13px] ms-fs-13 print:text-[11px] ms-pfs-11 font-bold text-slate-800 border-b border-dotted border-emerald-200 last:border-0">
@@ -3093,19 +3700,19 @@ const SingleMarkSheetRoyal = ({
           {/* Result table */}
           <div className="mt-3 print:mt-1.5 shrink-0">
             <div className="flex items-center gap-2 mb-1 print:mb-0.5">
-              <span className="text-[13.5px] ms-fs-13_5 print:text-[11.5px] ms-pfs-11_5 font-bold text-emerald-900">বিষয়ভিত্তিক ফলাফল</span>
+              <span className="text-[13.5px] ms-fs-13_5 print:text-[11.5px] ms-pfs-11_5 font-bold text-emerald-900">{ms('subjectResult')}</span>
               <div className="flex-1 h-[2px]" style={{ backgroundImage: 'linear-gradient(to right,#c9a227,transparent)', ...EXACT }} />
             </div>
             <div className="marks-table-wrap w-full overflow-x-auto print:overflow-visible rounded-xl border border-[#c9a227]">
               <table className="w-full min-w-[640px] print:min-w-0 border-collapse bg-white/90 text-slate-900">
                 <thead>
                   <tr className="text-center">
-                    <th style={TH_STYLE_ROYAL} className="px-2 py-2 print:py-1 text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold w-[8%]">ক্রমিক</th>
-                    <th style={TH_STYLE_ROYAL} className="px-3 py-2 print:py-1 text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold text-left">বিষয়</th>
-                    <th style={TH_STYLE_ROYAL} className="px-2 py-2 print:py-1 text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold">পূর্ণমান</th>
-                    <th style={TH_STYLE_ROYAL} className="px-2 py-2 print:py-1 text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold">পাশমার্ক</th>
-                    <th style={TH_STYLE_ROYAL} className="px-2 py-2 print:py-1 text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold whitespace-nowrap">সর্বোচ্চ প্রাপ্ত</th>
-                    <th style={TH_STYLE_ROYAL} className="px-2 py-2 print:py-1 text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold">প্রাপ্ত নম্বর</th>
+                    <th style={TH_STYLE_ROYAL} className="px-2 py-2 print:py-1 text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold w-[8%]">{ms('serial')}</th>
+                    <th style={TH_STYLE_ROYAL} className="px-3 py-2 print:py-1 text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold text-left">{ms('subject')}</th>
+                    <th style={TH_STYLE_ROYAL} className="px-2 py-2 print:py-1 text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold">{ms('fullMark')}</th>
+                    <th style={TH_STYLE_ROYAL} className="px-2 py-2 print:py-1 text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold">{ms('passMark')}</th>
+                    <th style={TH_STYLE_ROYAL} className="px-2 py-2 print:py-1 text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold whitespace-nowrap">{ms('highestMark')}</th>
+                    <th style={TH_STYLE_ROYAL} className="px-2 py-2 print:py-1 text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold">{ms('obtainedMark')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -3131,7 +3738,7 @@ const SingleMarkSheetRoyal = ({
           {/* Summary cards */}
           <div className="mt-3 print:mt-1.5 shrink-0">
             <div className="flex items-center gap-2 mb-1 print:mb-0.5">
-              <span className="text-[13.5px] ms-fs-13_5 print:text-[11.5px] ms-pfs-11_5 font-bold text-emerald-900">সারসংক্ষেপ</span>
+              <span className="text-[13.5px] ms-fs-13_5 print:text-[11.5px] ms-pfs-11_5 font-bold text-emerald-900">{ms('summary')}</span>
               <div className="flex-1 h-[2px]" style={{ backgroundImage: 'linear-gradient(to right,#c9a227,transparent)', ...EXACT }} />
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 print:grid-cols-4 gap-3 print:gap-1.5">
@@ -3153,13 +3760,13 @@ const SingleMarkSheetRoyal = ({
             <div className="marksheet-comments mt-3 print:mt-1.5 grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-4 print:gap-3 flex-1 min-h-0">
               {showClassTeacherSign && (
                 <div className="rounded-xl border border-[#c9a227] bg-white/85 p-2.5 print:p-1.5 min-h-[70px] print:min-h-[55px]">
-                  <p className="text-[13px] ms-fs-13 print:text-[11px] ms-pfs-11 font-bold text-emerald-900">শ্রেণী শিক্ষক/শিক্ষিকার মন্তব্য ও স্বাক্ষর :</p>
+                  <p className="text-[13px] ms-fs-13 print:text-[11px] ms-pfs-11 font-bold text-emerald-900">{ms('classTeacherCommentSign')} :</p>
                   <div className="mt-1.5 border-b border-dashed border-emerald-400 text-[12.5px] ms-fs-12_5 print:text-[11px] ms-pfs-11 text-slate-700">{student?.Note ?? ''}</div>
                 </div>
               )}
               {showGuardianSign && (
                 <div className="rounded-xl border border-[#c9a227] bg-white/85 p-2.5 print:p-1.5 min-h-[70px] print:min-h-[55px]">
-                  <p className="text-[13px] ms-fs-13 print:text-[11px] ms-pfs-11 font-bold text-emerald-900">অভিভাবকের মন্তব্য ও স্বাক্ষর :</p>
+                  <p className="text-[13px] ms-fs-13 print:text-[11px] ms-pfs-11 font-bold text-emerald-900">{ms('guardianCommentSign')} :</p>
                   <div className="mt-1.5 border-b border-dashed border-emerald-400" />
                 </div>
               )}
@@ -3175,26 +3782,30 @@ const SingleMarkSheetRoyal = ({
                 value={`https://qmmsoft.com/${institution?.InstitutionCode}/students/${session?.SessionID}/${ExamID}/${SubClassID}/${student?.UserCode}`}
                 viewBox="0 0 256 256" />
             </div>
-            <p className="text-[10.5px] ms-fs-10_5 print:text-[9px] ms-pfs-9 font-bold text-emerald-800 mt-1 print:mt-0.5">যাচাই করুন</p>
+            <p className="text-[10.5px] ms-fs-10_5 print:text-[9px] ms-pfs-9 font-bold text-emerald-800 mt-1 print:mt-0.5">{ms('verify')}</p>
           </div>
 
           <div className="col-span-2 text-center">
             <div className="h-11 print:h-7 flex items-end justify-center">
-              {showSignature && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-11 max-w-full object-contain print:max-h-7" />}
+              {showSignature && najemShowSign && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-11 max-w-full object-contain print:max-h-7" />}
             </div>
-            <div className="border-t-2 border-dashed border-[#c9a227] pt-1 print:pt-0.5">
-              <p className="text-[14px] ms-fs-14 print:text-[11.5px] ms-pfs-11_5 font-bold text-emerald-900">{toBn(najemName || institution?.NajemName || 'নায়েবে তালিমাত')}</p>
-              {showDate && <p className="text-[10.5px] ms-fs-10_5 print:text-[9px] ms-pfs-9 text-emerald-700 tabular-nums">তারিখ : {toBn(new Date().toLocaleDateString('bn-BD'))}</p>}
+            <div style={najemShowName ? undefined : { borderTopWidth: 0 }} className="border-t-2 border-dashed border-[#c9a227] pt-1 print:pt-0.5">
+              {najemShowName && (
+              <p className="text-[14px] ms-fs-14 print:text-[11.5px] ms-pfs-11_5 font-bold text-emerald-900">{toBn(najemName || institution?.NajemName || ms('najem'))}</p>
+              )}
+              {showDate && najemShowDate && <p className="text-[10.5px] ms-fs-10_5 print:text-[9px] ms-pfs-9 text-emerald-700 tabular-nums">{ms('date')} : {printDate}</p>}
             </div>
           </div>
 
           <div className="col-span-2 text-center">
             <div className="h-11 print:h-7 flex items-end justify-center">
-              {showSignature && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-11 max-w-full object-contain print:max-h-7" />}
+              {showSignature && principalShowSign && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-11 max-w-full object-contain print:max-h-7" />}
             </div>
-            <div className="border-t-2 border-dashed border-[#c9a227] pt-1 print:pt-0.5">
-              <p className="text-[14px] ms-fs-14 print:text-[11.5px] ms-pfs-11_5 font-bold text-emerald-900">{toBn(principalName || institution?.PrincipalName || 'মুহতামিম')}</p>
-              {showDate && <p className="text-[10.5px] ms-fs-10_5 print:text-[9px] ms-pfs-9 text-emerald-700 tabular-nums">তারিখ : {toBn(new Date().toLocaleDateString('bn-BD'))}</p>}
+            <div style={principalShowName ? undefined : { borderTopWidth: 0 }} className="border-t-2 border-dashed border-[#c9a227] pt-1 print:pt-0.5">
+              {principalShowName && (
+              <p className="text-[14px] ms-fs-14 print:text-[11.5px] ms-pfs-11_5 font-bold text-emerald-900">{toBn(principalName || institution?.PrincipalName || ms('principal'))}</p>
+              )}
+              {showDate && principalShowDate && <p className="text-[10.5px] ms-fs-10_5 print:text-[9px] ms-pfs-9 text-emerald-700 tabular-nums">{ms('date')} : {printDate}</p>}
             </div>
           </div>
         </div>
@@ -3219,10 +3830,32 @@ const MarkSheetPdf = ({
   paperSize = 'A4', orientation = 'portrait',
   studentInfoFields = {}, colorMode = 'color',
   showClassTeacherSign = true, showGuardianSign = true,
+  // The two signature blocks, three switchable parts each: the signature
+  // image, the name with the line above it, and the date under it.
+  najemShowSign = true, najemShowName = true, najemShowDate = true,
+  principalShowSign = true, principalShowName = true, principalShowDate = true,
   headerScale = 100, contentFontScale = 100, rowGapScale = 100,
+  language = 1,
+  // Press-printed mark sheet (report 2) — only template 8 uses these
+  pressPrint = false, pressHidePreview = true,
+  pressExamOffset = 0, pressBodyOffset = 0, pressSignOffset = 0,
+  scopeId = null,
 }) => {
   const institution = data?.institution;
-  const ExamName = data?.exam?.[0]?.ExamName;
+
+  // Language the sheet is printed in.
+  // The API always sends all three, so the choice is made here.
+  // LANG_ID_TO_CODE in MarkSheetConfig is the only place that says which
+  // id means which language — the labels below and the database columns
+  // picked here both read it, so the two can never disagree.
+  const lang = toLangCode(language);
+
+  // Picks the translated text, falling back to Bangla when it is missing.
+  const byLanguage = (bangla, arabic, english) =>
+    pickLang(bangla, arabic, english, lang);
+
+  const examRow = data?.exam?.[0];
+  const ExamName = byLanguage(examRow?.ExamName, examRow?.ExamAraName, examRow?.ExamEngName);
 
   // Paper-size/orientation scale — preview and print both
   const paperZoom = getPaperZoom(paperSize, orientation);
@@ -3232,8 +3865,17 @@ const MarkSheetPdf = ({
   const signaturePrincipalSrc = bufferToDataUrl(institution?.SignaturePrincipal);
 
   const session = data?.session || {};
-  const classInfo = data?.class || {};
-  const classGroupInfo = data?.classGroup || {};
+  const classRow = data?.class || {};
+  const classInfo = {
+    ...classRow,
+    ClassName: byLanguage(classRow?.ClassName, classRow?.ArabicClass, classRow?.EnglishClass),
+  };
+
+  const classGroupRow = data?.classGroup || {};
+  const classGroupInfo = {
+    ...classGroupRow,
+    SubClass: byLanguage(classGroupRow?.SubClass, classGroupRow?.SubClassAra, classGroupRow?.SubClassEng),
+  };
   const examSubjects = Array.isArray(data?.examSubjects) ? data.examSubjects : [];
 
   const examConfig = Array.isArray(data?.conditionAverage)
@@ -3246,12 +3888,29 @@ const MarkSheetPdf = ({
   if (students.length === 0) {
     return (
       <div className="font-SolaimanLipi flex items-center justify-center p-10 text-slate-500 bg-slate-50 rounded-lg border border-slate-200 text-lg">
-        কোনো শিক্ষার্থীর ডেটা পাওয়া যায়নি
+        {getMarkSheetText('noData', lang)}
       </div>
     );
   }
 
-  const visibleStudents = students;
+  // Names in the chosen language, resolved once for every template.
+  const visibleStudents = students.map((student) => ({
+    ...student,
+    UserName: byLanguage(student?.UserName, student?.StudentNameAra, student?.StudentNameEng),
+    FatherName: byLanguage(student?.FatherName, student?.FatherNameAra, student?.FatherNameEng),
+    MotherName: byLanguage(student?.MotherName, student?.MotherNameAra, student?.MotherNameEng),
+  }));
+
+  // Examinees sitting this exam.
+  //   totalExaminees  counted by the API across the whole exam, before
+  //                   any UserCode filter — this is the figure wanted
+  //   TotalStudent    the figure stored with the exam, if the API is old
+  //   students.length last resort only; it counts what this page shows,
+  //                   so a search for one ID would report 1
+  const totalStudents =
+    Number(data?.totalExaminees) ||
+    Number(examConfig?.TotalStudent) ||
+    students.length;
 
   // ⭐ templateId অনুযায়ী কম্পোনেন্ট বেছে নাও
   const renderSheet = (student, idx) => {
@@ -3277,7 +3936,20 @@ const MarkSheetPdf = ({
       studentInfoFields,
       showClassTeacherSign,
       showGuardianSign,
+      najemShowSign,
+      najemShowName,
+      najemShowDate,
+      principalShowSign,
+      principalShowName,
+      principalShowDate,
+      totalStudents,
       ExamName,
+      lang,
+      pressPrint,
+      pressHidePreview,
+      pressExamOffset,
+      pressBodyOffset,
+      pressSignOffset,
       ExamID: data?.examid,
       SubClassID: classGroupInfo?.SubClassID,
     };
@@ -3303,12 +3975,15 @@ const MarkSheetPdf = ({
         contentFontScale,
         rowGapScale,
         totalSubjects: examSubjects.length,
+        scopeId,
       })}</style>
       <div
-        id="marksheet-print-area"
-        className={`font-SolaimanLipi w-full bg-slate-100 py-6 min-h-screen flex flex-col items-center print:bg-white print:py-0 min-h-0 print:block ${
-          colorMode === 'bw' ? 'marksheet-mode-bw' : ''
-        }`}
+        id={scopeId || 'marksheet-print-area'}
+        className={`font-SolaimanLipi w-full ${
+          scopeId
+            ? ''
+            : 'bg-slate-100 py-6 min-h-screen flex flex-col items-center print:bg-white print:py-0 min-h-0 print:block'
+        } ${colorMode === 'bw' ? 'marksheet-mode-bw' : ''}`}
       >
         {/* Paper zoom wrapper — pages render at the real paper width */}
         <div className="w-full" style={{ zoom: paperZoom }}>

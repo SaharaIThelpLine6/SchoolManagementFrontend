@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Loading from '../components/Loading/Loading';
 import useTranslate from '../utils/Translate';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import DefaultSelect from '../components/Forms/DefaultSelect';
-import { markSheetResultReports } from '../Data/userReportsData';
+import { languageResultReport, markSheetResultReports } from '../Data/userReportsData';
 import { useGetClassListQuery } from '../features/class/classQuerySlice';
 import {
   useGetExamFilterExamsQuery,
@@ -56,162 +56,6 @@ const MARK_SHEET_TEMPLATES = [
 ];
 
 // ==========================================
-// Template thumbnails
-// A small drawing of each design, shown on the template card in the
-// settings modal so the design is recognisable before it is selected.
-// Nothing here is real data — it is a miniature of the layout.
-// ==========================================
-const TEMPLATE_THUMBS = {
-  'template-1': { layout: 'standard', page: '#ffffff', frame: '#e2e8f0', head: 'linear-gradient(to right,#115e59,#059669)', accent: '#0f766e', alt: '#f0fdfa', rainbow: true, radius: 4 },
-  'template-2': { layout: 'standard', page: '#faf8ff', frame: '#ddd6fe', head: 'linear-gradient(to bottom right,#312e81,#7e22ce,#c026d3)', accent: '#6d28d9', alt: '#f5f3ff', rainbow: true, radius: 8, inset: true },
-  'template-3': { layout: 'centered', page: '#fffdf7', frame: '#b45309', head: 'linear-gradient(to bottom,#fef3c7,#ffffff)', accent: '#b45309', alt: '#fffbeb', headText: '#92400e', double: true, radius: 3 },
-  'template-4': { layout: 'standard', page: '#ffffff', frame: '#000000', head: '#ffffff', accent: '#000000', alt: '#fafafa', headText: '#000000', rule: true, radius: 0 },
-  'template-5': { layout: 'sidebar', page: '#ffffff', frame: '#a5f3fc', head: 'linear-gradient(to bottom,#0f172a,#083344)', accent: '#0891b2', alt: '#ecfeff', radius: 8 },
-  'template-6': { layout: 'centered', page: '#f5f0e3', frame: '#1c1917', head: '#f5f0e3', accent: '#1c1917', alt: '#ede7d5', headText: '#1c1917', masthead: true, radius: 0 },
-  'template-7': { layout: 'bauhaus', page: '#ffffff', frame: '#000000', head: '#dc2626', accent: '#2563eb', alt: '#fef3c7', radius: 0 },
-  'template-8': { layout: 'centered', page: '#ffffff', frame: '#000000', head: '#ffffff', accent: '#334155', alt: '#ffffff', headText: '#000000', radius: 0 },
-  'template-9': { layout: 'centered', page: '#FFFDF4', frame: '#C9A227', head: '#FFFDF4', accent: '#2E8B8B', alt: '#f0fdfa', headText: '#1E3A8A', ribbon: true, double: true, radius: 2 },
-  'template-10': { layout: 'standard', page: '#ffffff', frame: '#1d4ed8', head: '#ffffff', accent: '#1e3a8a', alt: '#eff6ff', headText: '#1e3a8a', double: true, radius: 2 },
-  'template-11': { layout: 'centered', page: '#ffffff', frame: '#1d4ed8', head: '#ffffff', accent: '#1d4ed8', alt: '#eff6ff', headText: '#1d4ed8', title: true, double: true, radius: 2 },
-  'template-12': { layout: 'standard', page: '#f3faf6', frame: '#c9a227', head: 'linear-gradient(to right,#0b3d26,#14694a,#0b3d26)', accent: '#0f5132', alt: '#ecfdf5', outer: '#0f5132', radius: 8, inset: true },
-};
-
-const ThumbRows = ({ count = 3, color = '#cbd5e1' }) => (
-  <div className="flex w-full flex-col gap-[2px]">
-    {Array.from({ length: count }).map((_, i) => (
-      <div key={i} className="h-[2px] rounded-full" style={{ backgroundColor: color, opacity: 0.55 }} />
-    ))}
-  </div>
-);
-
-const ThumbTable = ({ t, rows = 4 }) => (
-  <div className="w-full overflow-hidden" style={{ border: `1px solid ${t.accent}33`, borderRadius: 2 }}>
-    <div className="h-[4px] w-full" style={{ background: t.accent }} />
-    {Array.from({ length: rows }).map((_, i) => (
-      <div key={i} className="flex h-[4px] items-center gap-[3px] px-[2px]" style={{ backgroundColor: i % 2 ? t.alt : '#ffffff' }}>
-        <div className="h-[1.5px] flex-1 rounded-full" style={{ backgroundColor: t.accent, opacity: 0.35 }} />
-        <div className="h-[1.5px] w-[6px] rounded-full" style={{ backgroundColor: t.accent, opacity: 0.55 }} />
-        <div className="h-[1.5px] w-[6px] rounded-full" style={{ backgroundColor: t.accent, opacity: 0.55 }} />
-      </div>
-    ))}
-  </div>
-);
-
-const ThumbChips = ({ t, count = 4 }) => (
-  <div className="flex gap-[3px]">
-    {Array.from({ length: count }).map((_, i) => (
-      <div key={i} className="h-[7px] flex-1 rounded-[2px]" style={{ background: t.accent, opacity: 0.25 + i * 0.12, border: `0.5px solid ${t.accent}` }} />
-    ))}
-  </div>
-);
-
-const TemplateThumb = ({ id }) => {
-  const t = TEMPLATE_THUMBS[id] || TEMPLATE_THUMBS['template-1'];
-
-  // Bauhaus is colour blocks rather than a page layout.
-  if (t.layout === 'bauhaus') {
-    return (
-      <div className="h-full w-full overflow-hidden bg-white" style={{ border: '2px solid #000' }}>
-        <div className="flex h-[22%] items-center gap-[3px] px-[4px]" style={{ backgroundColor: '#dc2626', borderBottom: '2px solid #000' }}>
-          <div className="h-[8px] w-[8px] rounded-full border border-black bg-white" />
-          <div className="h-[3px] flex-1 rounded-full bg-white/80" />
-        </div>
-        <div className="h-[10%]" style={{ backgroundColor: '#facc15', borderBottom: '2px solid #000' }} />
-        <div className="flex h-[68%]">
-          <div className="w-[12%]" style={{ backgroundColor: '#dc2626', borderRight: '2px solid #000' }} />
-          <div className="flex-1 p-[3px]">
-            <div className="mb-[3px] h-[10px] w-full bg-black" />
-            <div className="mb-[3px] h-[5px] w-full" style={{ backgroundColor: '#2563eb' }} />
-            <ThumbTable t={t} rows={3} />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Dark side column with the content on the right.
-  if (t.layout === 'sidebar') {
-    return (
-      <div className="flex h-full w-full overflow-hidden" style={{ border: `1px solid ${t.frame}`, borderRadius: t.radius, backgroundColor: t.page }}>
-        <div className="flex w-[35%] flex-col items-center gap-[3px] p-[4px]" style={{ background: t.head }}>
-          <div className="h-[10px] w-[10px] rounded-[3px] bg-white/90" />
-          <ThumbRows count={4} color="#67e8f9" />
-          <div className="mt-auto h-[10px] w-[10px] rounded-[2px] bg-white" />
-        </div>
-        <div className="flex flex-1 flex-col gap-[3px] p-[4px]">
-          <ThumbTable t={t} rows={4} />
-          <ThumbChips t={t} />
-        </div>
-      </div>
-    );
-  }
-
-  const centered = t.layout === 'centered';
-
-  return (
-    <div
-      className="h-full w-full overflow-hidden"
-      style={{
-        border: `${t.double ? 2 : 1}px ${t.double ? 'double' : 'solid'} ${t.frame}`,
-        borderRadius: t.radius,
-        backgroundColor: t.outer || t.page,
-        padding: t.inset || t.outer ? 2 : 0,
-      }}
-    >
-      <div
-        className="flex h-full w-full flex-col gap-[3px] p-[4px]"
-        style={{
-          backgroundColor: t.page,
-          borderRadius: Math.max(0, t.radius - 2),
-          border: t.outer ? `1px solid ${t.frame}` : undefined,
-        }}
-      >
-        <div
-          className={`flex shrink-0 items-center gap-[3px] px-[3px] py-[2px] ${centered ? 'flex-col justify-center' : ''}`}
-          style={{
-            background: t.head,
-            borderRadius: t.inset ? 3 : 0,
-            borderBottom: t.masthead || t.rule ? `2px solid ${t.accent}` : undefined,
-          }}
-        >
-          {!centered && (
-            <div className="h-[9px] w-[9px] shrink-0 rounded-full bg-white" style={{ border: `1px solid ${t.accent}66` }} />
-          )}
-          <div className={`flex flex-col gap-[2px] ${centered ? 'items-center' : 'flex-1'}`}>
-            <div className="h-[3px] rounded-full" style={{ width: centered ? 34 : '70%', backgroundColor: t.headText || '#ffffff', opacity: 0.9 }} />
-            <div className="h-[2px] rounded-full" style={{ width: centered ? 22 : '45%', backgroundColor: t.headText || '#ffffff', opacity: 0.55 }} />
-          </div>
-          {t.ribbon && <div className="h-[5px] w-[26px] rounded-[1px]" style={{ background: 'linear-gradient(to right,#ea580c,#f59e0b,#ea580c)' }} />}
-          {t.title && <div className="h-[3px] w-[30px] rounded-full" style={{ backgroundColor: t.accent }} />}
-        </div>
-
-        {t.rainbow && (
-          <div className="h-[2px] w-full shrink-0 rounded-full" style={{ background: 'linear-gradient(to right,#e5484d,#facc15,#22c55e,#0ea5e9,#a855f7)' }} />
-        )}
-
-        <div className="flex shrink-0 gap-[4px]">
-          <div className="flex-1 rounded-[2px] p-[2px]" style={{ border: `0.5px solid ${t.accent}44`, backgroundColor: t.alt }}>
-            <ThumbRows count={3} color={t.accent} />
-          </div>
-          <div className="flex-1 rounded-[2px] p-[2px]" style={{ border: `0.5px solid ${t.accent}44`, backgroundColor: t.alt }}>
-            <ThumbRows count={3} color={t.accent} />
-          </div>
-        </div>
-
-        <ThumbTable t={t} rows={4} />
-        <ThumbChips t={t} />
-
-        <div className="mt-auto flex shrink-0 items-end gap-[4px] pt-[2px]">
-          <div className="h-[8px] w-[8px] rounded-[1px] bg-white" style={{ border: `1px solid ${t.accent}` }} />
-          <div className="flex-1 border-t border-dashed" style={{ borderColor: t.accent }} />
-          <div className="flex-1 border-t border-dashed" style={{ borderColor: t.accent }} />
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ==========================================
 // Size sliders
 // One control shape, used both on the toolbar and inside the settings
 // modal, so a size can be changed from either place and both show the
@@ -219,6 +63,45 @@ const TemplateThumb = ({ id }) => {
 // ==========================================
 const BN_DIGITS = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
 const toBnNum = (value) => String(value).replace(/\d/g, (d) => BN_DIGITS[Number(d)]);
+
+/**
+ * Moves one block of the press-printed sheet up or down.
+ * Pixels, not a percentage, and it rests at 0 rather than 100 — minus is up,
+ * plus is down, so a block can be lined up with what the press already put
+ * on the paper.
+ */
+const OffsetSlider = ({ label, value, onChange, hint, min = -100, max = 100, step = 1 }) => (
+  <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm">
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-[13px] font-semibold text-slate-700">{label}</span>
+      <div className="flex items-center gap-2 shrink-0">
+        <span className="text-[12px] font-bold text-[#7C3AED] tabular-nums">
+          {Number(value) > 0 ? '+' : ''}{toBnNum(value)} px
+        </span>
+        <button
+          type="button"
+          title="রিসেট"
+          onClick={() => onChange('0')}
+          className="flex h-5 w-5 items-center justify-center rounded border border-slate-200 text-slate-400 hover:text-[#7C3AED] hover:border-[#DDD6FE] transition"
+        >
+          <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h5M20 20v-5h-5M20 9A8 8 0 006.3 5.3M4 15a8 8 0 0013.7 3.7" />
+          </svg>
+        </button>
+      </div>
+    </div>
+    <input
+      type="range"
+      min={min}
+      max={max}
+      step={step}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="mt-2 w-full accent-[#7C3AED]"
+    />
+    {hint && <p className="mt-1 text-[11px] leading-snug text-slate-500">{hint}</p>}
+  </div>
+);
 
 const ScaleSlider = ({ label, value, onChange, hint, min = 60, max = 160, step = 5 }) => (
   <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm">
@@ -252,12 +135,11 @@ const ScaleSlider = ({ label, value, onChange, hint, min = 60, max = 160, step =
 );
 
 /**
- * Live sample of the subject table at the chosen row size, so the effect
- * is visible without closing the settings modal.
+ * Live sample of the result table. It uses the same arithmetic the sheet
+ * does — real padding and real font sizes, never a zoom — so what the
+ * sample shows is what gets printed.
  */
 const TableScaleSample = ({ rowGap = 100, font = 100 }) => {
-  // Same arithmetic the sheet itself uses: real padding and font sizes,
-  // so the sample shows what will actually be printed.
   const pad = (6 * (Number(rowGap) || 100)) / 100;
   const size = (11 * (Number(font) || 100)) / 100;
   const cell = { paddingTop: pad, paddingBottom: pad, fontSize: size };
@@ -267,8 +149,8 @@ const TableScaleSample = ({ rowGap = 100, font = 100 }) => {
       <table className="w-full border-collapse text-center">
         <thead>
           <tr style={{ backgroundColor: '#0f5132', color: '#ffffff' }}>
-            {['ক্রমিক', 'বিষয়', 'পূর্ণমান', 'প্রাপ্ত নম্বর'].map((h, i) => (
-              <th key={h} className={`px-2 font-bold ${i === 1 ? 'text-left' : ''}`} style={cell}>{h}</th>
+            {['ক্রমিক', 'বিষয়', 'পূর্ণমান', 'প্রাপ্ত নম্বর'].map((head, i) => (
+              <th key={head} className={`px-2 font-bold ${i === 1 ? 'text-left' : ''}`} style={cell}>{head}</th>
             ))}
           </tr>
         </thead>
@@ -289,17 +171,146 @@ const TableScaleSample = ({ rowGap = 100, font = 100 }) => {
 };
 
 /** Live sample of the institution name and address at the chosen size. */
-const HeaderScaleSample = ({ scale, name, address }) => (
-  <div
-    className="mt-2 overflow-hidden rounded-md px-3 py-2 text-center text-white"
-    style={{ backgroundImage: 'linear-gradient(to right,#0b3d26,#14694a,#0b3d26)' }}
-  >
-    <div style={{ zoom: (Number(scale) || 100) / 100 }}>
-      <p className="text-[15px] font-bold leading-tight">{name || 'প্রতিষ্ঠানের নাম'}</p>
-      <p className="text-[10px] text-emerald-100">{address || 'ঠিকানা'}</p>
+const HeaderScaleSample = ({ scale, name, address }) => {
+  const pct = (Number(scale) || 100) / 100;
+  return (
+    <div
+      className="mt-2 overflow-hidden rounded-md px-3 py-2 text-center text-white"
+      style={{ backgroundImage: 'linear-gradient(to right,#0b3d26,#14694a,#0b3d26)' }}
+    >
+      <p className="font-bold leading-tight" style={{ fontSize: 15 * pct }}>
+        {name || 'প্রতিষ্ঠানের নাম'}
+      </p>
+      <p className="text-emerald-100" style={{ fontSize: 10 * pct }}>
+        {address || 'ঠিকানা'}
+      </p>
     </div>
-  </div>
-);
+  );
+};
+
+// ==========================================
+// Template miniature
+// A real mark sheet, rendered small. The abstract thumbnails could not show
+// what a design actually looks like, so each card now renders the template
+// itself — same header, same table, same colours — shrunk to fit.
+//
+// The sheet is laid out at A4 width (794px) and scaled down with a
+// transform, which costs nothing to lay out and keeps every proportion.
+// Each one gets its own scopeId so the stylesheet it carries applies to
+// that card alone and never leaks into the sheet being previewed.
+// ==========================================
+const MINI_WIDTH = 794;   // the width every template is designed at
+// One A4 page at that scale: the sheet is 286mm tall (the printable area),
+// which is 286 x 96 / 25.4 px. Matching it exactly keeps the card from
+// showing a strip of empty white under the sheet.
+const MINI_HEIGHT = Math.round((286 * 96) / 25.4);
+
+/** A single student with a few subjects — enough to show a design off. */
+const MINI_SAMPLE = {
+  institution: {
+    InstitutionName: 'জামিয়া ইসলামিয়া দারুল মাদরাসা',
+    Address: 'যাত্রাবাড়ী, ঢাকা',
+    InstitutionCode: 'SAMPLE',
+    PrincipalName: 'মুহতামিম',
+    NajemName: 'নাযেম',
+    Logo: null,
+    SignatureNajem: null,
+    SignaturePrincipal: null,
+  },
+  session: { SessionName: '২০২৬', SessionID: 1 },
+  class: { ClassName: 'নমুনা শ্রেণী' },
+  classGroup: { SubClassID: 1 },
+  exam: [{ ExamID: 1, ExamName: 'বার্ষিক পরীক্ষা' }],
+  examid: 1,
+  conditionAverage: [{
+    ExamType: 1, AverageSubsonkha: 4,
+    DivisionID1: 1, DivisionNumber1: 80,
+    DivisionID2: 2, DivisionNumber2: 70,
+    DivisionID3: 3, DivisionNumber3: 60,
+  }],
+  divisions: [
+    { ID: 1, DivisionNames: 'এ+' },
+    { ID: 2, DivisionNames: 'এ' },
+    { ID: 3, DivisionNames: 'এ-' },
+  ],
+  examSubjects: ['বাংলা', 'ইংরেজি', 'গণিত', 'হাদীস'].map((name, i) => ({
+    ID: i + 1, SubjectID: i + 1, SubjectName: name,
+    MaxNumber: 100, PassNumber: 33, HighestMark: 95,
+  })),
+  students: [{
+    ID: 1, UserID: 1,
+    UserName: 'মোসা: জান্নাতুল আক্তার',
+    FatherName: 'মো: রাসেল মিয়া',
+    MotherName: 'মোসা: ঝিমা বেগম',
+    DateOfBirth: '০১/০১/২০১২',
+    AdmissionSerial: 7, UserCode: '১০০৪',
+    DivisionNames: 'এ', Positions: 2, Total: 340,
+    Note: 'ভালো ফলাফল করেছে।',
+    subjects: [88, 82, 90, 80].map((mark, i) => ({ SubjectID: i + 1, Marks: mark, HighestMark: 95 })),
+  }],
+};
+
+const TemplateMiniature = ({
+  templateId, data, width = 150,
+  showDate, showSignature, principalName, najemName,
+  paperSize, orientation, studentInfoFields, colorMode,
+  showClassTeacherSign, showGuardianSign,
+  najemShowSign, najemShowName, najemShowDate, principalShowSign, principalShowName, principalShowDate,
+  headerScale, contentFontScale, rowGapScale,
+  language,
+  pressPrint, pressHidePreview, pressExamOffset, pressBodyOffset, pressSignOffset,
+}) => {
+  // The real report can hold hundreds of students; a card needs exactly one.
+  const sheetData = useMemo(() => {
+    if (!data?.students?.length) return MINI_SAMPLE;
+    return { ...data, students: data.students.slice(0, 1) };
+  }, [data]);
+
+  const scale = width / MINI_WIDTH;
+
+  return (
+    <div
+      className="relative overflow-hidden rounded bg-white"
+      style={{ width, height: MINI_HEIGHT * scale }}
+    >
+      <div
+        className="pointer-events-none absolute left-0 top-0 origin-top-left"
+        style={{ width: MINI_WIDTH, transform: `scale(${scale})` }}
+      >
+        <MarkSheetPdf
+          data={sheetData}
+          templateId={templateId}
+          scopeId={`ms-mini-${templateId}-${width}`}
+          showDate={showDate}
+          showSignature={showSignature}
+          principalName={principalName}
+          najemName={najemName}
+          paperSize={paperSize}
+          orientation={orientation}
+          studentInfoFields={studentInfoFields}
+          colorMode={colorMode}
+          showClassTeacherSign={showClassTeacherSign}
+          showGuardianSign={showGuardianSign}
+          najemShowSign={najemShowSign}
+          najemShowName={najemShowName}
+          najemShowDate={najemShowDate}
+          principalShowSign={principalShowSign}
+          principalShowName={principalShowName}
+          principalShowDate={principalShowDate}
+          headerScale={headerScale}
+          contentFontScale={contentFontScale}
+          rowGapScale={rowGapScale}
+          language={language}
+          pressPrint={pressPrint}
+          pressHidePreview={pressHidePreview}
+          pressExamOffset={pressExamOffset}
+          pressBodyOffset={pressBodyOffset}
+          pressSignOffset={pressSignOffset}
+        />
+      </div>
+    </div>
+  );
+};
 
 const MarkSheet = () => {
   const translate = useTranslate();
@@ -312,6 +323,15 @@ const MarkSheet = () => {
   // ⭐ স্টেট: স্বাক্ষর, তারিখ ও নামের জন্য
   const [showDate, setShowDate] = useState(true);
   const [showSignature, setShowSignature] = useState(true);
+
+  // The two signature blocks, three parts each — signature image,
+  // name with the line above it, and the date under it.
+  const [najemShowSign, setNajemShowSign] = useState(true);
+  const [najemShowName, setNajemShowName] = useState(true);
+  const [najemShowDate, setNajemShowDate] = useState(true);
+  const [principalShowSign, setPrincipalShowSign] = useState(true);
+  const [principalShowName, setPrincipalShowName] = useState(true);
+  const [principalShowDate, setPrincipalShowDate] = useState(true);
   const [principalName, setPrincipalName] = useState('');
   const [najemName, setNajemName] = useState('');
 
@@ -325,6 +345,10 @@ const MarkSheet = () => {
 
   // ⭐ স্টেট: প্রিন্ট স্কেল (subject বেশি হলে ছোট করে এক পেজে আনার জন্য)
   const [printScale, setPrintScale] = useState('100');
+
+  // Squeezes the sheet in from the left and right edges. 100 = full width,
+  // lower leaves a wider blank margin on both sides.
+  const [sideScale, setSideScale] = useState('100');
 
   // ⭐ স্টেট: রঙিন / সাদা-কালো প্রিন্ট
   const [colorMode, setColorMode] = useState('color');
@@ -357,6 +381,7 @@ const MarkSheet = () => {
     dob: false,
     registration: true,
     admission: true,
+    totalStudents: true,
   });
 
   // ⭐ নতুন স্টেট: ড্রপডাউন ওপেন/ক্লোজ
@@ -364,6 +389,17 @@ const MarkSheet = () => {
 
   // Toolbar popover holding the three size sliders.
   const [isSizeDropdownOpen, setIsSizeDropdownOpen] = useState(false);
+
+  // Report 2 — printing onto a sheet the press has already printed.
+  // The three offsets move the exam line, the data block and the signature
+  // row separately, so each can be lined up with the paper.
+  const [isPressDropdownOpen, setIsPressDropdownOpen] = useState(false);
+  // Takes the institution block off the preview too, so the screen shows
+  // what the press-printed paper will look like
+  const [pressHidePreview, setPressHidePreview] = useState(true);
+  const [pressExamOffset, setPressExamOffset] = useState('0');
+  const [pressBodyOffset, setPressBodyOffset] = useState('0');
+  const [pressSignOffset, setPressSignOffset] = useState('0');
 
   // Template strip under the filter row — every design at a glance,
   // so one can be picked without opening the settings modal.
@@ -375,7 +411,9 @@ const MarkSheet = () => {
   const [previewTemplateId, setPreviewTemplateId] = useState(null);
 
   // ⭐ চেক করা হচ্ছে কয়টি ফিল্ড সিলেক্ট করা আছে
-  const checkedCount = Object.values(studentInfoFields).filter(Boolean).length;
+  const checkedCount = Object.entries(studentInfoFields).filter(
+    ([key, val]) => key !== 'totalStudents' && Boolean(val)
+  ).length;
 
   const {
     data: reportData,
@@ -392,13 +430,14 @@ const MarkSheet = () => {
   const { data: savedSettings } = useGetMarkSheetSettingsQuery();
   const [saveMarkSheetSettings, { isLoading: isSavingSettings, isError: isSaveError }] =
     useSaveMarkSheetSettingsMutation();
-  const methods = useForm();
+  const methods = useForm({ defaultValues: { LanguageID: 1 } });
   const { control, handleSubmit, setValue } = methods;
 
   const selectedReportID = useWatch({ control, name: 'ReportID' });
   const sessionID = useWatch({ control, name: 'SessionID' });
   const examID = useWatch({ control, name: 'ExamID' });
   const SubClassID = useWatch({ control, name: 'SubClassID' });
+  const languageID = useWatch({ control, name: 'LanguageID' });
 
   const { data: examNameData } = useGetExamFilterExamsQuery(
     { SessionID: sessionID },
@@ -417,6 +456,26 @@ const MarkSheet = () => {
     UserCode1: appliedUserCode1 || undefined,
     UserCode2: appliedUserCode2 || undefined,
   };
+
+  // Report 2 is the press-printed mark sheet. It always uses the Classic
+  // Traditional design (template-8), because the blocks that print are
+  // positioned for that one sheet; picking another design here would put
+  // them in the wrong place on the pre-printed paper.
+  const PRESS_TEMPLATE_ID = 'template-8';
+  const isPressReport = Number(selectedReportID) === 2;
+  const activeTemplate = isPressReport ? PRESS_TEMPLATE_ID : selectedTemplate;
+
+  const pressProps = {
+    pressPrint: isPressReport,
+    pressHidePreview,
+    pressExamOffset: Number(pressExamOffset) || 0,
+    pressBodyOffset: Number(pressBodyOffset) || 0,
+    pressSignOffset: Number(pressSignOffset) || 0,
+  };
+
+  // 1 = Bangla, 2 = Arabic, 3 = English. Empty select means Bangla.
+  // The API always sends all three, so this only picks which one prints.
+  const sheetLanguage = Number(languageID) || 1;
 
   const hasMarkSheetParams = !!params.sessionid && !!params.examid && !!params.classid;
 
@@ -452,6 +511,9 @@ const MarkSheet = () => {
       if (!event.target.closest('.size-dropdown-container')) {
         setIsSizeDropdownOpen(false);
       }
+      if (!event.target.closest('.press-dropdown-container')) {
+        setIsPressDropdownOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -466,6 +528,12 @@ const MarkSheet = () => {
     if (s.templateId) setSelectedTemplate(s.templateId);
     if (s.showDate !== null && s.showDate !== undefined) setShowDate(Boolean(s.showDate));
     if (s.showSignature !== null && s.showSignature !== undefined) setShowSignature(Boolean(s.showSignature));
+    if (s.najemShowSign !== null && s.najemShowSign !== undefined) setNajemShowSign(Boolean(s.najemShowSign));
+    if (s.najemShowName !== null && s.najemShowName !== undefined) setNajemShowName(Boolean(s.najemShowName));
+    if (s.najemShowDate !== null && s.najemShowDate !== undefined) setNajemShowDate(Boolean(s.najemShowDate));
+    if (s.principalShowSign !== null && s.principalShowSign !== undefined) setPrincipalShowSign(Boolean(s.principalShowSign));
+    if (s.principalShowName !== null && s.principalShowName !== undefined) setPrincipalShowName(Boolean(s.principalShowName));
+    if (s.principalShowDate !== null && s.principalShowDate !== undefined) setPrincipalShowDate(Boolean(s.principalShowDate));
     if (s.showClassTeacherSign !== null && s.showClassTeacherSign !== undefined) setShowClassTeacherSign(Boolean(s.showClassTeacherSign));
     if (s.showGuardianSign !== null && s.showGuardianSign !== undefined) setShowGuardianSign(Boolean(s.showGuardianSign));
     if (s.principalName) setPrincipalName(s.principalName);
@@ -474,10 +542,15 @@ const MarkSheet = () => {
     if (s.orientation) setOrientation(s.orientation);
     if (s.colorMode) setColorMode(s.colorMode);
     if (s.printScale) setPrintScale(String(s.printScale));
+    if (s.sideScale) setSideScale(String(s.sideScale));
     if (s.fontScale) setFontScale(String(s.fontScale));
     if (s.headerScale) setHeaderScale(String(s.headerScale));
     if (s.rowGapScale) setRowGapScale(String(s.rowGapScale));
     if (s.contentFontScale) setContentFontScale(String(s.contentFontScale));
+    if (s.pressHidePreview !== null && s.pressHidePreview !== undefined) setPressHidePreview(Boolean(s.pressHidePreview));
+    if (s.pressExamOffset !== null && s.pressExamOffset !== undefined) setPressExamOffset(String(s.pressExamOffset));
+    if (s.pressBodyOffset !== null && s.pressBodyOffset !== undefined) setPressBodyOffset(String(s.pressBodyOffset));
+    if (s.pressSignOffset !== null && s.pressSignOffset !== undefined) setPressSignOffset(String(s.pressSignOffset));
     if (s.studentInfoFields && typeof s.studentInfoFields === 'object') {
       setStudentInfoFields((prev) => ({ ...prev, ...s.studentInfoFields }));
     }
@@ -485,15 +558,17 @@ const MarkSheet = () => {
 
   const shouldShowFields = (fieldName) => {
     switch (selectedReportID) {
+      // Report 2 is the press-printed mark sheet — same filters as report 1,
+      // only the sheet it prints onto is different.
       case 1:
-        return ['ReportID', 'SessionID', 'ExamID', 'SubClassID', 'UserCode'].includes(fieldName);
       case 2:
+        return ['ReportID', 'LanguageID', 'SessionID', 'ExamID', 'SubClassID', 'UserCode'].includes(fieldName);
       case 3:
       case 4:
       case 5:
-        return ['ReportID', 'SessionID', 'ExamID', 'SubClassID'].includes(fieldName);
+        return ['ReportID', 'LanguageID', 'SessionID', 'ExamID', 'SubClassID'].includes(fieldName);
       case 6:
-        return ['ReportID', 'SessionID', 'ExamID'].includes(fieldName);
+        return ['ReportID', 'LanguageID', 'SessionID', 'ExamID'].includes(fieldName);
       default:
         return false;
     }
@@ -537,6 +612,12 @@ const MarkSheet = () => {
         templateId: selectedTemplate,
         showDate,
         showSignature,
+        najemShowSign,
+        najemShowName,
+        najemShowDate,
+        principalShowSign,
+        principalShowName,
+        principalShowDate,
         showClassTeacherSign,
         showGuardianSign,
         principalName,
@@ -545,10 +626,15 @@ const MarkSheet = () => {
         orientation,
         colorMode,
         printScale: Number(printScale),
+        sideScale: Number(sideScale),
         fontScale: Number(fontScale),
         headerScale: Number(headerScale),
         rowGapScale: Number(rowGapScale),
         contentFontScale: Number(contentFontScale),
+        pressHidePreview,
+        pressExamOffset: Number(pressExamOffset),
+        pressBodyOffset: Number(pressBodyOffset),
+        pressSignOffset: Number(pressSignOffset),
         studentInfoFields,
       }).unwrap();
       setIsSettingsOpen(false);
@@ -587,7 +673,7 @@ const MarkSheet = () => {
     return (
       <MarkSheetPdf 
         data={data} 
-        templateId={selectedTemplate} 
+        templateId={activeTemplate} 
         showDate={showDate}
         showSignature={showSignature}
         principalName={principalName}
@@ -598,14 +684,49 @@ const MarkSheet = () => {
         colorMode={colorMode}
         showClassTeacherSign={showClassTeacherSign} // ⭐ নতুন প্রপস
         showGuardianSign={showGuardianSign} // ⭐ নতুন প্রপস
+        najemShowSign={najemShowSign}
+        najemShowName={najemShowName}
+        najemShowDate={najemShowDate}
+        principalShowSign={principalShowSign}
+        principalShowName={principalShowName}
+        principalShowDate={principalShowDate}
         headerScale={headerScale}
         contentFontScale={contentFontScale}
         rowGapScale={rowGapScale}
+        language={sheetLanguage}
+        {...pressProps}
       />
     );
   };
 
   const canPrint = hasMarkSheetParams && !!data && !isMarkSheetBusy && !isMarkSheetError;
+
+  // Passed to every miniature so a card shows the design with the
+  // settings actually in force, not a generic version of it.
+  const miniProps = {
+    data,
+    showDate,
+    showSignature,
+    principalName,
+    najemName,
+    paperSize: 'A4',
+    orientation: 'portrait',
+    studentInfoFields,
+    colorMode,
+    showClassTeacherSign,
+    showGuardianSign,
+    najemShowSign,
+    najemShowName,
+    najemShowDate,
+    principalShowSign,
+    principalShowName,
+    principalShowDate,
+    headerScale,
+    contentFontScale,
+    rowGapScale,
+    language: sheetLanguage,
+    ...pressProps,
+  };
 
   return (
     <div className="font-SolaimanLipi space-y-4 bg-transparent max-w-full overflow-x-hidden">
@@ -617,6 +738,18 @@ const MarkSheet = () => {
         @media print {
           #mark-sheet-print-area { zoom: ${Number(printScale) / 100}; }
         }
+        ${Number(sideScale) === 100 ? '' : `
+        #mark-sheet-print-area .marksheet-page {
+          padding-left: ${(100 - Number(sideScale)) / 2}% !important;
+          padding-right: ${(100 - Number(sideScale)) / 2}% !important;
+        }
+        /* The subject tables carry a min-width on screen (print already
+           clears it). Without lifting it the table stops shrinking and
+           pushes back out through the margin we just made, so the preview
+           would stop matching the print. */
+        #mark-sheet-print-area .marksheet-page table {
+          min-width: 0 !important;
+        }`}
       `}</style>
 
       {/* ================= মূল কন্টেন্ট এরিয়া ================= */}
@@ -629,7 +762,7 @@ const MarkSheet = () => {
               <FormProvider {...methods}>
                 <form
                   onSubmit={handleSubmit(onSubmit)}
-                  className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 items-end"
+                  className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-[repeat(5,minmax(0,1fr))_minmax(0,1.7fr)_auto] gap-3 items-end"
                 >
                   <DefaultSelect
                     label={translate('Report')}
@@ -690,22 +823,35 @@ const MarkSheet = () => {
                     />
                   )}
 
+                  {shouldShowFields('LanguageID') && (
+                    <DefaultSelect
+                      label="ভাষা"
+                      nameField="name"
+                      registerKey="LanguageID"
+                      valueField="id"
+                      options={languageResultReport}
+                      type="number"
+                      defaultSelect={false}
+                    />
+                  )}
+
                   {shouldShowFields('UserCode') && (
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-2 sm:col-span-2 xl:col-span-1 xl:col-start-6">
                       <DefaultInput registerKey="UserCode1" label="আইডি থেকে" />
                       <DefaultInput registerKey="UserCode2" label="আইডি পর্যন্ত" />
                     </div>
                   )}
 
                   {/* ⭐ রিপোর্ট তৈরি এবং সেটিংস বাটন */}
-                  <div className="flex items-center gap-2 w-full">
+                  <div className="flex items-center gap-2 w-full min-w-0 sm:col-span-2 xl:col-span-1 xl:col-start-7">
                     <button
                       type="submit"
-                      className={`w-auto px-6 flex items-center justify-center gap-1.5 h-[44px] rounded-lg text-[13px] font-bold ${C.primary} shadow-sm transition`}
+                      className={`w-auto px-5 flex items-center justify-center gap-1.5 h-[44px] shrink-0 rounded-lg text-[13px] font-bold ${C.primary} shadow-sm transition`}
                     >
                       View
                     </button>
                     
+                    {!isPressReport && (
                     <button
                       type="button"
                       onClick={() => setIsTemplatePanelOpen((open) => !open)}
@@ -716,14 +862,15 @@ const MarkSheet = () => {
                       }`}
                       title="সব টেমপ্লেট দেখে নির্বাচন করুন"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 5h16v14H4zM4 9h16M9 9v10" />
                       </svg>
-                      টেমপ্লেট
-                      <svg className={`w-3.5 h-3.5 transition-transform ${isTemplatePanelOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <span className="whitespace-nowrap">টেমপ্লেট</span>
+                      <svg className={`w-3.5 h-3.5 shrink-0 transition-transform ${isTemplatePanelOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                       </svg>
                     </button>
+                    )}
 
                     <button
                       type="button"
@@ -764,7 +911,7 @@ const MarkSheet = () => {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-12">
                   {MARK_SHEET_TEMPLATES.map((tpl) => {
                     const isSelected = selectedTemplate === tpl.id;
                     return (
@@ -779,11 +926,11 @@ const MarkSheet = () => {
                             : 'border-slate-200 bg-white hover:border-slate-300'
                         }`}
                       >
-                        <div className="h-20 w-full">
-                          <TemplateThumb id={tpl.id} />
+                        <div className="flex justify-center">
+                          <TemplateMiniature templateId={tpl.id} width={75} {...miniProps} />
                         </div>
                         <div className="mt-1.5 flex items-center justify-between gap-1">
-                          <span className={`truncate text-[11px] font-bold ${isSelected ? 'text-[#6D28D9]' : 'text-slate-600'}`}>
+                          <span className={`truncate text-[10px] font-bold leading-tight ${isSelected ? 'text-[#6D28D9]' : 'text-slate-600'}`}>
                             {tpl.name}
                           </span>
                           {isSelected && (
@@ -906,6 +1053,18 @@ const MarkSheet = () => {
                           />
                           <span className="text-sm font-medium text-slate-700">ভর্তি নং</span>
                         </label>
+                        {/* ⭐ Separate section — not part of the 5-field limit */}
+                        <div className="pt-2 border-t border-slate-100">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input 
+                              type="checkbox" 
+                              checked={studentInfoFields.totalStudents !== false} 
+                              onChange={(e) => setStudentInfoFields(prev => ({ ...prev, totalStudents: e.target.checked }))} 
+                              className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500" 
+                            />
+                            <span className="text-sm font-medium text-slate-700">মোট পরীক্ষার্থীর সংখ্যা</span>
+                          </label>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -920,14 +1079,31 @@ const MarkSheet = () => {
                   <option value="A5">A5</option>
                 </select>
 
-                <select
-                  value={orientation}
-                  onChange={(e) => setOrientation(e.target.value)}
-                  className="h-8 rounded-lg border border-[#DDD6FE] bg-white px-2 py-1 text-sm font-medium text-slate-700 outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
-                >
-                  <option value="portrait">Portrait</option>
-                  <option value="landscape">Landscape</option>
-                </select>
+                {/* কাগজ লম্বা নাকি আড়াআড়ি — ছবি দেখেই বোঝা যায় */}
+                <div className="flex h-8 items-center gap-0.5 rounded-lg border border-[#DDD6FE] bg-white p-0.5">
+                  {[
+                    { value: 'portrait', title: 'লম্বা কাগজ (Portrait)', x: 7, y: 3, w: 10, h: 18 },
+                    { value: 'landscape', title: 'আড়াআড়ি কাগজ (Landscape)', x: 3, y: 7, w: 18, h: 10 },
+                  ].map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      title={opt.title}
+                      aria-label={opt.title}
+                      aria-pressed={orientation === opt.value}
+                      onClick={() => setOrientation(opt.value)}
+                      className={`flex h-7 w-8 items-center justify-center rounded-md transition ${
+                        orientation === opt.value
+                          ? 'bg-[#F5F3FF] text-[#7C3AED] ring-1 ring-[#7C3AED]'
+                          : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600'
+                      }`}
+                    >
+                      <svg className="h-[18px] w-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <rect x={opt.x} y={opt.y} width={opt.w} height={opt.h} rx="1.5" strokeWidth="2" />
+                      </svg>
+                    </button>
+                  ))}
+                </div>
 
                 {/* ⭐ রঙিন / সাদা-কালো */}
                 <select
@@ -940,12 +1116,21 @@ const MarkSheet = () => {
                   <option value="bw">সাদা-কালো</option>
                 </select>
 
-                {/* ⭐ প্রিন্ট স্কেল — subject বেশি হলে ছোট করে এক পেজে আনার জন্য */}
+                {/* ⭐ প্রিন্ট স্কেল — subject বেশি হলে ছোট করে এক পেজে আনার জন্য।
+                    আইকনটা বোঝায় পুরো পাতাটাই ছোট-বড় হচ্ছে। */}
+                <div
+                  title="পুরো পাতা ছোট/বড় — বিষয় বেশি হয়ে দুই পাতায় চলে গেলে কমিয়ে দিন"
+                  className="flex h-8 items-center gap-1 rounded-lg border border-[#DDD6FE] bg-white pl-2 focus-within:border-[#7C3AED] focus-within:ring-1 focus-within:ring-[#7C3AED]"
+                >
+                  <svg className="h-4 w-4 shrink-0 text-[#7C3AED]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="18" height="18" rx="2" strokeWidth="2" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 8h4M8 8v4M16 16h-4M16 16v-4" />
+                  </svg>
                 <select
                   value={printScale}
                   onChange={(e) => setPrintScale(e.target.value)}
-                  title="প্রিন্ট সাইজ — subject বেশি হলে ছোট করুন"
-                  className="h-8 rounded-lg border border-[#DDD6FE] bg-white px-2 py-1 text-sm font-medium text-slate-700 outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
+                  aria-label="পুরো পাতার আকার"
+                  className="h-full rounded-r-lg border-0 bg-transparent pl-0 pr-2 text-sm font-medium text-slate-700 outline-none focus:ring-0"
                 >
                   <option value="100">১০০%</option>
                   <option value="95">৯৫%</option>
@@ -954,6 +1139,92 @@ const MarkSheet = () => {
                   <option value="80">৮০%</option>
                   <option value="75">৭৫%</option>
                 </select>
+                </div>
+
+                {/* ⭐ দুই পাশ থেকে চেপে আনা — কাগজের বাঁ ও ডান কিনারায় কতটুকু
+                    ফাঁকা থাকবে। পাতার মাপ বদলায় না, ভিতরের লেখা ভিতরে আসে। */}
+                <div
+                  title="দুই পাশ থেকে চেপে আনুন — বাঁ ও ডান কিনারায় ফাঁকা বাড়ে"
+                  className="flex h-8 items-center gap-1 rounded-lg border border-[#DDD6FE] bg-white pl-2 focus-within:border-[#7C3AED] focus-within:ring-1 focus-within:ring-[#7C3AED]"
+                >
+                  <svg className="h-4 w-4 shrink-0 text-[#7C3AED]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4v16M21 4v16" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 12h4m0 0L8.5 9.5M11 12l-2.5 2.5M17 12h-4m0 0l2.5-2.5M13 12l2.5 2.5" />
+                  </svg>
+                  <select
+                    value={sideScale}
+                    onChange={(e) => setSideScale(e.target.value)}
+                    aria-label="দুই পাশের ফাঁক"
+                    className="h-full rounded-r-lg border-0 bg-transparent pl-0 pr-2 text-sm font-medium text-slate-700 outline-none focus:ring-0"
+                  >
+                    <option value="100">১০০%</option>
+                    <option value="96">৯৬%</option>
+                    <option value="92">৯২%</option>
+                    <option value="88">৮৮%</option>
+                    <option value="84">৮৪%</option>
+                    <option value="80">৮০%</option>
+                  </select>
+                </div>
+
+                {/* Block offsets — report 2 only, same three controls as in the settings modal */}
+                {isPressReport && (
+                  <div className="relative press-dropdown-container">
+                    <button
+                      type="button"
+                      onClick={() => setIsPressDropdownOpen(!isPressDropdownOpen)}
+                      title="ঘর উপর-নিচ"
+                      className="flex items-center gap-2 h-8 rounded-lg border border-[#DDD6FE] bg-white px-3 py-1 text-sm font-medium text-slate-700 outline-none hover:bg-slate-50 focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
+                    >
+                      <svg className="w-4 h-4 text-[#7C3AED]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m0-16l-3 3m3-3l3 3m-3 13l-3-3m3 3l3-3" />
+                      </svg>
+                      ঘর সরান
+                      <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+
+                    {isPressDropdownOpen && (
+                      <div className="absolute right-0 top-full mt-1 w-80 bg-white border border-slate-200 shadow-xl rounded-xl p-3 z-50 space-y-2.5">
+                        <p className="px-1 text-[11px] leading-snug text-slate-500">
+                          প্রেসে ছাপা কাগজে শুধু এই তিনটা ঘর ছাপা হবে। কাগজের সাথে মিলিয়ে আলাদা আলাদা উপরে-নিচে সরান।
+                        </p>
+                        <label className="flex items-start gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={pressHidePreview}
+                          onChange={(e) => setPressHidePreview(e.target.checked)}
+                          className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
+                        />
+                        <span>
+                          <span className="block text-[13px] font-semibold text-slate-700">প্রিভিউতেও হেডার লুকান</span>
+                          <span className="block text-[11px] leading-snug text-slate-500">
+                            প্রতিষ্ঠানের নাম, ঠিকানা ও শিক্ষাবর্ষ পর্দাতেও সরে যাবে — ছাপা কাগজ যেমন দেখাবে ঠিক তেমন। জায়গাটা ফাঁকা থেকে যায়, বর্ডারটা তখন কাটা দাগে দেখায়।
+                          </span>
+                        </span>
+                      </label>
+                      <OffsetSlider
+                        label="পরীক্ষার নামের লাইন"
+                        value={pressExamOffset}
+                        onChange={setPressExamOffset}
+                        hint="মাইনাস = উপরে, প্লাস = নিচে।"
+                      />
+                      <OffsetSlider
+                        label="মাঝের ডাটা ব্লক"
+                        value={pressBodyOffset}
+                        onChange={setPressBodyOffset}
+                        hint="পরীক্ষার্থীর তথ্য, নম্বর বিভাজন, ফলাফলের টেবিল ও মন্তব্য — একসাথে।"
+                      />
+                      <OffsetSlider
+                        label="স্বাক্ষরের সারি"
+                        value={pressSignOffset}
+                        onChange={setPressSignOffset}
+                        hint="নিচের দুই স্বাক্ষর ও তারিখ।"
+                      />
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Size sliders — the same three controls as in the settings modal */}
                 <div className="relative size-dropdown-container">
@@ -1116,6 +1387,57 @@ const MarkSheet = () => {
 
               </div>
 
+              {/* প্রেসে ছাপা মার্কশিটের ঘর — রিপোর্ট ২ বাছলে দেখা যায় */}
+              {isPressReport && (
+                <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                  <h4 className="text-sm font-bold text-slate-700 mb-1 flex items-center gap-2">
+                    <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m0-16l-3 3m3-3l3 3m-3 13l-3-3m3 3l3-3" />
+                    </svg>
+                    ঘর উপর-নিচ করুন
+                  </h4>
+                  <p className="mb-3 text-[12px] leading-snug text-slate-600">
+                    প্রেসে ছাপা কাগজে প্রতিষ্ঠানের নাম, ঠিকানা, শিক্ষাবর্ষ ও বর্ডার আগে থেকেই আছে — তাই ওগুলো আর ছাপা হয় না।
+                    শুধু নিচের তিনটা ঘর বসে। কাগজ হাতে নিয়ে মিলিয়ে নিন।
+                  </p>
+
+                  <div className="space-y-3">
+                      <label className="flex items-start gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={pressHidePreview}
+                          onChange={(e) => setPressHidePreview(e.target.checked)}
+                          className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
+                        />
+                        <span>
+                          <span className="block text-[13px] font-semibold text-slate-700">প্রিভিউতেও হেডার লুকান</span>
+                          <span className="block text-[11px] leading-snug text-slate-500">
+                            প্রতিষ্ঠানের নাম, ঠিকানা ও শিক্ষাবর্ষ পর্দাতেও সরে যাবে — ছাপা কাগজ যেমন দেখাবে ঠিক তেমন। জায়গাটা ফাঁকা থেকে যায়, বর্ডারটা তখন কাটা দাগে দেখায়।
+                          </span>
+                        </span>
+                      </label>
+                      <OffsetSlider
+                        label="পরীক্ষার নামের লাইন"
+                        value={pressExamOffset}
+                        onChange={setPressExamOffset}
+                        hint="মাইনাস = উপরে, প্লাস = নিচে।"
+                      />
+                      <OffsetSlider
+                        label="মাঝের ডাটা ব্লক"
+                        value={pressBodyOffset}
+                        onChange={setPressBodyOffset}
+                        hint="পরীক্ষার্থীর তথ্য, নম্বর বিভাজন, ফলাফলের টেবিল ও মন্তব্য — একসাথে।"
+                      />
+                      <OffsetSlider
+                        label="স্বাক্ষরের সারি"
+                        value={pressSignOffset}
+                        onChange={setPressSignOffset}
+                        hint="নিচের দুই স্বাক্ষর ও তারিখ।"
+                      />
+                  </div>
+                </div>
+              )}
+
               {/* ⭐ আকারের সেটিংস — তিনটি স্লাইডার, সাথে লাইভ প্রিভিউ */}
               <div className="mb-6 p-4 bg-slate-50 border border-slate-200 rounded-xl">
                 <h4 className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
@@ -1237,6 +1559,19 @@ const MarkSheet = () => {
                     />
                     <span className="text-sm font-medium text-slate-700">ভর্তি নং</span>
                   </label>
+                  {/* ⭐ totalStudents is separate — not part of the 5-field limit */}
+                  <label className="col-span-2 sm:col-span-3 flex items-center gap-2 cursor-pointer pt-3 mt-1 border-t border-slate-200">
+                    <input 
+                      type="checkbox" 
+                      checked={studentInfoFields.totalStudents !== false} 
+                      onChange={(e) => setStudentInfoFields(prev => ({ ...prev, totalStudents: e.target.checked }))} 
+                      className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500" 
+                    />
+                    <span className="text-sm font-medium text-slate-700">
+                      মোট পরীক্ষার্থীর সংখ্যা
+                      <span className="ml-2 text-[10px] text-slate-400 font-normal">(৫টির সীমার বাইরে)</span>
+                    </span>
+                  </label>
                 </div>
               </div>
 
@@ -1268,6 +1603,74 @@ const MarkSheet = () => {
                       />
                       <span className="text-sm font-medium text-slate-700">স্বাক্ষর (ছবি) দেখাবে</span>
                     </label>
+
+                    {/* দুই স্বাক্ষরের তিনটা করে অংশ — আলাদা আলাদা */}
+                    <div className="mt-1 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 rounded-lg border border-slate-200 bg-white p-3">
+                      <p className="sm:col-span-2 text-[12px] font-bold text-slate-500">
+                        নায়েবে তালিমাত ও মুহতামিম — প্রতিটা অংশ আলাদা করে বন্ধ করা যায়
+                      </p>
+                      <div className="space-y-1">
+                        <p className="text-[13px] font-semibold text-slate-700">নায়েবে তালিমাত</p>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={najemShowSign}
+                          onChange={(e) => setNajemShowSign(e.target.checked)}
+                          className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500"
+                        />
+                        <span className="text-sm text-slate-600">স্বাক্ষরের ছবি</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={najemShowName}
+                          onChange={(e) => setNajemShowName(e.target.checked)}
+                          className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500"
+                        />
+                        <span className="text-sm text-slate-600">নাম ও উপরের রেখা</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={najemShowDate}
+                          onChange={(e) => setNajemShowDate(e.target.checked)}
+                          className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500"
+                        />
+                        <span className="text-sm text-slate-600">তারিখ</span>
+                      </label>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-[13px] font-semibold text-slate-700">মুহতামিম</p>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={principalShowSign}
+                          onChange={(e) => setPrincipalShowSign(e.target.checked)}
+                          className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500"
+                        />
+                        <span className="text-sm text-slate-600">স্বাক্ষরের ছবি</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={principalShowName}
+                          onChange={(e) => setPrincipalShowName(e.target.checked)}
+                          className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500"
+                        />
+                        <span className="text-sm text-slate-600">নাম ও উপরের রেখা</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={principalShowDate}
+                          onChange={(e) => setPrincipalShowDate(e.target.checked)}
+                          className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500"
+                        />
+                        <span className="text-sm text-slate-600">তারিখ</span>
+                      </label>
+                      </div>
+                    </div>
+
                     {/* ⭐ নতুন চেকবক্স */}
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input 
@@ -1363,8 +1766,8 @@ const MarkSheet = () => {
                       <p className="text-xs text-slate-500">{tpl.desc}</p>
 
                       {/* Miniature of the design */}
-                      <div className={`mt-3 w-full h-28 rounded-lg border p-1.5 ${isSelected ? 'border-[#DDD6FE] bg-white' : 'border-slate-100 bg-slate-50'}`}>
-                        <TemplateThumb id={tpl.id} />
+                      <div className={`mt-3 flex w-full justify-center rounded-lg border p-1.5 ${isSelected ? 'border-[#DDD6FE] bg-white' : 'border-slate-100 bg-slate-50'}`}>
+                        <TemplateMiniature templateId={tpl.id} width={105} {...miniProps} />
                       </div>
                     </div>
                   );
@@ -1437,15 +1840,23 @@ const MarkSheet = () => {
                     colorMode={colorMode}
                     showClassTeacherSign={showClassTeacherSign}
                     showGuardianSign={showGuardianSign}
+                    najemShowSign={najemShowSign}
+                    najemShowName={najemShowName}
+                    najemShowDate={najemShowDate}
+                    principalShowSign={principalShowSign}
+                    principalShowName={principalShowName}
+                    principalShowDate={principalShowDate}
                     headerScale={headerScale}
                     contentFontScale={contentFontScale}
                     rowGapScale={rowGapScale}
+                    language={sheetLanguage}
+                    {...pressProps}
                   />
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-4 py-8">
-                  <div className="h-[420px] w-[300px] rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
-                    <TemplateThumb id={previewTemplateId} />
+                  <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+                    <TemplateMiniature templateId={previewTemplateId} width={210} {...miniProps} />
                   </div>
                   <p className="text-sm font-medium text-slate-500 text-center">
                     সেশন, পরীক্ষা ও শ্রেণী নির্বাচন করে View দিলে এখানে আসল ডাটা দিয়ে প্রিভিউ দেখা যাবে।

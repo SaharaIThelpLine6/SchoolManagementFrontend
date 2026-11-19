@@ -186,7 +186,7 @@ const Header = () => {
               </svg>
             </button>
             {/* লোগোর উপর ক্লিক করলে প্রতিষ্ঠানের তথ্য পাতায় চলে যাবে */}
-            <Link className='text-center flex flex-col items-center justify-center' to={"/general-info/institution-info"}>
+            <Link className='text-center flex flex-col items-center justify-center' to={"/dashboard/general-info/institution-info"}>
               <img
                 src={logo ? logo : LogoAvater}
                 alt="Logo"

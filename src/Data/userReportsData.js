@@ -122,7 +122,11 @@ export const resultReportsOld = [
 export const markSheetResultReports = [
   {
     ReportID: 1,
-    ReportName: '1. ব্যক্তিগত মার্কসীট',
+    ReportName: '1. মার্কসীট',
+  },
+  {
+    ReportID: 2,
+    ReportName: '2. প্রেসে ছাপা মার্কশিট',
   }
 ];
 
@@ -151,8 +155,8 @@ export const language = [
 ];
 export const languageResultReport = [
   { id: 1, name: 'বাংলা' },
-  { id: 2, name: 'আরবী' },
-  { id: 3, name: 'ইংরেজি' },
+  { id: 2, name: 'ইংরেজি' },
+  { id: 3, name: 'আরবী' },
 ];
 export const examVacationStatus = [
   { id: 1, name: 'পরীক্ষার রুটিন থেকে' },

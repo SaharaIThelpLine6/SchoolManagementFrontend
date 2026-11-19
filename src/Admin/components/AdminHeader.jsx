@@ -152,7 +152,7 @@ const AdminHeader = () => {
                 <path d="M4 18h16" />
               </svg>
             </button>
-            <Link to={"/general-info/institution-info"}>
+            <Link to={"general-info/institution-info"}>
               <img
                 src={DEFAULT_LOGO}
                 alt="Logo"
