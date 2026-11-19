@@ -1,9 +1,11 @@
 import React from "react";
 import bnBijoy2Unicode from "../../utils/conveter";
+import { getResultSummary } from "./jointResultSummary";
 
 const AvgNumberResult = ({ studentResult }) => {
   const jointColumns = studentResult?.jointSourceExams ?? [];
-  
+  const summary = getResultSummary(studentResult);
+
   return (
     <div className="bg-white px-[5px]">
       <div className="flex flex-col items-center">
@@ -162,11 +164,11 @@ const AvgNumberResult = ({ studentResult }) => {
             </div>
             <div className="flex items-center space-x-2">
               <p className="text-[16px]">গড়:</p>
-              <p>{bnBijoy2Unicode(String((studentResult?.Total / studentResult?.averageCondition?.AverageSubsonkha).toFixed(2)))}</p>
+              <p>{bnBijoy2Unicode(String(summary.average))}</p>
             </div>
             <div className="flex items-center space-x-2">
               <p className="text-[16px]">মোট নম্বর:</p>
-              <p>{bnBijoy2Unicode(String(studentResult?.Total))}</p>
+              <p>{bnBijoy2Unicode(String(summary.total))}</p>
             </div>
           </div>
         </div>

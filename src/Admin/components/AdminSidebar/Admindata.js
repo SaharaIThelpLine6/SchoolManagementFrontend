@@ -18,6 +18,12 @@ export const AdminmenuData = [
     icon: 'LuWarehouse',
   },
   {
+    id: '6',
+    name: 'Voice SMS অ্যাকাউন্ট',
+    route: '/admin/voice-sms',
+    icon: 'LuWarehouse',
+  },
+  {
     id: '4',
     name: 'Payment Info',
     route: '/Payment-info',

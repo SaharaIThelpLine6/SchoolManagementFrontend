@@ -17,7 +17,8 @@ const formatElapsed = (milliseconds) => {
   return `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
 };
 
-const VoiceRecording = () => {
+// onSaved(url): সেভ হওয়া অডিওর URL প্যারেন্টকে জানায় (Voice SMS পাঠাতে লাগে)
+const VoiceRecording = ({ onSaved } = {}) => {
   const recorderRef = useRef(null);
   const streamRef = useRef(null);
   const previewUrlRef = useRef(null);
@@ -120,6 +121,7 @@ const VoiceRecording = () => {
     setPreviewUrl(url);
     setAudioFile(file);
     setSavedUrl('');
+    onSaved?.('');
     setCopied(false);
     setError('');
   };
@@ -216,6 +218,7 @@ const VoiceRecording = () => {
     try {
       const response = await uploadVoiceRecording(audioFile).unwrap();
       setSavedUrl(response.url);
+      onSaved?.(response.url);
     } catch (uploadError) {
       setError(uploadError?.data?.error || 'Could not save the recording. Please try again.');
     }

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import bnBijoy2Unicode from "../../utils/conveter";
 import { Buffer } from "buffer";
 import convertBijoyToBengali from "../../utils/uniconveter";
+import { getResultSummary } from "./jointResultSummary";
 const StudentResultAvgPrintView = ({ studentResult }) => {
   const [logo, setLogo] = useState(null);
   const [principal, setPrincipal] = useState(null);
@@ -10,6 +11,10 @@ const StudentResultAvgPrintView = ({ studentResult }) => {
   const user = studentResult?.User || {};
   const averageCondition = studentResult?.averageCondition || {};
   const subjectCount = averageCondition?.SubSonkha || studentResult?.SubSonkha || 0;
+  // Joint result hole onno exam gulor column o print e dekhabe (screen view er moto)
+  const jointColumns = studentResult?.jointSourceExams ?? [];
+  const hasJoint = jointColumns.length > 0;
+  const summary = getResultSummary(studentResult);
   console.log(studentResult);
   
   useEffect(() => {
@@ -125,12 +130,24 @@ const StudentResultAvgPrintView = ({ studentResult }) => {
         <table className="w-full border border-collapse">
           <thead className="border border-black">
             <tr className="border border-b-[2px] border-t-[2px] border-black">
-              <th className="border border-black">ক্রমিক নং</th>
-              <th className="border border-black w-72">বিষয়</th>
-              <th className="border border-black">পূর্ণমান</th>
-              <th className="border border-black">পাশ নম্বর</th>
-              <th className="border border-black">প্রাপ্ত নম্বর</th>
+              <th className="border border-black" rowSpan={hasJoint ? 2 : 1}>ক্রমিক নং</th>
+              <th className="border border-black w-72" rowSpan={hasJoint ? 2 : 1}>বিষয়</th>
+              <th className="border border-black" rowSpan={hasJoint ? 2 : 1}>পূর্ণমান</th>
+              <th className="border border-black" rowSpan={hasJoint ? 2 : 1}>পাশ নম্বর</th>
+              <th className="border border-black" colSpan={1 + jointColumns.length}>প্রাপ্ত নম্বর</th>
             </tr>
+            {hasJoint && (
+              <tr className="border border-b-[2px] border-black">
+                <th className="border border-black px-1 text-[13px]">
+                  {bnBijoy2Unicode(studentResult?.Exam?.ExamName ?? studentResult?.ExamName ?? "")}
+                </th>
+                {jointColumns.map((exam) => (
+                  <th key={exam.ExamID} className="border border-black px-1 text-[13px]">
+                    {bnBijoy2Unicode(exam.ExamName ?? "")}
+                  </th>
+                ))}
+              </tr>
+            )}
           </thead>
           <tbody className="text-center">
             {Array.from({ length: subjectCount }).map((_, index) => {
@@ -163,6 +180,13 @@ const StudentResultAvgPrintView = ({ studentResult }) => {
                   <td className="border border-black pl-2">
                     {bnBijoy2Unicode(String(studentResult?.[`SubVal${index + 1}`] ?? ""))}
                   </td>
+                  {jointColumns.map((exam) => (
+                    <td key={exam.ExamID} className="border border-black pl-2">
+                      {bnBijoy2Unicode(String(
+                        exam.MarksByUserID?.[String(studentResult?.UserID)]?.[averageCondition?.[`SubjectID${index + 1}`]] ?? ""
+                      ))}
+                    </td>
+                  ))}
                 </tr>
               );
             })}
@@ -182,17 +206,10 @@ const StudentResultAvgPrintView = ({ studentResult }) => {
                 মেধা স্থান : {bnBijoy2Unicode(String(studentResult?.Positions ?? studentResult?.Position ?? 0))}
               </td>
               <td>
-                গড় : {bnBijoy2Unicode(
-                  String(
-                    (
-                      Number(studentResult?.Total || 0) /
-                      Number(averageCondition?.AverageSubsonkha || subjectCount || 1)
-                    ).toFixed(2)
-                  )
-                )}
+                গড় : {bnBijoy2Unicode(String(summary.average))}
               </td>
               <td>
-                মোট নম্বর : {bnBijoy2Unicode(String(studentResult?.Total))}
+                মোট নম্বর : {bnBijoy2Unicode(String(summary.total))}
               </td>
             </tr>
           </tbody>
