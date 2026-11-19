@@ -210,6 +210,8 @@ const DashboardDesignNew = () => {
 
   const classWiseStudent =
     studentclassData?.classWiseStudent || [];
+  const subClassWiseStudent =
+    studentclassData?.subClassWiseStudent || [];
 
 
   /* ---------- Payment Transaction Query ---------- */
@@ -832,6 +834,7 @@ const DashboardDesignNew = () => {
           <div className="md:col-span-1 col-span-1">
             <ClassRoutine
               data={classWiseStudent}
+              subClassData={subClassWiseStudent}
               isLoading={isLoading}
               isError={isError}
             />

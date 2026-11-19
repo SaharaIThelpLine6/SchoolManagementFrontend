@@ -59,13 +59,13 @@ export const menuData = [
         icon: 'SubCard'
       },
 
-      {
-        id: '7',
-        name: 'User Image',
-        route: 'general-info/user-image',
-        subMenu: false,
-        icon: 'SubImage'
-      },
+      // {
+      //   id: '7',
+      //   name: 'User Image',
+      //   route: 'general-info/user-image',
+      //   subMenu: false,
+      //   icon: 'SubImage'
+      // },
       {
         id: '8',
         name: 'Bulk Image',
