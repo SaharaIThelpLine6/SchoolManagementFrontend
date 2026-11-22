@@ -204,6 +204,11 @@ import VoiceSMS from '../pages/VoiceSMS';
 import JointResultEntry from '../pages/JointResultEntry';
 import JointResultList from '../pages/JointResultList';
 import AdmissionLists from '../components/Tables/AdmissionLists';
+import { SalaryStructurePage } from '../pages/teacher/SalaryStructurePage';
+import { SalaryHeadsPage } from '../pages/teacher/SalaryHeadPage';
+import { GenerateSalaryPage } from '../pages/teacher/GenerateSalaryPage';
+import { PaymentsPage } from '../pages/teacher/PaymentsPage';
+import { ReportsPage } from '../pages/teacher/ReportsPage';
 
 const Router = createBrowserRouter([
   {
@@ -755,16 +760,66 @@ const Router = createBrowserRouter([
                   </RequirePermission>
                 ),
               },
-              {
-                path: 'payRole',
-                element: (
-                  <RequirePermission
-                    permissionId={permissionsDataList.teacher_payroll}
-                  >
-                    <PayRole pageTitle="Pay Role" />
-                  </RequirePermission>
-                ),
-              },
+              // {
+              //   path: 'payRole',
+              //   element: (
+              //     // <RequirePermission
+              //     //   permissionId={permissionsDataList.teacher_payroll}
+              //     // >
+              //     <SalaryHeadsPage pageTitle="Pay Role" />
+              //     // </RequirePermission>
+              //   ),
+              // },
+              // {
+              //   path: 'payStructure',
+              //   element: (
+              //     // <RequirePermission
+              //     //   permissionId={permissionsDataList.teacher_payroll}
+              //     // >
+              //     <SalaryStructurePage pageTitle="Pay Role" />
+              //     // </RequirePermission>
+              //   ),
+              // },
+              // {
+              //   path: 'monthlySalary',
+              //   element: (
+              //     // <RequirePermission
+              //     //   permissionId={permissionsDataList.teacher_payroll}
+              //     // >
+              //     <GenerateSalaryPage pageTitle="Pay Role" />
+              //     // </RequirePermission>
+              //   ),
+              // },
+              // {
+              //   path: 'salaryPayment',
+              //   element: (
+              //     // <RequirePermission
+              //     //   permissionId={permissionsDataList.teacher_payroll}
+              //     // >
+              //     <PaymentsPage pageTitle="Pay Role" />
+              //     // </RequirePermission>
+              //   ),
+              // },
+              // {
+              //   path: 'salaryReport',
+              //   element: (
+              //     // <RequirePermission
+              //     //   permissionId={permissionsDataList.teacher_payroll}
+              //     // >
+              //     <ReportsPage pageTitle="Pay Role" />
+              //     // </RequirePermission>
+              //   ),
+              // },
+              // {
+              //   path: 'payRole',
+              //   element: (
+              //     <RequirePermission
+              //       permissionId={permissionsDataList.teacher_payroll}
+              //     >
+              //       <PayRole pageTitle="Pay Role" />
+              //     </RequirePermission>
+              //   ),
+              // },
               {
                 path: 'pRName',
                 element: (
@@ -1554,126 +1609,126 @@ const Router = createBrowserRouter([
 
     ],
   },
-  {
-    path: '/:schoolid/rg',
-    element: <UserRegistration />,
-  },
+  // {
+  //   path: '/:schoolid/rg',
+  //   element: <UserRegistration />,
+  // },
   {
     path: '/donation_homepage',
     element: <DonationHomePage />,
   },
-  {
-    path: '/:schoolid/forget_pass',
-    element: <UserForgetPassword />,
-  },
-  {
-    path: '/:schoolid/login',
-    element: <UserLogin />,
-  },
-  {
-    path: '/:schoolid/dashboard',
-    element: <UserPanel />,
-    children: [
-      {
-        index: true,
-        element: <Dashboard pageTitle="Dashboard" />,
-      },
-      {
-        path: 'user_reports',
-        element: <StudentReports pageTitle="Student Reports" />,
-      },
-      {
-        path: 'student-payment-history',
-        element: <StudentPaymentHistory pageTitle="Student Payment History" />,
-      },
-      {
-        path: 'student-payment-history/:id',
-        element: (
-          <StudentPaymentHistoryDetails pageTitle="Student Payment History Details" />
-        ),
-      },
-      {
-        path: 'profile-details',
-        element: <UserProfile pageTitle="Student Payment History Details" />,
-      },
-      {
-        path: 'student-results',
-        element: <StudentResults pageTitle="Student Results" />,
-      },
-      {
-        path: 'student-results/:examId/:subClassId/:sessionId/:userId',
-        element: <StudentResultsView pageTitle="Student Results View" />,
-      },
-      {
-        path: 'exam-routine',
-        element: <ExamRoutine pageTitle="Exam Routine" />,
-      },
-      {
-        path: 'online-admission',
-        element: <OnlineAdmissionStudent pageTitle="Online Admission" />,
-      },
-      {
-        path: 'institution-contact',
-        element: <InstitutionInfoUserPanel pageTitle="Institution Contact" />,
-      },
-      {
-        path: 'reports',
-        element: <Reports pageTitle="Teacher Contact" />,
-      },
-      {
-        path: 'reports-list',
-        element: <ReportsList pageTitle="Reports List" />,
-      },
-      {
-        path: 'notice',
-        element: <UserPanelNotice pageTitle="Notice List" />,
-      },
-      {
-        path: 'class-routine',
-        element: <ClassRoutine pageTitle="Class Routine" />,
-      },
-      {
-        path: 'video-tutorial',
-        element: <VideoTutorialLink pageTitle="Video Tutorial" />,
-      },
-      {
-        path: 'home-work',
-        element: <HomeWorkUserPanel pageTitle="Home Work" />,
-      },
-      {
-        path: 'home-work-history',
-        element: <HomeWorkHistoryUserPanel pageTitle="Home Work History" />,
-      },
-      {
-        path: 'home-work-history/:subjectName',
-        element: <SubjectHistoryUserPanel pageTitle="Subject History" />,
-      },
-      {
-        path: 'monthly-fee',
-        element: <StudentFeeUserPanel pageTitle="Month Fee" />,
-      },
-      // {
-      //   path: 'payment-success',
-      //   element: <PaymentSuccess pageTitle="Payment Success" />,
-      // },
-      {
-        path: 'payment-fail',
-        element: <PaymentFail pageTitle="Payment Fail" />,
-      },
-      {
-        path: 'payment-cancel',
-        element: <PaymentCancel pageTitle="Payment Cancel" />,
-      },
-      {
-        path: 'payment-success',
-        element: <OnlinePaymentInvoiceDownload pageTitle="Payment Invoice" />,
-      },
-      // {
-      //   path: 'all-invoices',
-      //   element: <AllUserPanelInvoice pageTitle="All Invoice" />,
-      // },
-    ],
-  },
+  // {
+  //   path: '/:schoolid/forget_pass',
+  //   element: <UserForgetPassword />,
+  // },
+  // {
+  //   path: '/:schoolid/login',
+  //   element: <UserLogin />,
+  // },
+  // {
+  //   path: '/:schoolid/dashboard',
+  //   element: <UserPanel />,
+  //   children: [
+  //     {
+  //       index: true,
+  //       element: <Dashboard pageTitle="Dashboard" />,
+  //     },
+  //     {
+  //       path: 'user_reports',
+  //       element: <StudentReports pageTitle="Student Reports" />,
+  //     },
+  //     {
+  //       path: 'student-payment-history',
+  //       element: <StudentPaymentHistory pageTitle="Student Payment History" />,
+  //     },
+  //     {
+  //       path: 'student-payment-history/:id',
+  //       element: (
+  //         <StudentPaymentHistoryDetails pageTitle="Student Payment History Details" />
+  //       ),
+  //     },
+  //     {
+  //       path: 'profile-details',
+  //       element: <UserProfile pageTitle="Student Payment History Details" />,
+  //     },
+  //     {
+  //       path: 'student-results',
+  //       element: <StudentResults pageTitle="Student Results" />,
+  //     },
+  //     {
+  //       path: 'student-results/:examId/:subClassId/:sessionId/:userId',
+  //       element: <StudentResultsView pageTitle="Student Results View" />,
+  //     },
+  //     {
+  //       path: 'exam-routine',
+  //       element: <ExamRoutine pageTitle="Exam Routine" />,
+  //     },
+  //     {
+  //       path: 'online-admission',
+  //       element: <OnlineAdmissionStudent pageTitle="Online Admission" />,
+  //     },
+  //     {
+  //       path: 'institution-contact',
+  //       element: <InstitutionInfoUserPanel pageTitle="Institution Contact" />,
+  //     },
+  //     {
+  //       path: 'reports',
+  //       element: <Reports pageTitle="Teacher Contact" />,
+  //     },
+  //     {
+  //       path: 'reports-list',
+  //       element: <ReportsList pageTitle="Reports List" />,
+  //     },
+  //     {
+  //       path: 'notice',
+  //       element: <UserPanelNotice pageTitle="Notice List" />,
+  //     },
+  //     {
+  //       path: 'class-routine',
+  //       element: <ClassRoutine pageTitle="Class Routine" />,
+  //     },
+  //     {
+  //       path: 'video-tutorial',
+  //       element: <VideoTutorialLink pageTitle="Video Tutorial" />,
+  //     },
+  //     {
+  //       path: 'home-work',
+  //       element: <HomeWorkUserPanel pageTitle="Home Work" />,
+  //     },
+  //     {
+  //       path: 'home-work-history',
+  //       element: <HomeWorkHistoryUserPanel pageTitle="Home Work History" />,
+  //     },
+  //     {
+  //       path: 'home-work-history/:subjectName',
+  //       element: <SubjectHistoryUserPanel pageTitle="Subject History" />,
+  //     },
+  //     {
+  //       path: 'monthly-fee',
+  //       element: <StudentFeeUserPanel pageTitle="Month Fee" />,
+  //     },
+  //     // {
+  //     //   path: 'payment-success',
+  //     //   element: <PaymentSuccess pageTitle="Payment Success" />,
+  //     // },
+  //     {
+  //       path: 'payment-fail',
+  //       element: <PaymentFail pageTitle="Payment Fail" />,
+  //     },
+  //     {
+  //       path: 'payment-cancel',
+  //       element: <PaymentCancel pageTitle="Payment Cancel" />,
+  //     },
+  //     {
+  //       path: 'payment-success',
+  //       element: <OnlinePaymentInvoiceDownload pageTitle="Payment Invoice" />,
+  //     },
+  //     // {
+  //     //   path: 'all-invoices',
+  //     //   element: <AllUserPanelInvoice pageTitle="All Invoice" />,
+  //     // },
+  //   ],
+  // },
   {
     path: '/query',
     element: <Query />,

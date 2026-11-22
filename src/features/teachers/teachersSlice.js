@@ -14,7 +14,20 @@ export const teachersSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Teacher', "Teacher_Subject", "TeacherSubjectSubmission"], // define tag type
+  tagTypes: [
+    'Teacher',
+    "Teacher_Subject",
+    "TeacherSubjectSubmission",
+    "Teacher",
+    "Head",
+    "Structure",
+    "Sheet",
+    "Payment",
+    "MonthStatus",
+    "TeacherSummary",
+    "ReportTeacherMonthly",
+    "ReportMatrix"
+  ], // define tag type
   endpoints: (builder) => ({
     getDesignation: builder.query({
       query: () => 'designation',
@@ -208,6 +221,234 @@ export const teachersSlice = createApi({
         },
       }),
     }),
+
+    /* ============================================================
+     A) TEACHERS
+     ============================================================ */
+    getTeachers: builder.query({
+      query: () => "teachers",
+      providesTags: ["Teacher"],
+    }),
+    /* ============================================================
+   B) SALARY HEADS
+   ============================================================ */
+    getHeads: builder.query({
+      // ?IsActive=1|0 (optional)
+      query: ({ IsActive } = {}) => {
+        const params = new URLSearchParams();
+        if (IsActive !== undefined && IsActive !== null && IsActive !== "") {
+          params.append("IsActive", String(IsActive));
+        }
+        const qs = params.toString();
+        return `heads${qs ? `?${qs}` : ""}`;
+      },
+      providesTags: ["Head"],
+    }),
+
+    createHead: builder.mutation({
+      // body: { HeadName, HeadType, SortOrder }
+      query: (body) => ({ url: "heads", method: "POST", body }),
+      invalidatesTags: ["Head", "Sheet"], // new head affects future generate
+    }),
+
+    updateHead: builder.mutation({
+      // body: { HeadName, HeadType, SortOrder }
+      query: ({ headId, ...body }) => ({
+        url: `heads/${headId}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["Head", "Sheet"],
+    }),
+
+    toggleHeadActive: builder.mutation({
+      query: (headId) => ({
+        url: `heads/${headId}/toggle`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["Head", "Structure", "Sheet"],
+    }),
+
+    /* ============================================================
+       C) SALARY STRUCTURE
+       ============================================================ */
+    getStructures: builder.query({
+      // ?UserID= (optional)
+      query: ({ UserID } = {}) => {
+        const params = new URLSearchParams();
+        if (UserID) params.append("UserID", String(UserID));
+        const qs = params.toString();
+        return `structures${qs ? `?${qs}` : ""}`;
+      },
+      providesTags: ["Structure"],
+    }),
+
+    saveTeacherStructure: builder.mutation({
+      // body: { Amounts: { "<HeadID>": 5000, ... } }
+      query: ({ userId, Amounts }) => ({
+        url: `structures/teacher/${userId}`,
+        method: "PUT",
+        body: { Amounts },
+      }),
+      invalidatesTags: ["Structure", "Sheet"],
+    }),
+
+    applyStructureBulk: builder.mutation({
+      // body: { UserIDs: [1,2,3], Amounts: {...} }
+      query: (body) => ({
+        url: "structures/apply-bulk",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Structure", "Sheet"],
+    }),
+
+    /* ============================================================
+       D) SALARY SHEETS
+       ============================================================ */
+    getSheets: builder.query({
+      // ?Year=&Month=&UserID=&Status=  (all optional)
+      query: ({ Year, Month, UserID, Status } = {}) => {
+        const params = new URLSearchParams();
+        if (Year) params.append("Year", String(Year));
+        if (Month) params.append("Month", String(Month));
+        if (UserID) params.append("UserID", String(UserID));
+        if (Status) params.append("Status", Status);
+        const qs = params.toString();
+        return `sheets${qs ? `?${qs}` : ""}`;
+      },
+      providesTags: ["Sheet"],
+    }),
+
+    generateSheets: builder.mutation({
+      // body: { Year, Month, UserIDs? }
+      query: (body) => ({
+        url: "sheets/generate",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Sheet"],
+    }),
+
+    updateSheet: builder.mutation({
+      // body: { Details: [{ HeadID, Amount }], Remarks? }
+      query: ({ sheetId, ...body }) => ({
+        url: `sheets/${sheetId}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["Sheet"],
+    }),
+
+    finalizeSheet: builder.mutation({
+      query: (sheetId) => ({
+        url: `sheets/${sheetId}/finalize`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["Sheet"],
+    }),
+
+    finalizeSheetsForMonth: builder.mutation({
+      // body: { Year, Month }
+      query: (body) => ({
+        url: "sheets/finalize",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Sheet"],
+    }),
+
+    revertSheet: builder.mutation({
+      query: (sheetId) => ({
+        url: `sheets/${sheetId}/revert`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["Sheet"],
+    }),
+
+    /* ============================================================
+       E) PAYMENTS
+       ============================================================ */
+    getPayments: builder.query({
+      // ?UserID=&From=&To=&PaymentMethod=&IsReversed=
+      query: ({ UserID, From, To, PaymentMethod, IsReversed } = {}) => {
+        const params = new URLSearchParams();
+        if (UserID) params.append("UserID", String(UserID));
+        if (From) params.append("From", From);
+        if (To) params.append("To", To);
+        if (PaymentMethod) params.append("PaymentMethod", PaymentMethod);
+        if (IsReversed !== undefined && IsReversed !== null && IsReversed !== "") {
+          params.append("IsReversed", String(IsReversed));
+        }
+        const qs = params.toString();
+        return `payments${qs ? `?${qs}` : ""}`;
+      },
+      providesTags: ["Payment"],
+    }),
+
+    getPaymentById: builder.query({
+      query: (paymentId) => `payments/${paymentId}`,
+      providesTags: ["Payment"],
+    }),
+
+    createPayment: builder.mutation({
+      // body: { UserID, PaymentDate, PaymentMethod, Note, Details: [{ SalaryYear, SalaryMonth, Amount }] }
+      query: (body) => ({
+        url: "payments",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Payment", "MonthStatus", "TeacherSummary", "Sheet"],
+    }),
+
+    reversePayment: builder.mutation({
+      // body: { ReverseReason }
+      query: ({ paymentId, ReverseReason }) => ({
+        url: `payments/${paymentId}/reverse`,
+        method: "PATCH",
+        body: { ReverseReason },
+      }),
+      invalidatesTags: ["Payment", "MonthStatus", "TeacherSummary"],
+    }),
+
+    /* ============================================================
+       F) STATUS & REPORTS
+       ============================================================ */
+    getMonthStatus: builder.query({
+      // ?UserID=&Year=
+      query: ({ UserID, Year }) => ({
+        url: "month-status",
+        params: { UserID, Year },
+      }),
+      providesTags: ["MonthStatus"],
+    }),
+
+    getTeacherSummary: builder.query({
+      // ?UserID=
+      query: ({ UserID }) => ({
+        url: "teacher-summary",
+        params: { UserID },
+      }),
+      providesTags: ["TeacherSummary"],
+    }),
+
+    getReportTeacherMonthly: builder.query({
+      // ?UserID=&Year=
+      query: ({ UserID, Year }) => ({
+        url: "reports/teacher-monthly",
+        params: { UserID, Year },
+      }),
+      providesTags: ["ReportTeacherMonthly"],
+    }),
+
+    getReportMatrix: builder.query({
+      // ?Year=
+      query: ({ Year }) => ({
+        url: "reports/matrix",
+        params: { Year },
+      }),
+      providesTags: ["ReportMatrix"],
+    }),
   }),
 });
 
@@ -233,5 +474,39 @@ export const {
   useDeleteTeacherSubjectMutation,
   useGetTeacherSubjectSubmissionsQuery,
   useSubmitTeacherKhataMutation,
-  useGetTeacherAttendanceTodayDashboardQuery
+  useGetTeacherAttendanceTodayDashboardQuery,
+
+  // Teachers
+  useGetTeachersQuery,
+
+  // Heads
+  useGetHeadsQuery,
+  useCreateHeadMutation,
+  useUpdateHeadMutation,
+  useToggleHeadActiveMutation,
+
+  // Structure
+  useGetStructuresQuery,
+  useSaveTeacherStructureMutation,
+  useApplyStructureBulkMutation,
+
+  // Sheets
+  useGetSheetsQuery,
+  useGenerateSheetsMutation,
+  useUpdateSheetMutation,
+  useFinalizeSheetMutation,
+  useFinalizeSheetsForMonthMutation,
+  useRevertSheetMutation,
+
+  // Payments
+  useGetPaymentsQuery,
+  useGetPaymentByIdQuery,
+  useCreatePaymentMutation,
+  useReversePaymentMutation,
+
+  // Status & Reports
+  useGetMonthStatusQuery,
+  useGetTeacherSummaryQuery,
+  useGetReportTeacherMonthlyQuery,
+  useGetReportMatrixQuery,
 } = teachersSlice;
