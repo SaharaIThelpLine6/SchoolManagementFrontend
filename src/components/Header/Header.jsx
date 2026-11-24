@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import TranslateButton from "../../components/Header/TranslateButton";
 import { useGetUserInfoQuery } from "../../features/payment/paymentSlice";
 import { useGetInstitutionInfoQuery } from "../../features/settings/settingsQuerySlice";
-import { toggleSidebar } from "../../features/sidebar/sideBarSlice";
+import { toggleDesktopSidebar, toggleSidebar } from "../../features/sidebar/sideBarSlice";
 import { useGetSoftwareDetailsQuery } from "../../features/userInfo/userInfoQuerySlice";
 import bnBijoy2Unicode from "../../utils/conveter";
 import { showModal } from "../../utils/ModalControlar";
@@ -21,11 +21,13 @@ const Header = () => {
   const dispatch = useDispatch();
   const translate = useTranslate();
   const isOpen = useSelector((state) => state.sideBar.isOpen);
+  const isDesktopOpen = useSelector((state) => state.sideBar.isDesktopOpen);
   const { data: userPayInfo, refetch } = useGetUserInfoQuery();
   const { data: institutionInfo } = useGetInstitutionInfoQuery();
   const { data: softwareDetails } = useGetSoftwareDetailsQuery();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sidebarMenuOpen, setSidebarMenuOpen] = useState(false);
   const [logo, setLogo] = useState(null);
 
   useEffect(() => {
@@ -198,9 +200,47 @@ const Header = () => {
                 </span>
               )}
             </Link>
+            <button
+              type="button"
+              onClick={() => dispatch(toggleDesktopSidebar())}
+              className="hidden lg:flex p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200"
+              title={isDesktopOpen ? "Hide Sidebar" : "Show Sidebar"}
+            >
+              {isDesktopOpen ? (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="22"
+                  height="22"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                  <line x1="9" y1="3" x2="9" y2="21" />
+                  <path d="M14 16l-4-4 4-4" />
+                </svg>
+              ) : (<svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <line x1="9" y1="3" x2="9" y2="21" />
+                <path d="M10 16l4-4-4-4" />
+              </svg>
+              )}
+            </button>
           </div>
         </div>
-
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4 flex-1 min-w-0">
           <h2 className="pl-2 text-sm sm:text-base md:text-[20px] font-semibold text-gray-800 text-center sm:text-left truncate">

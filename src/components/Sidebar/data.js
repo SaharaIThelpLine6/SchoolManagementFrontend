@@ -305,6 +305,36 @@ export const menuData = [
       },
       // {
       //   id: "2",
+      //   name: "বেতন খাত ব্যবস্থাপনা",
+      //   route: "/teacherinfo/payRole",
+      //   icon: 'SubUser',
+      // },
+      // {
+      //   id: "3",
+      //   name: "বেতন কাঠামো ব্যবস্থাপনা",
+      //   route: "/teacherinfo/payStructure",
+      //   icon: 'SubUser',
+      // },
+      // {
+      //   id: "4",
+      //   name: "মাসিক বেতন তৈরি",
+      //   route: "/teacherinfo/monthlySalary",
+      //   icon: 'SubUser',
+      // },
+      // {
+      //   id: "5",
+      //   name: "বেতন পরিশোধ ব্যবস্থাপনা",
+      //   route: "/teacherinfo/salaryPayment",
+      //   icon: 'SubUser',
+      // },
+      // {
+      //   id: "6",
+      //   name: "বেতন সংক্রান্ত রিপোর্ট",
+      //   route: "/teacherinfo/salaryReport",
+      //   icon: 'SubUser',
+      // },
+      // {
+      //   id: "2",
       //   name: "Pay-role Heading",
       //   route: "/teacherinfo/payRole",
       //   subMenu: false,
@@ -328,7 +358,7 @@ export const menuData = [
       //   subMenu: false,
       // },
       {
-        id: '6',
+        id: '7',
         name: 'All Tutorials Teacher',
         route: 'teacherinfo/all-tutorials-teacher',
         icon: 'SubVideo',
@@ -559,79 +589,79 @@ export const menuData = [
     ],
   },
 
-  // {
-  //   id: '11',
-  //   name: 'Accounting',
-  //   route: 'accounting',
-  //   icon: 'FaCalculator',
-  //   subMenu: [
-  //     {
-  //       id: '1',
-  //       name: 'Deposit Costs',
-  //       route: 'accounting',
-  //       icon: 'SubMoney',
-  //     },
-  //     {
-  //       id: '2',
-  //       name: 'Deposit Costs Report',
-  //       route: 'accounting/income-expense-report',
-  //       icon: 'SubReport',
-  //     },
-  //     {
-  //       id: '3',
-  //       name: 'Fee Setting',
-  //       route: 'accounting/fee-setting',
-  //       icon: 'SubSettings',
-  //     },
-  //     {
-  //       id: '4',
-  //       name: 'Student Fee Collection',
-  //       route: 'accounting/student-fee-collection',
-  //       icon: 'SubFee',
-  //     },
-  //     {
-  //       id: '5',
-  //       name: 'Dues List',
-  //       route: 'accounting/dues-list',
-  //       icon: 'SubDues',
-  //     },
-  //     {
-  //       id: '6',
-  //       name: 'Monthly Dues',
-  //       route: 'accounting/monthly-dues',
-  //       icon: 'SubDues',
-  //     },
-  //     {
-  //       id: '7',
-  //       name: 'Fee Collection Report',
-  //       route: 'accounting/fee-collection-report',
-  //       icon: 'SubReport',
-  //     },
-  //     {
-  //       id: '8',
-  //       name: 'Balance Transfer',
-  //       route: 'accounting/balance-transfer',
-  //       icon: 'SubTransfer',
-  //     },
-  //     {
-  //       id: '9',
-  //       name: 'Delete Edit Record',
-  //       route: 'accounting/delete-edit-record',
-  //       icon: 'SubDelete',
-  //     },
-  //     // {
-  //     //   id: '10',
-  //     //   name: 'Student Admission',
-  //     //   route: '/accounting/student-admission',
-  //     // },
-  //     {
-  //       id: '11',
-  //       name: 'All Tutorials Accounting',
-  //       route: 'accounting/all-tutorials-accounting',
-  //       icon: 'SubVideo',
-  //     },
-  //   ],
-  // },
+  {
+    id: '11',
+    name: 'Accounting',
+    route: 'accounting',
+    icon: 'FaCalculator',
+    subMenu: [
+      {
+        id: '1',
+        name: 'Deposit Costs',
+        route: 'accounting',
+        icon: 'SubMoney',
+      },
+      {
+        id: '2',
+        name: 'Deposit Costs Report',
+        route: 'accounting/income-expense-report',
+        icon: 'SubReport',
+      },
+      {
+        id: '3',
+        name: 'Fee Setting',
+        route: 'accounting/fee-setting',
+        icon: 'SubSettings',
+      },
+      {
+        id: '4',
+        name: 'Student Fee Collection',
+        route: 'accounting/student-fee-collection',
+        icon: 'SubFee',
+      },
+      {
+        id: '5',
+        name: 'Dues List',
+        route: 'accounting/dues-list',
+        icon: 'SubDues',
+      },
+      {
+        id: '6',
+        name: 'Monthly Dues',
+        route: 'accounting/monthly-dues',
+        icon: 'SubDues',
+      },
+      {
+        id: '7',
+        name: 'Fee Collection Report',
+        route: 'accounting/fee-collection-report',
+        icon: 'SubReport',
+      },
+      {
+        id: '8',
+        name: 'Balance Transfer',
+        route: 'accounting/balance-transfer',
+        icon: 'SubTransfer',
+      },
+      {
+        id: '9',
+        name: 'Delete Edit Record',
+        route: 'accounting/delete-edit-record',
+        icon: 'SubDelete',
+      },
+      // {
+      //   id: '10',
+      //   name: 'Student Admission',
+      //   route: '/accounting/student-admission',
+      // },
+      {
+        id: '11',
+        name: 'All Tutorials Accounting',
+        route: 'accounting/all-tutorials-accounting',
+        icon: 'SubVideo',
+      },
+    ],
+  },
 
 
 
