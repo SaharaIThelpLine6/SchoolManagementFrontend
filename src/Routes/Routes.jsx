@@ -11,6 +11,8 @@ import Result from '../pages/public/Result';
 import ResultRequest from '../pages/public/ResultRequest';
 import StudentAdmissionForm from '../pages/public/studentAddmitionForm';
 import PrivateRoute from './PrivateRoute';
+import About from '../pages/public/About';
+import Gallery from '../pages/public/Gallery';
 
 // Public Pages
 const LandingPage = lazy(() => import('../pages/LandingPage/Home'));
@@ -1606,6 +1608,8 @@ const Router = createBrowserRouter([
       { path: 'support_video', element: <Video /> },
       { path: 'donation', element: <Donation /> },
       { path: 'donation/payment-success', element: <OnlineDonationInvoice /> },
+      { path: 'about', element: <About /> },
+      { path: 'gallery', element: <Gallery /> },
 
     ],
   },

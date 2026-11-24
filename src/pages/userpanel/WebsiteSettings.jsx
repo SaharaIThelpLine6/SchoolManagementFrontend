@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Controller, FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import Select from "react-select";
 import Swal from 'sweetalert2';
@@ -13,9 +13,144 @@ import Keyword from '../../components/Keywords/Keywords';
 import DefaultSelect from '../../components/Forms/DefaultSelect';
 const API_URL = import.meta.env.VITE_SERVER_URL;
 
+/* ---------------------------------------------------------------------------
+   Reusable picker for an ordered list of images (banner slider, gallery).
+
+   Every entry is one of:
+     - already saved -> { id, path, url }
+     - newly picked  -> { id, file, url }   (url is an object URL preview)
+--------------------------------------------------------------------------- */
+function ImageListField({ title, hint, images, onAdd, onRemove, onMove, translate }) {
+  const inputRef = useRef(null);
+
+  return (
+    <div className="bg-blue-50 p-5 rounded-lg border border-blue-100 mt-4 mb-4">
+      <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+        <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+          <svg
+            className="w-5 h-5 mr-2 text-blue-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
+          </svg>
+          {title}
+        </h3>
+
+        <span className="text-sm font-medium text-gray-500">
+          {images.length} {translate('image(s)')}
+        </span>
+      </div>
+
+      {hint && <p className="text-sm text-gray-500 mb-4">{hint}</p>}
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        {images.map((image, index) => (
+          <div
+            key={image.id}
+            className="group relative rounded-lg overflow-hidden border border-gray-200 bg-white shadow-sm"
+          >
+            <img
+              src={image.url}
+              alt={`${title} ${index + 1}`}
+              className="w-full h-32 object-cover"
+            />
+
+            {/* position in the list */}
+            <span className="absolute top-1.5 left-1.5 bg-black/60 text-white text-xs font-semibold px-2 py-0.5 rounded">
+              {index + 1}
+            </span>
+
+            {/* not uploaded yet */}
+            {image.file && (
+              <span className="absolute bottom-1.5 left-1.5 bg-amber-500 text-white text-[11px] font-semibold px-2 py-0.5 rounded">
+                {translate('New')}
+              </span>
+            )}
+
+            <button
+              type="button"
+              onClick={() => onRemove(image.id)}
+              title={translate('Delete image')}
+              className="absolute top-1.5 right-1.5 bg-red-500 hover:bg-red-600 text-white w-6 h-6 rounded-full text-xs flex items-center justify-center shadow"
+            >
+              ✕
+            </button>
+
+            {/* reorder */}
+            <div className="absolute inset-x-1.5 bottom-1.5 flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                type="button"
+                onClick={() => onMove(index, -1)}
+                disabled={index === 0}
+                title={translate('Move left')}
+                className="bg-white/90 hover:bg-white text-gray-700 w-6 h-6 rounded text-xs shadow disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                ◀
+              </button>
+              <button
+                type="button"
+                onClick={() => onMove(index, 1)}
+                disabled={index === images.length - 1}
+                title={translate('Move right')}
+                className="bg-white/90 hover:bg-white text-gray-700 w-6 h-6 rounded text-xs shadow disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                ▶
+              </button>
+            </div>
+          </div>
+        ))}
+
+        {/* add tile */}
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          className="h-32 rounded-lg border-2 border-dashed border-blue-300 bg-white/60 hover:bg-white hover:border-blue-500 text-blue-600 flex flex-col items-center justify-center gap-2 transition-colors"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="28"
+            height="28"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          <span className="text-sm font-semibold">{translate('Add Image')}</span>
+        </button>
+      </div>
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        onChange={(event) => {
+          onAdd(Array.from(event.target.files || []));
+          // clearing lets the same file be picked again right after removing it
+          event.target.value = '';
+        }}
+        className="hidden"
+      />
+    </div>
+  );
+}
+
 export default function WebsiteSettings() {
-  const [bannerImg, setBannerImg] = useState(null);
-  const [bannerUrl, setBannerUrl] = useState(null);
+  // Home page banner slider
+  const [bannerImages, setBannerImages] = useState([]);
+  // Photo gallery page
+  const [galleryImages, setGalleryImages] = useState([]);
 
   const [aboutImg, setAboutImg] = useState(null);
   const [aboutUrl, setAboutUrl] = useState(null);
@@ -30,6 +165,7 @@ export default function WebsiteSettings() {
       whyUsTitle: '',
       subjectListTitle: '',
       teacherListTitle: '',
+      galleryTitle: '',
       bannerImage: null,
       singleImage: null,
       whyUsList: [{ text: '' }],
@@ -124,10 +260,33 @@ export default function WebsiteSettings() {
     return <div className="w-20 h-14 bg-gray-200 rounded flex items-center justify-center text-xs">Unsupported</div>;
   };
 
+  // Turns saved paths into list entries
+  const toSavedEntries = (paths, prefix) =>
+    paths.map((path, index) => ({
+      id: `${prefix}-${index}-${path}`,
+      path,
+      url: `${API_URL}/public${path}`,
+    }));
+
+  const parseJsonList = (value) => {
+    try {
+      const list = Array.isArray(value) ? value : JSON.parse(value);
+      return Array.isArray(list) ? list.filter(Boolean) : [];
+    } catch (e) {
+      return [];
+    }
+  };
+
   // Load existing settings
   useEffect(() => {
     if (data) {
       console.log(data);
+
+      // Image lists are collected during the loop and applied after it, so
+      // the old single BannerImage can be used as a fallback.
+      let savedBannerList = null;
+      let savedGalleryList = null;
+      let legacyBannerPath = null;
 
       data.forEach((item) => {
         const key = item.FieldKey;
@@ -156,11 +315,17 @@ export default function WebsiteSettings() {
             replaceImportantLinks([{ title: '', link: '' }]);
           }
         }
+        else if (key == 'BannerImages') {
+          savedBannerList = parseJsonList(value);
+        }
+        else if (key == 'GalleryImages') {
+          savedGalleryList = parseJsonList(value);
+        }
         else {
           setValue(key, value);
         }
         if (key == 'BannerImage') {
-          setBannerUrl(`${API_URL}/public${value}`);
+          legacyBannerPath = value;
         }
         if (key == 'whyUsImage') {
           setAboutUrl(`${API_URL}/public${value}`);
@@ -185,14 +350,96 @@ export default function WebsiteSettings() {
           try {
             const classSubjectsData = Array.isArray(value) ? value : [];
             setClassSubjectList(classSubjectsData);
+
+            /* The classes and subjects that are already published are marked
+               with OnlineAction = 1 by the save route. They are read back
+               here, otherwise the rows came up empty every time the page was
+               opened even though the website was showing them. */
+            const activeRows = classSubjectsData
+              .filter((group) => Number(group.OnlineAction) === 1)
+              .map((group) => ({
+                // the select stores its value as a string
+                text: String(group.SubClassID),
+                subjects: (group.AcademicSubjects || [])
+                  .filter((subject) => Number(subject.OnlineAction) === 1)
+                  .map((subject) => subject.SubjectID),
+              }));
+
+            replaceClassSubjectFields(
+              activeRows.length ? activeRows : [{ text: '', subjects: [] }]
+            );
           } catch (error) {
             console.error('Error parsing subjectClass:', error);
             setClassSubjectList([]);
           }
         }
       });
+
+      // New multi-image list wins; otherwise fall back to the single image
+      const bannerPaths =
+        savedBannerList && savedBannerList.length
+          ? savedBannerList
+          : legacyBannerPath
+            ? [legacyBannerPath]
+            : [];
+
+      setBannerImages(toSavedEntries(bannerPaths, 'banner'));
+      setGalleryImages(toSavedEntries(savedGalleryList || [], 'gallery'));
     }
-  }, [data, setValue, append, replace, replaceVideo, replaceImportantLinks]);
+  }, [data, setValue, append, replace, replaceVideo, replaceImportantLinks, replaceClassSubjectFields]);
+
+  // Release the object URLs of the previews when leaving the page
+  useEffect(() => {
+    return () => {
+      [...bannerImages, ...galleryImages].forEach((image) => {
+        if (image.file) URL.revokeObjectURL(image.url);
+      });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /* One set of handlers for both lists — the setter decides which list. */
+  const addImages = (setList, prefix) => (files) => {
+    if (!files.length) return;
+
+    const picked = files.map((file, index) => ({
+      id: `${prefix}-new-${Date.now()}-${index}-${file.name}`,
+      file,
+      url: URL.createObjectURL(file),
+    }));
+
+    setList((prev) => [...prev, ...picked]);
+  };
+
+  const removeImage = (setList) => (id) => {
+    setList((prev) => {
+      const target = prev.find((image) => image.id === id);
+      if (target?.file) URL.revokeObjectURL(target.url);
+      return prev.filter((image) => image.id !== id);
+    });
+  };
+
+  // Display order on the website follows this list
+  const moveImage = (setList) => (index, step) => {
+    setList((prev) => {
+      const next = index + step;
+      if (next < 0 || next >= prev.length) return prev;
+      const list = [...prev];
+      [list[index], list[next]] = [list[next], list[index]];
+      return list;
+    });
+  };
+
+  // Saved paths that stay + the newly picked files, under one field name each
+  const appendImageList = (formData, images, existingField, filesField) => {
+    formData.append(
+      existingField,
+      JSON.stringify(images.filter((image) => image.path).map((image) => image.path))
+    );
+    images
+      .filter((image) => image.file)
+      .forEach((image) => formData.append(filesField, image.file));
+  };
 
   const onSubmit = async (data) => {
     const formattedSubjects = data.classList
@@ -210,6 +457,7 @@ export default function WebsiteSettings() {
     formData.append('studentListHeading', data.studentListHeading);
     formData.append('aboutText', data.aboutText);
     formData.append('whyUsTitle', data.whyUsTitle);
+    formData.append('galleryTitle', data.galleryTitle || '');
     // JSON (stringify!)
     formData.append('whyUsList', JSON.stringify(data.whyUsList));
     formData.append('subjectListTitle', data.subjectListTitle);
@@ -219,10 +467,11 @@ export default function WebsiteSettings() {
     formData.append('primary', data.primary);
     formData.append('secondary', data.secondary);
 
+    // Image lists
+    appendImageList(formData, bannerImages, 'existingBannerImages', 'bannerImages');
+    appendImageList(formData, galleryImages, 'existingGalleryImages', 'galleryImages');
+
     // Images (only if selected)
-    if (data.bannerImage instanceof File) {
-      formData.append('bannerImage', data.bannerImage);
-    }
     if (data.singleImage instanceof File) {
       formData.append('singleImage', data.singleImage);
     }
@@ -423,33 +672,17 @@ export default function WebsiteSettings() {
             label={translate("About Section Text")}
           // require="About text is required"
           />
-          <div className="bg-blue-50 p-5 rounded-lg border border-blue-100 mt-4 mb-4">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-              <svg
-                className="w-5 h-5 mr-2 text-blue-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-              {translate('Upload About Image')}
-            </h3>
-            <div className="flex justify-center items-center">
-              <DefaultImageUpload
-                registerKey="bannerImage"
-                require="This is required"
-                image={bannerImg}
-                setPreviewUrl={setBannerUrl}
-                previewUrl={bannerUrl}
-              />
-            </div>
-          </div>
+
+          {/* ---------- Banner images (home page slider) ---------- */}
+          <ImageListField
+            title={translate('Banner Images')}
+            hint={translate('Add as many banner images as you need. They are shown as a slider on the home page, in the order below.')}
+            images={bannerImages}
+            onAdd={addImages(setBannerImages, 'banner')}
+            onRemove={removeImage(setBannerImages)}
+            onMove={moveImage(setBannerImages)}
+            translate={translate}
+          />
 
           <div className="mt-2">
             <DefaultInput
@@ -519,6 +752,26 @@ export default function WebsiteSettings() {
               {translate("Add")}
             </button>
           </div>
+
+          {/* ---------- Photo gallery ---------- */}
+          <div className="mt-4">
+            <DefaultInput
+              registerKey="galleryTitle"
+              type="text"
+              label={translate("Gallery Page Title")}
+            />
+          </div>
+
+          <ImageListField
+            title={translate('Gallery Images')}
+            hint={translate('These photos are shown on the gallery page, in the order below.')}
+            images={galleryImages}
+            onAdd={addImages(setGalleryImages, 'gallery')}
+            onRemove={removeImage(setGalleryImages)}
+            onMove={moveImage(setGalleryImages)}
+            translate={translate}
+          />
+          {/* ---------- Photo gallery end ---------- */}
 
           <div className="mt-2">
             <DefaultInput

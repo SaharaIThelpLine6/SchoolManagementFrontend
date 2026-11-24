@@ -1,9 +1,12 @@
 .dashboard-quick-actions {
   --quick-primary: #0b7ed3;
+  /* one place to change the launcher size; the menu and panel follow it */
+  --quick-size: 56px;
   position: fixed;
-  right: max(30px, env(safe-area-inset-right));
-  bottom: max(60px, env(safe-area-inset-bottom));
-  z-index: 40;
+  right: max(20px, env(safe-area-inset-right));
+  bottom: max(28px, env(safe-area-inset-bottom));
+  /* above the dashboard footer, below SweetAlert and other modals */
+  z-index: 100;
   color: #24344b;
 }
 
@@ -24,14 +27,14 @@
   isolation: isolate;
   display: grid;
   place-items: center;
-  width: 60px;
-  height: 60px;
+  width: var(--quick-size);
+  height: var(--quick-size);
   border: 2px solid #ffffffd9;
   border-radius: 50%;
   color: white;
   background: linear-gradient(140deg, #28c6db 0%, var(--quick-primary) 58%, #5064d9 100%);
   box-shadow: 0 8px 22px #0b7ed345, inset 0 1px 1px #ffffff66;
-  transition: transform 180ms ease, box-shadow 180ms ease;
+  transition: transform 220ms ease, opacity 220ms ease, box-shadow 180ms ease;
 }
 
 .dashboard-quick-actions__launcher::before {
@@ -43,11 +46,48 @@
   background: conic-gradient(from 25deg, #22d3ee, #0b7ed3, #a78bfa, #5eead4, #22d3ee);
   filter: blur(13px);
   opacity: 0.65;
+  transition: opacity 220ms ease;
 }
 
 .dashboard-quick-actions__launcher:hover {
   transform: translateY(-3px);
   box-shadow: 0 10px 30px #0b7ed35c, inset 0 1px 1px #ffffff66;
+}
+
+/* ---------------------------------------------------------------------------
+   Resting state
+
+   While the page is being read the launcher slides most of the way off the
+   right edge and fades, so it never sits on top of a table cell or a line of
+   text. Moving the pointer, scrolling, hovering or focusing brings it back,
+   and the visible part stays clickable the whole time.
+--------------------------------------------------------------------------- */
+.dashboard-quick-actions.is-idle .dashboard-quick-actions__launcher {
+  transform: translateX(38%);
+  opacity: 0.4;
+  box-shadow: none;
+}
+
+.dashboard-quick-actions.is-idle .dashboard-quick-actions__launcher::before {
+  opacity: 0.2;
+}
+
+.dashboard-quick-actions.is-idle .dashboard-quick-actions__launcher:hover,
+.dashboard-quick-actions.is-idle .dashboard-quick-actions__launcher:focus-visible,
+.dashboard-quick-actions.is-idle .dashboard-quick-actions__launcher:active {
+  transform: translateY(-3px);
+  opacity: 1;
+  box-shadow: 0 10px 30px #0b7ed35c, inset 0 1px 1px #ffffff66;
+}
+
+.dashboard-quick-actions.is-idle .dashboard-quick-actions__launcher:hover::before,
+.dashboard-quick-actions.is-idle .dashboard-quick-actions__launcher:focus-visible::before {
+  opacity: 0.65;
+}
+
+/* the green dot is noise while resting */
+.dashboard-quick-actions.is-idle .dashboard-quick-actions__status {
+  opacity: 0;
 }
 
 .dashboard-quick-actions__status {
@@ -59,17 +99,19 @@
   border: 2px solid white;
   border-radius: 50%;
   background: #4ade80;
+  transition: opacity 220ms ease;
 }
 
 .dashboard-quick-actions__menu {
   position: absolute;
   right: 5px;
-  bottom: 78px;
+  bottom: calc(var(--quick-size) + 18px);
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 14px;
   width: max-content;
+  max-width: calc(100vw - 32px);
   animation: quick-actions-enter 180ms ease-out;
 }
 
@@ -99,6 +141,7 @@
   border: 2px solid white;
   border-radius: 50%;
   color: white;
+  flex-shrink: 0;
   transition: transform 180ms ease;
 }
 
@@ -115,9 +158,9 @@
 .dashboard-quick-actions__panel {
   position: absolute;
   right: 0;
-  bottom: 80px;
+  bottom: calc(var(--quick-size) + 20px);
   width: min(360px, calc(100vw - 32px));
-  max-height: calc(100dvh - 124px);
+  max-height: calc(100dvh - var(--quick-size) - 60px);
   overflow-y: auto;
   border: 1px solid #dcebf5;
   border-radius: 18px;
@@ -170,7 +213,7 @@
   border-radius: 10px;
   background: #fbfdff;
   color: #24344b;
-  font-size: 15px;
+  font-size: 16px; /* 16px keeps iOS from zooming the page on focus */
   outline: none;
 }
 .dashboard-quick-actions__input-wrap input:focus { border-color: var(--quick-primary); box-shadow: 0 0 0 3px #0b7ed31a; }
@@ -191,9 +234,24 @@
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 @keyframes quick-actions-spin { to { transform: rotate(360deg); } }
+
 @media (max-width: 640px) {
-  .dashboard-quick-actions { right: max(16px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); }
+  .dashboard-quick-actions {
+    --quick-size: 50px;
+    right: max(12px, env(safe-area-inset-right));
+    /* clears the dashboard footer line at the bottom of the page */
+    bottom: calc(max(16px, env(safe-area-inset-bottom)) + 18px);
+  }
+
+  .dashboard-quick-actions__label { font-size: 13px; padding: 7px 12px; }
+  .dashboard-quick-actions__action-icon { width: 44px; height: 44px; }
+
+  /* on a short screen the panel takes the room it needs, from the top down */
+  .dashboard-quick-actions__panel {
+    max-height: calc(100dvh - var(--quick-size) - 48px);
+  }
 }
+
 @media (prefers-reduced-motion: reduce) {
   .dashboard-quick-actions *, .dashboard-quick-actions *::before { animation: none; transition: none; }
 }

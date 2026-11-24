@@ -1,6 +1,5 @@
-//h
 import { Buffer } from 'buffer';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, Link } from 'react-router-dom';
 import Counter from '../../components/Counter';
@@ -17,6 +16,24 @@ const MadrashaHomePage = () => {
   const dispatch = useDispatch();
   const [showAllWhyUs, setShowAllWhyUs] = useState(false);
 
+  /* ---------------------------------------------------------------------
+     Hero description height
+
+     The about text can be very long, which used to push the text column
+     far past the hero image. It is now cut at the height of the image
+     (on desktop) or at a fixed number of lines (on mobile), and a
+     "আরো পড়ুন" button appears only when the text really does not fit.
+     The full text lives on its own page: /:schoolid/about
+  --------------------------------------------------------------------- */
+  const heroImageRef = useRef(null);
+  const heroTextTopRef = useRef(null);
+  const aboutTextRef = useRef(null);
+  const [aboutMaxHeight, setAboutMaxHeight] = useState(null);
+  const [aboutOverflowing, setAboutOverflowing] = useState(false);
+
+  /* Banner slider — the settings page can now save several banner images */
+  const [bannerIndex, setBannerIndex] = useState(0);
+
   useEffect(() => {
     dispatch(fetchWebsiteSettings({ schoolId: schoolid }));
   }, [dispatch]);
@@ -30,6 +47,59 @@ const MadrashaHomePage = () => {
   }, [websiteSettings]);
 
   console.log(settingsObject, 'settingsObject');
+
+  /* Banner images for the hero slider.
+
+     New setting: BannerImages — a JSON array of paths saved by the website
+     settings page. The old single BannerImage is still used when the list is
+     missing, so nothing breaks before the first save. */
+  const bannerImages = React.useMemo(() => {
+    const raw = settingsObject.BannerImages;
+    let list = [];
+
+    if (Array.isArray(raw)) {
+      list = raw;
+    } else if (typeof raw === 'string' && raw.trim()) {
+      try {
+        const parsed = JSON.parse(raw);
+        list = Array.isArray(parsed) ? parsed : [];
+      } catch {
+        list = raw.split(',').map((item) => item.trim());
+      }
+    }
+
+    if (!list.length && settingsObject.BannerImage) {
+      list = [settingsObject.BannerImage];
+    }
+
+    return list
+      .filter(Boolean)
+      .map((path) => `${API_URL}/public/${String(path).replace(/^\/+/, '')}`);
+  }, [settingsObject.BannerImages, settingsObject.BannerImage]);
+
+  const hasSlider = bannerImages.length > 1;
+
+  const showBanner = (index) => {
+    if (!bannerImages.length) return;
+    const total = bannerImages.length;
+    setBannerIndex(((index % total) + total) % total);
+  };
+
+  // Keep the index valid when the number of images changes
+  useEffect(() => {
+    setBannerIndex(0);
+  }, [bannerImages.length]);
+
+  // Auto play, stopped while the pointer is on the slider
+  const [bannerPaused, setBannerPaused] = useState(false);
+
+  useEffect(() => {
+    if (bannerImages.length < 2 || bannerPaused) return;
+    const timer = setInterval(() => {
+      setBannerIndex((prev) => (prev + 1) % bannerImages.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [bannerImages.length, bannerPaused]);
 
   function toArray(value) {
     if (!value) return [];
@@ -75,6 +145,72 @@ const MadrashaHomePage = () => {
     console.log(settingsObject);
   }, [settingsObject]);
 
+  /* Measure the hero image and cut the description to the same height.
+     Runs again on resize, when the image finishes loading and whenever
+     the text itself changes. */
+  useEffect(() => {
+    const MOBILE_LINES = 7;        // lines kept when the layout is stacked
+    const READ_MORE_SPACE = 64;    // room left for the "আরো পড়ুন" button
+
+    const measure = () => {
+      const paragraph = aboutTextRef.current;
+      if (!paragraph) return;
+
+      const isDesktop =
+        typeof window !== 'undefined' &&
+        window.matchMedia('(min-width: 1024px)').matches;
+
+      let nextHeight;
+
+      if (isDesktop && heroImageRef.current) {
+        const imageHeight = heroImageRef.current.offsetHeight;
+        const topHeight = heroTextTopRef.current
+          ? heroTextTopRef.current.offsetHeight
+          : 0;
+        nextHeight = Math.max(imageHeight - topHeight - READ_MORE_SPACE, 140);
+      } else {
+        const lineHeight =
+          parseFloat(window.getComputedStyle(paragraph).lineHeight) || 30;
+        nextHeight = Math.round(lineHeight * MOBILE_LINES);
+      }
+
+      setAboutMaxHeight((prev) => (prev === nextHeight ? prev : nextHeight));
+
+      // scrollHeight is the full text height, even while it is cut off
+      const overflowing = paragraph.scrollHeight > nextHeight + 2;
+      setAboutOverflowing((prev) => (prev === overflowing ? prev : overflowing));
+    };
+
+    measure();
+
+    window.addEventListener('resize', measure);
+
+    // the banner images load later and change the hero height
+    const images = heroImageRef.current
+      ? Array.from(heroImageRef.current.querySelectorAll('img'))
+      : [];
+    images.forEach((image) => {
+      if (!image.complete) image.addEventListener('load', measure);
+    });
+
+    let observer;
+    if (typeof ResizeObserver !== 'undefined' && heroImageRef.current) {
+      observer = new ResizeObserver(measure);
+      observer.observe(heroImageRef.current);
+    }
+
+    return () => {
+      window.removeEventListener('resize', measure);
+      images.forEach((image) => image.removeEventListener('load', measure));
+      if (observer) observer.disconnect();
+    };
+  }, [
+    settingsObject.aboutText,
+    settingsObject.BannerImage,
+    settingsObject.BannerImages,
+    settingsObject.primaryHeading,
+  ]);
+
   const bufferConveter = (bufferData) => {
     if (!bufferData) return '/logo.png';
     const buffer = Buffer.from(bufferData);
@@ -108,32 +244,144 @@ const MadrashaHomePage = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-screen-2xl relative z-10">
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
             {/* Text */}
-            <div className="flex-1 text-center lg:text-left space-y-6">
-              <div className="inline-block px-4 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-white mb-4">
-                {schoolData?.InstitutionName}
+            <div className="flex-1 text-center lg:text-left">
+              {/* Heading + institution badge are measured together, so the
+                  description can take exactly the space that is left */}
+              <div ref={heroTextTopRef} className="space-y-6">
+                <h1 className="text-[28px] md:text-[40px] text-white leading-tight drop-shadow-2xl text-justify hyphens-auto">
+                  {settingsObject?.primaryHeading}
+                </h1>
+                <div className="inline-block px-4 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-white">
+                  {schoolData?.InstitutionName}
+                </div>
               </div>
-              <h1 className="text-[28px] md:text-[40px] text-white leading-tight drop-shadow-2xl text-justify hyphens-auto">
-                {settingsObject?.primaryHeading}
-              </h1>
-              <p className="text-[18px] md:text-[22px] mt-2 mb-4 text-[#D8F3DC] max-w-xl mx-auto lg:mx-0 leading-relaxed text-justify hyphens-auto">
-                {settingsObject.aboutText}
-              </p>
+
+              <div className="mt-4">
+                <p
+                  ref={aboutTextRef}
+                  className="text-[18px] md:text-[22px] text-[#D8F3DC] max-w-xl mx-auto lg:mx-0 leading-relaxed text-justify hyphens-auto"
+                  style={{
+                    maxHeight: aboutMaxHeight ? `${aboutMaxHeight}px` : undefined,
+                    overflow: 'hidden',
+                    // soft fade on the cut edge, works on any background
+                    WebkitMaskImage: aboutOverflowing
+                      ? 'linear-gradient(to bottom, #000 calc(100% - 2.2rem), transparent 100%)'
+                      : undefined,
+                    maskImage: aboutOverflowing
+                      ? 'linear-gradient(to bottom, #000 calc(100% - 2.2rem), transparent 100%)'
+                      : undefined,
+                  }}
+                >
+                  {settingsObject.aboutText}
+                </p>
+
+                {aboutOverflowing && (
+                  <Link
+                    to={`/${schoolid}/about`}
+                    className="group mt-4 inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur-sm border border-white/30 px-6 py-2.5 text-white text-[16px] md:text-[18px] font-bold transition-all duration-300 hover:bg-white/25 hover:scale-105"
+                  >
+                    আরো পড়ুন
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="transition-transform duration-300 group-hover:translate-x-1"
+                    >
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                      <path d="M5 12l14 0" />
+                      <path d="M13 18l6 -6" />
+                      <path d="M13 6l6 6" />
+                    </svg>
+                  </Link>
+                )}
+              </div>
             </div>
 
-            {/* Image */}
-            <div className="flex-1 flex justify-center lg:justify-end">
-              <div className="relative">
+            {/* Image slider */}
+            <div className="flex-1 flex justify-center lg:justify-end w-full">
+              <div
+                className="relative w-full max-w-2xl lg:max-w-3xl"
+                ref={heroImageRef}
+                onMouseEnter={() => setBannerPaused(true)}
+                onMouseLeave={() => setBannerPaused(false)}
+              >
                 <div
                   className="absolute -inset-4 rounded-3xl blur-lg opacity-40"
                   style={{
                     background: `linear-gradient(to right, ${settingsObject.secondary || '#fbbf24'}, ${settingsObject.primary || '#4ade80'})`,
                   }}
                 ></div>
-                <img
-                  src={`${API_URL}/public/${settingsObject.BannerImage}`}
-                  alt="hero"
-                  className="relative rounded-[5px] shadow-2xl w-full max-w-2xl lg:max-w-3xl object-cover up_down_animation border-4 border-white/20"
-                />
+
+                {/* The first image carries the height; the rest sit on top of
+                    it and only the active one is visible, so changing slides
+                    never makes the hero jump. */}
+                <div className="relative rounded-[5px] overflow-hidden shadow-2xl border-4 border-white/20 up_down_animation">
+                  {bannerImages.map((src, index) => (
+                    <img
+                      key={src}
+                      src={src}
+                      alt={`banner ${index + 1}`}
+                      className={`${
+                        index === 0 ? 'relative' : 'absolute inset-0 h-full'
+                      } w-full object-cover transition-opacity duration-700 ${
+                        index === bannerIndex ? 'opacity-100' : 'opacity-0'
+                      }`}
+                    />
+                  ))}
+                </div>
+
+                {hasSlider && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => showBanner(bannerIndex - 1)}
+                      aria-label="previous banner"
+                      className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white flex items-center justify-center transition-all duration-300 hover:scale-110"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M15 6l-6 6l6 6" />
+                      </svg>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => showBanner(bannerIndex + 1)}
+                      aria-label="next banner"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white flex items-center justify-center transition-all duration-300 hover:scale-110"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M9 6l6 6l-6 6" />
+                      </svg>
+                    </button>
+
+                    <div className="relative z-10 flex items-center justify-center gap-2 mt-4">
+                      {bannerImages.map((src, index) => (
+                        <button
+                          key={src}
+                          type="button"
+                          onClick={() => showBanner(index)}
+                          aria-label={`banner ${index + 1}`}
+                          className={`h-2.5 rounded-full transition-all duration-300 ${
+                            index === bannerIndex ? 'w-7' : 'w-2.5 bg-white/50 hover:bg-white/80'
+                          }`}
+                          style={
+                            index === bannerIndex
+                              ? { backgroundColor: settingsObject.secondary || '#fbbf24' }
+                              : undefined
+                          }
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>

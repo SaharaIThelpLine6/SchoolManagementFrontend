@@ -18,6 +18,9 @@ const whatsappMessage = import.meta.env.VITE_SUPPORT_WHATSAPP_MESSAGE ||
   'আসসালামু আলাইকুম। আমি Qmmsoft ড্যাশবোর্ড ব্যবহার করছি। আমার কিছু সহায়তা প্রয়োজন।';
 const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
 
+// How long the launcher stays fully visible after the last pointer move or scroll
+const IDLE_DELAY = 2200;
+
 const copy = {
   en: {
     open: 'Support & quick actions', close: 'Close quick actions',
@@ -56,6 +59,9 @@ export default function DashboardQuickActions() {
   const [view, setView] = useState('closed');
   const [userCode, setUserCode] = useState('');
   const [error, setError] = useState('');
+  // While reading, the launcher tucks itself against the right edge so it
+  // never covers a table cell or a line of text (see .is-idle in the CSS).
+  const [idle, setIdle] = useState(false);
   const rootRef = useRef(null);
   const launcherRef = useRef(null);
   const inputRef = useRef(null);
@@ -87,6 +93,33 @@ export default function DashboardQuickActions() {
     return () => {
       document.removeEventListener('pointerdown', handlePointerDown);
       document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [view]);
+
+  // Wake on scroll or pointer movement, tuck away again once both stop.
+  useEffect(() => {
+    if (view !== 'closed') {
+      setIdle(false);
+      return undefined;
+    }
+
+    let timer;
+    const wake = () => {
+      setIdle(false);
+      clearTimeout(timer);
+      timer = setTimeout(() => setIdle(true), IDLE_DELAY);
+    };
+
+    wake();
+    window.addEventListener('scroll', wake, { passive: true, capture: true });
+    window.addEventListener('pointermove', wake, { passive: true });
+    window.addEventListener('touchstart', wake, { passive: true });
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('scroll', wake, { capture: true });
+      window.removeEventListener('pointermove', wake);
+      window.removeEventListener('touchstart', wake);
     };
   }, [view]);
 
@@ -135,7 +168,10 @@ export default function DashboardQuickActions() {
   };
 
   return (
-    <div className="dashboard-quick-actions" ref={rootRef}>
+    <div
+      className={`dashboard-quick-actions${idle && view === 'closed' ? ' is-idle' : ''}`}
+      ref={rootRef}
+    >
       {view === 'user' && canEdit && (
         <section className="dashboard-quick-actions__panel" id="dashboard-quick-actions-panel"
           role="dialog" aria-labelledby="quick-user-title" aria-describedby="quick-user-hint">
@@ -197,6 +233,8 @@ export default function DashboardQuickActions() {
       <button ref={launcherRef} type="button" className="dashboard-quick-actions__launcher"
         aria-label={view === 'closed' ? text.open : text.close} title={view === 'closed' ? text.open : text.close}
         aria-expanded={view !== 'closed'} aria-controls={view !== 'closed' ? 'dashboard-quick-actions-panel' : undefined}
+        onPointerEnter={() => setIdle(false)}
+        onFocus={() => setIdle(false)}
         onClick={() => view === 'closed' ? setView('menu') : close()}>
         {view === 'closed' ? <BsChatDotsFill size={28} aria-hidden="true" /> : <FiX size={29} aria-hidden="true" />}
         {view === 'closed' && <span className="dashboard-quick-actions__status" aria-hidden="true" />}
