@@ -1,8 +1,26 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { Buffer } from "buffer";
 import { useGetSubClassListQuery } from "../../../features/class/classQuerySlice";
 import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
-import PdfHeader from "./PdfHeader";
+
+/* ---------------------------------------------------------------------------
+   Image source helper — same approach as BanglaFeeList / AdmitCardGenerate.
+
+   The logo is stored as varbinary in SQL Server, so the API does not send a
+   path but a byte list: { type: 'Buffer', data: [137, 80, 78, 71, ...] }.
+   That is converted into a base64 data URL. A plain string path passes
+   through unchanged.
+--------------------------------------------------------------------------- */
+const toImageSrc = (img) => {
+  if (!img) return "";
+  if (typeof img === "string") return img;
+  if (img?.data) {
+    const base64String = Buffer.from(img.data).toString("base64");
+    return `data:image/png;base64,${base64String}`;
+  }
+  return "";
+};
 
 const AdmissionFormPdf = ({ student, admissionStatus, SubClassID, SessionID }) => {
 
@@ -43,6 +61,41 @@ const AdmissionFormPdf = ({ student, admissionStatus, SubClassID, SessionID }) =
     }
   };
 
+  /* -------------------------------------------------------------------------
+     Header data — read straight from Institution_Information, the same way
+     BanglaFeeList builds its own paper head instead of relying on a shared
+     header component. The name is rendered here with the default app font
+     (see .af-head-name below), because SolaimanLipi still carries legacy
+     Bijoy/ANSI glyph mappings and draws U+2018 (') as a Bengali conjunct,
+     turning "জামি'আ" into "জামি্থআ".
+  ------------------------------------------------------------------------- */
+  const institutionName =
+    institutionInfo?.InstitutionName ||
+    institutionInfo?.institutionName ||
+    "";
+
+  const institutionAddress =
+    institutionInfo?.Address ||
+    institutionInfo?.address ||
+    "";
+
+  const institutionContact =
+    institutionInfo?.ContactNumber ||
+    institutionInfo?.Mobile ||
+    institutionInfo?.MobileNo ||
+    "";
+
+  const institutionLogo = useMemo(
+    () =>
+      toImageSrc(
+        institutionInfo?.InstitutionLogo ||
+        institutionInfo?.Logo ||
+        institutionInfo?.logo ||
+        institutionInfo?.InstituteLogo
+      ),
+    [institutionInfo]
+  );
+
   // Admission Status
   const showPast =
     String(admissionStatus) === "1" ||
@@ -50,15 +103,15 @@ const AdmissionFormPdf = ({ student, admissionStatus, SubClassID, SessionID }) =
 
   const showCurrent = String(admissionStatus) === "2";
 
-  // সব শিক্ষাবর্ষের ভর্তি তথ্য
+  // Admission records of every session
   const allAdmissions = Array.isArray(student?.AllAdmissions)
     ? student.AllAdmissions
     : [];
 
-  // নির্বাচিত বর্তমান শিক্ষাবর্ষ
+  // Currently selected session
   const selectedSessionID = Number(SessionID);
 
-  // বর্তমান শিক্ষাবর্ষের আগের সর্বশেষ ভর্তি তথ্য বের করা
+  // Latest admission record before the selected session
   const pastAdmission = showPast
     ? allAdmissions
         .filter(
@@ -69,7 +122,7 @@ const AdmissionFormPdf = ({ student, admissionStatus, SubClassID, SessionID }) =
         )[0] || null
     : null;
 
-  // ================= বিগত তথ্য =================
+  // ================= PAST INFO =================
 
   const pastSubClassName = showPast
     ? conv(pastAdmission?.SubClass)
@@ -92,7 +145,7 @@ const AdmissionFormPdf = ({ student, admissionStatus, SubClassID, SessionID }) =
     : undefined;
 
 
-  // ================= বর্তমান তথ্য =================
+  // ================= CURRENT INFO =================
 
   const currentSubClassName = showCurrent
     ? conv(subClasData?.SubClass)
@@ -150,6 +203,35 @@ const AdmissionFormPdf = ({ student, admissionStatus, SubClassID, SessionID }) =
             font-family: 'SolaimanLipi', 'Bangla', sans-serif;
             color: #000;
           }
+
+          /* Institution name, address and contact line.
+
+             SolaimanLipi keeps legacy Bijoy/ANSI glyph mappings in the
+             punctuation range, so quote characters are drawn as Bengali
+             conjuncts. ExamReportList / BanglaFeeList print correctly
+             because they stay on the default app font, so the header of
+             this form uses the same stack. */
+          .af-form .af-head {
+            font-family: 'Noto Sans Bengali', 'Hind Siliguri', 'Kalpurush',
+                         'Nikosh', 'Bangla', sans-serif;
+          }
+          .af-head-name {
+            font-size: 24px;
+            font-weight: 700;
+            line-height: 1.25;
+            margin: 0;
+          }
+          .af-head-sub {
+            font-size: 13px;
+            line-height: 1.3;
+            margin: 2px 0 0 0;
+          }
+          .af-head-contact {
+            font-size: 12px;
+            line-height: 1.3;
+            margin: 1px 0 0 0;
+          }
+
           .af-box { border: 1px solid #000; }
           .af-title-bar {
             border-bottom: 1px solid #000;
@@ -168,7 +250,6 @@ const AdmissionFormPdf = ({ student, admissionStatus, SubClassID, SessionID }) =
           }
           .af-row { display: flex; }
           .af-label { font-weight: 700; }
-          // .af-pledge p { margin: 2px 0; text-align: justify; }
           .af-pledge p { text-align: justify; }
           .af-dotline {
             display: inline-block;
@@ -187,6 +268,10 @@ const AdmissionFormPdf = ({ student, admissionStatus, SubClassID, SessionID }) =
             .admission-form-page:last-child {
               page-break-after: auto;
               break-after: auto;
+            }
+            .af-head img {
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
             }
           }
           @media screen {
@@ -210,14 +295,40 @@ const AdmissionFormPdf = ({ student, admissionStatus, SubClassID, SessionID }) =
           background: "#fff",
         }}
       >
-        {/* ================= HEADER ================= */}
-        <PdfHeader compact={true} />
+        {/* ================= HEADER =================
+            Built here instead of the shared PdfHeader, like BanglaFeeList
+            builds its own paper head, so the institution name is not forced
+            onto SolaimanLipi. */}
+        <div className="af-head" style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          {institutionLogo && (
+            <img
+              src={institutionLogo}
+              alt=""
+              style={{ height: "64px", width: "64px", flexShrink: 0, objectFit: "contain" }}
+            />
+          )}
+
+          <div style={{ flex: 1, minWidth: 0, textAlign: "center" }}>
+            <h1 className="af-head-name">{institutionName}</h1>
+            {institutionAddress && (
+              <p className="af-head-sub">{institutionAddress}</p>
+            )}
+            {institutionContact && (
+              <p className="af-head-contact">{institutionContact}</p>
+            )}
+          </div>
+
+          {institutionLogo && (
+            <span style={{ height: "64px", width: "64px", flexShrink: 0 }} aria-hidden="true" />
+          )}
+        </div>
+
         <div style={{ borderBottom: "2px solid #000", margin: "4px 0 4px 0" }}></div>
 
         {/* ================= TOP INFO (Past | Form | Current) ================= */}
         <div className="af-row" style={{ marginTop: "6px", justifyContent: "space-between", alignItems: "flex-start" }}>
 
-          {/* LEFT: বিগত তথ্য */}
+          {/* LEFT: past info */}
           <div style={{ position: "relative", border: "1px solid #000", width: "38%", padding: "14px 8px 8px 8px", fontSize: "15px" }}>
             <div style={{ position: "absolute", top: "-10px", left: "50%", transform: "translateX(-50%)", background: "#fff", padding: "0 10px", border: "1px solid #000", fontWeight: "bold" }}>
               বিগত তথ্য
@@ -235,7 +346,7 @@ const AdmissionFormPdf = ({ student, admissionStatus, SubClassID, SessionID }) =
               <span>{pastStudentCode}</span>
             </div>
             <div>
-              <span className="">ভর্তি সিরিয়াল : </span>
+              <span className="">ভর্তি সিরিয়াল : </span>
               <span> </span>
               <span>{pastAdmissionSerial}</span>
             </div>
@@ -264,14 +375,14 @@ const AdmissionFormPdf = ({ student, admissionStatus, SubClassID, SessionID }) =
             </div>
           </div>
 
-          {/* MIDDLE: ভর্তি ফরম */}
+          {/* MIDDLE: form title */}
           <div style={{ width: "24%", display: "flex", justifyContent: "center", alignItems: "center", paddingTop: "10px" }}>
             <div style={{ border: "1px solid #000", padding: "8px 28px", fontSize: "18px", fontWeight: "bold", boxShadow: "4px 4px 0px #000", background: "#fff" }}>
               ভর্তি ফরম
             </div>
           </div>
 
-          {/* RIGHT: বর্তমান তথ্য */}
+          {/* RIGHT: current info */}
           <div style={{ position: "relative", border: "1px solid #000", width: "38%", padding: "14px 8px 8px 8px", fontSize: "16px" }}>
             <div style={{ position: "absolute", top: "-10px", left: "50%", transform: "translateX(-50%)", background: "#fff", padding: "0 10px", border: "1px solid #000", fontWeight: "bold" }}>
               বর্তমান
@@ -289,10 +400,11 @@ const AdmissionFormPdf = ({ student, admissionStatus, SubClassID, SessionID }) =
               <span>{currentStudentCode}</span>
             </div>
             <div>
-              <span className="">ভর্তি সিরিয়াল : </span>
+              <span className="">ভর্তি সিরিয়াল : </span>
               <span>{currentAdmissionSerial}</span>
             </div>
-            {/* 🟢 ভর্তির পরে (IsActive === "2") অবস্থায় বর্তমান বক্সেও আবাসিক/অনাবাসিক/ডে-কেয়ার দেখাবে */}
+            {/* After admission (IsActive === "2") the current box also shows
+                residential / non-residential / day-care checkboxes. */}
             {showCurrent && (
               <div style={{ display: "flex", alignItems: "center" }}>
                 <span className="">আবাসিক </span>
@@ -334,7 +446,7 @@ const AdmissionFormPdf = ({ student, admissionStatus, SubClassID, SessionID }) =
 
           <p style={{ }}>
             বিনীত নিবেদন এই যে, আমি{" "}
-            {institutionInfo?.InstitutionName} এর যাবতীয়
+            <span className="af-head">{institutionName}</span> এর যাবতীয়
             কানুন ও নীতিমালা মেনে চলার অঙ্গীকারে আবদ্ধ হয়ে ভর্তি হওয়ার জন্য
             বিনীত আবেদন করছি।
           </p>
@@ -350,10 +462,10 @@ const AdmissionFormPdf = ({ student, admissionStatus, SubClassID, SessionID }) =
           আমার বিস্তারিত তথ্যাদি নিম্নে প্রদান করা হলো-
         </div>
 
-        {/* 🟢 Left & Right Boxes with Gap */}
+        {/* Left & right boxes with gap */}
         <div className="af-row" style={{ marginTop: "4px", gap: "8px", alignItems: "stretch" }}>
 
-          {/* LEFT: Personal info */}
+          {/* LEFT: personal info */}
           <div style={{ width: "40%", border: "1px solid #000", padding: "0px 8px", fontSize: "16px" }}>
             {[
               { label: "নাম", value: studentName },
@@ -380,7 +492,7 @@ const AdmissionFormPdf = ({ student, admissionStatus, SubClassID, SessionID }) =
             ))}
           </div>
 
-          {/* RIGHT: Addresses */}
+          {/* RIGHT: addresses */}
           <div style={{ width: "60%", border: "1px solid #000" }}>
 
             <div style={{ textAlign: "center", fontWeight: 700, borderBottom: "1px solid #000", padding: "2px 0", fontSize: "16px" }}>
@@ -427,28 +539,6 @@ const AdmissionFormPdf = ({ student, admissionStatus, SubClassID, SessionID }) =
               <span style={{ flex: 1, paddingLeft: "4px" }}></span>
             </div>
           </div>
-
-          {/* Right Box */}
-          {/* <div className="w-1/2 border border-black p-2 h-40">
-            <div className="text-center border-b border-black text-xs mb-1">
-              <h2 className="font-bold">স্থায়ী ঠিকানা</h2>
-            </div>
-            <div className="grid grid-cols-2 text-2xs">
-              <p className="font-bold">গ্রাম/মহল্লা: </p>
-              <p className="font-bold">থানা: </p>
-              <p className="font-bold">ডাক: </p>
-              <p className="font-bold">জেলা: </p>
-            </div>
-            <div className="text-center border-b border-black text-xs mb-1 mt-1">
-              <h2 className="font-bold">অস্থায়ী ঠিকানা</h2>
-            </div>
-            <div className="grid grid-cols-2 text-2xs">
-              <p className="font-bold">গ্রাম/মহল্লা: </p>
-              <p className="font-bold">থানা: </p>
-              <p className="font-bold">ডাক: </p>
-              <p className="font-bold">জেলা: </p>
-            </div>
-          </div> */}
         </div>
 
         {/* ================= GUARDIAN INFO ================= */}

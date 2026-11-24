@@ -124,28 +124,13 @@ export default function StudentsReportList() {
   );
 
   /* -------- রিপোর্ট-ভিত্তিক বাড়তি অপশন (দ্বিতীয় সারিতে) --------
-     🔹 কিছুই না থাকলে null — তাহলে খালি ভায়োলেট সারিটা রেন্ডারই হবে না */
-  // const hasExtraFilters = Boolean(cfg.printModeSwitch);
-  // const extraFilters = !hasExtraFilters ? null : (
-  //   <>
-  //     {cfg.printModeSwitch && (
-  //       <FilterSelect
-  //         label="প্রিন্ট মোড"
-  //         value={printMode}
-  //         onChange={(e) => setPrintMode(e.target.value)}
-  //       >
-  //         <option value="data">ডেটা সহ ফরম</option>
-  //         <option value="blank">খালি ফরম (হাতে লিখার জন্য)</option>
-  //       </FilterSelect>
-  //     )}
-  //   </>
-  // );
-
+  🔹 কিছুই না থাকলে null — তাহলে খালি ভায়োলেট সারিটা রেন্ডারই হবে না */
   const hasExtraFilters = Boolean(cfg.printModeSwitch);
 
   const extraFilters = !hasExtraFilters ? null : (
-    <div className="flex flex-wrap gap-4 items-end">
-
+    /* flex-wrap সরিয়ে flex-nowrap ব্যবহার করা হয়েছে যাতে এক লাইনে থাকে */
+    <div className="flex flex-nowrap items-end gap-4">
+      
       {/* প্রিন্ট মোড */}
       {cfg.printModeSwitch && (
         <FilterSelect
@@ -164,17 +149,16 @@ export default function StudentsReportList() {
           <label className="text-xs font-semibold text-slate-600">
             ইউজার কোড
           </label>
-
           <input
             type="text"
             placeholder="User Code..."
             value={userCodeSearch}
             onChange={(e) => setUserCodeSearch(e.target.value)}
-            className="border border-slate-300 rounded-md px-3 py-[6px] text-sm focus:outline-none focus:ring-1 focus:ring-violet-500 w-40"
+            /* h-[38px] বা প্যাডিং ট্রিম করা হয়েছে যাতে সিলেক্ট বক্সের সাথে হাইট মিলে যায় */
+            className="border border-slate-300 rounded-md px-3 py-[6px] h-[38px] text-sm focus:outline-none focus:ring-1 focus:ring-violet-500 w-40"
           />
         </div>
       )}
-
     </div>
   );
 
@@ -236,36 +220,6 @@ export default function StudentsReportList() {
             rowsPerPage={rowsPerPage}
           />
         );
-
-      // case 'AdmissionFormPdf': {
-      //   // খালি ফরম মোড → একটি ফাঁকা ফরম
-      //   if (printMode === 'blank' || !filteredData || filteredData.length === 0) {
-      //     return (
-      //       <div className="admission-form-wrap">
-      //         <AdmissionFormPdf
-      //           SubClassID={filters.SubClassID}
-      //           SessionID={filters.SessionID}
-      //           admissionStatus={printMode === 'blank' ? '' : filters.IsActive}
-      //         />
-      //       </div>
-      //     );
-      //   }
-      //   // ডেটা মোড → প্রতিটি ছাত্রের জন্য আলাদা ফরম
-      //   return (
-      //     <>
-      //       {filteredData.map((student, i) => (
-      //         <div key={student.StudentCode || i} className="admission-form-wrap">
-      //           <AdmissionFormPdf
-      //             SubClassID={filters.SubClassID}
-      //             SessionID={filters.SessionID}
-      //             student={student}
-      //             admissionStatus={filters.IsActive}
-      //           />
-      //         </div>
-      //       ))}
-      //     </>
-      //   );
-      // }
 
       case 'AdmissionFormPdf': {
 
