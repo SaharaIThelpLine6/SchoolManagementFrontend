@@ -122,6 +122,10 @@ export const feeCollectionSlice = createApi({
       query: ({ fundId, caId }) => `general_ledger_by_caid/${fundId}/${caId}`,
       providesTags: ['GeneralLedgersByFundAndCaids'],
     }),
+    getGeneralLedgersByFund: builder.query({
+      query: ({ fundId }) => `general_ledger_by_fund/${fundId}`,
+      providesTags: ['GeneralLedgersByFundAndCaids'],
+    }),
 
     getGLedgers: builder.query({
       query: () => `general_ledger/`,
@@ -677,5 +681,6 @@ export const {
   useUpdateMonthlyAttendanceLeftMutation,
   useUpdateMonthlyAttendanceRightMutation,
   useGetSearchStudentsExamFeeQuery,
-  useGetPaymentTransactionReportQuery
+  useGetPaymentTransactionReportQuery,
+  useGetGeneralLedgersByFundQuery
 } = feeCollectionSlice;

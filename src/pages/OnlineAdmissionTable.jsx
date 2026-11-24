@@ -205,14 +205,14 @@ const OnlineAdmissionTable = ({ pageTitle }) => {
       field: 'UserName',
       hozAlign: 'center',
       width: 150,
-      render: (row) => <p>{bnBijoy2Unicode(row.UserName)}</p>,
+      render: (row) => <p>{(row.UserName)}</p>,
     },
     {
       title: translate('Father Name'),
       field: 'FatherName',
       hozAlign: 'center',
       width: 150,
-      render: (row) => <p>{bnBijoy2Unicode(row.FatherName)}</p>,
+      render: (row) => <p>{(row.FatherName)}</p>,
     },
     {
       title: translate('Gender'),
@@ -233,14 +233,14 @@ const OnlineAdmissionTable = ({ pageTitle }) => {
       field: 'permanentVill',
       hozAlign: 'center',
       width: 120,
-      render: (row) => <p>{bnBijoy2Unicode(row.permanentVill)}</p>,
+      render: (row) => <p>{(row.permanentVill)}</p>,
     },
     {
       title: translate('Post Office'),
       field: 'permanentPost',
       hozAlign: 'center',
       width: 120,
-      render: (row) => <p>{bnBijoy2Unicode(row.permanentPost)}</p>,
+      render: (row) => <p>{(row.permanentPost)}</p>,
     },
     {
       title: translate('Date of Birth'),

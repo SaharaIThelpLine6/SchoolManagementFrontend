@@ -88,6 +88,7 @@ const DepositCosts = ({ pageTitle }) => {
         skip: !FundID || !CAID,
       }
     );
+
   const { data: gSLData } = useGetSubLedgerQuery(ledgerGLID, {
     skip: !ledgerGLID,
   });

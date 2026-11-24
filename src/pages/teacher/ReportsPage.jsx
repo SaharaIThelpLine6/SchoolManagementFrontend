@@ -1,3 +1,4 @@
+// ReportsPage.jsx — বেতন রিপোর্ট (v2: YearID / MonthID, ডাটাবেসের মাস)
 import React, { useEffect, useMemo, useState } from 'react';
 import { Drawer } from './Drawer';
 import { Modal } from './Modal';
@@ -5,10 +6,10 @@ import { ReceiptView } from './ReceiptView';
 import { StatusBadge } from './StatusBadge';
 import { SummaryCard } from './SummaryCard';
 import { TeacherSelect } from './TeacherSelect';
-import { YearSelect } from './YearSelect';
-import { LABELS, MONTHS_BN, MONTHS_SHORT_BN } from '../../helper/labels';
-import { getMonthStatus } from '../../utils/calc';
-import { formatDate, formatMoney, getMonthNameBn } from '../../utils/format';
+import { SalaryYearSelect, useYearValue } from './SalaryYearSelect';
+import { LABELS } from '../../helper/labels';
+import { formatDate, formatMoney, toBengaliDigits } from '../../utils/format';
+import { mapTeacher, mapPayment, mapMonthRow, toNum } from '../../helper/salaryMappers';
 import {
   useGetTeachersQuery,
   useGetDesignationQuery,
@@ -26,54 +27,52 @@ const MATRIX_CELL_CLASSES = {
   ADVANCE: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100',
 };
 
-// ─── Mappers ──────────────────────────────────────────────────────
-const mapTeacher = (t) => ({
-  userId: t.userId ?? t.UserID,
-  userCode: t.userCode ?? t.UserCode ?? '',
-  name: t.name ?? t.UserName ?? '',
-  designation: (t.designation ?? t.Designation ?? '').trim(),
-});
-
-const mapPayment = (p) => ({
-  paymentId: p.PaymentID ?? p.paymentId,
-  receiptNo: p.ReceiptNo ?? p.receiptNo,
-  userId: p.UserID ?? p.userId,
-  paymentDate: (p.PaymentDate ?? p.paymentDate ?? '').toString().slice(0, 10),
-  method: p.PaymentMethod ?? p.method ?? 'CASH',
-  note: p.Note ?? p.note ?? '',
-  totalAmount: Number(p.TotalAmount ?? p.totalAmount ?? 0) || 0,
-  isReversed: Boolean(p.IsReversed ?? p.isReversed),
-  reverseReason: p.ReverseReason ?? p.reverseReason ?? null,
-  details: (p.Details ?? p.details ?? []).map((d) => ({
-    year: Number(d.SalaryYear ?? d.year),
-    month: Number(d.SalaryMonth ?? d.month),
-    amount: Number(d.Amount ?? d.amount ?? 0) || 0,
-  })),
-});
+const Icon = ({ d, size = 14, className = '' }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    {d.map((p, i) => <path key={i} d={p} />)}
+  </svg>
+);
+const IC = {
+  chart: ['M3 3v18h18', 'M7 12h3v6H7z', 'M12 8h3v10h-3z', 'M17 5h3v13h-3z'],
+  download: ['M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4', 'M7 10l5 5 5-5', 'M12 15V3'],
+  print: ['M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2', 'M6 9V3h12v6', 'M6 14h12v8H6z'],
+  receipt: ['M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z', 'M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8', 'M12 17.5v-11'],
+  undo: ['M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8', 'M3 3v5h5'],
+  down: ['m6 9 6 6 6-6'],
+  right: ['m9 18 6-6-6-6'],
+};
 
 const mapDesignations = (arr) =>
-  [...(arr ?? [])]
-    .sort((a, b) => (a.SL ?? 0) - (b.SL ?? 0))
-    .map((d) => (d.Designation ?? '').trim())
-    .filter(Boolean);
-
+  [...(arr ?? [])].sort((a, b) => (a.SL ?? 0) - (b.SL ?? 0)).map((d) => (d.Designation ?? '').trim()).filter(Boolean);
 const norm = (s) => (s ?? '').trim().toLowerCase();
 
-// ─── Component ────────────────────────────────────────────────────
+// report থেকে আসা একটা মাসের ডিটেইল ও পেমেন্ট
+const buildMonthExtras = (reportData, monthId, paymentById) => {
+  const details = (reportData?.details ?? [])
+    .filter((d) => Number(d.MonthID) === Number(monthId))
+    .map((d) => ({ headId: d.HeadID, headName: d.HeadName, headType: d.HeadType, amount: toNum(d.Amount) }));
+  const monthPayments = (reportData?.payments ?? [])
+    .filter((p) => Number(p.MonthID) === Number(monthId))
+    .map((p) => ({ payment: paymentById.get(Number(p.PaymentID)) ?? mapPayment(p), monthAmount: toNum(p.Amount) }));
+  return { details, monthPayments };
+};
+
 export const ReportsPage = () => {
   const [activeTab, setActiveTab] = useState('teacherMonthly');
 
-  // Tab A state
+  // Tab A
   const [tabATeacherId, setTabATeacherId] = useState(null);
-  const [tabAYear, setTabAYear] = useState(new Date().getFullYear());
+  const [tabAYearId, setTabAYearId] = useState(null);
+  const tabAYearValue = useYearValue(tabAYearId);
   const [expandedMonths, setExpandedMonths] = useState({});
 
-  // Tab B state
-  const [tabBYear, setTabBYear] = useState(new Date().getFullYear());
+  // Tab B
+  const [tabBYearId, setTabBYearId] = useState(null);
+  const tabBYearValue = useYearValue(tabBYearId);
   const [tabBDesignation, setTabBDesignation] = useState('ALL');
-  const [drawerCell, setDrawerCell] = useState(null);
+  const [drawerCell, setDrawerCell] = useState(null); // { userId, monthId, monthName }
 
-  // Tab C state
+  // Tab C
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [tabCTeacherId, setTabCTeacherId] = useState('');
@@ -83,216 +82,139 @@ export const ReportsPage = () => {
   const [reverseReason, setReverseReason] = useState('');
   const [reverseError, setReverseError] = useState('');
 
-  // Shared receipt modal
   const [receiptPayment, setReceiptPayment] = useState(null);
-
   const [toast, setToast] = useState(null);
   const addToast = (kind, text) => {
     setToast({ kind, text });
     window.setTimeout(() => setToast(null), 2500);
   };
 
-  // ─── Base Queries ───────────────────────────────────────────────
-  const { data: teachersRes, isLoading: teachersLoading } = useGetTeachersQuery();
+  // ─── Base ─────────────────────────────────────────────────────
+  const { data: teachersRes } = useGetTeachersQuery();
   const { data: designationData } = useGetDesignationQuery();
+  const teachers = useMemo(() => (teachersRes?.data ?? []).map(mapTeacher), [teachersRes]);
+  const designations = useMemo(() => Array.from(new Set(mapDesignations(designationData))), [designationData]);
+  const teacherMap = useMemo(() => new Map(teachers.map((t) => [Number(t.userId), t])), [teachers]);
 
-  const teachers = useMemo(
-    () => (teachersRes?.data ?? []).map(mapTeacher),
-    [teachersRes]
-  );
-
-  const designations = useMemo(() => {
-    const list = mapDesignations(designationData);
-    return Array.from(new Set(list));
-  }, [designationData]);
-
-  const teacherMap = useMemo(
-    () => new Map(teachers.map((t) => [Number(t.userId), t])),
-    [teachers]
-  );
-
-  // Auto-select first teacher for Tab A
   useEffect(() => {
-    if (!tabATeacherId && teachers.length > 0) {
-      setTabATeacherId(teachers[0].userId);
-    }
+    if (!tabATeacherId && teachers.length > 0) setTabATeacherId(teachers[0].userId);
   }, [teachers, tabATeacherId]);
 
-  // ─── Tab A Query ────────────────────────────────────────────────
-  const { data: reportRes, isLoading: reportLoading } = useGetReportTeacherMonthlyQuery(
-    { UserID: tabATeacherId, Year: tabAYear },
-    { skip: !tabATeacherId }
-  );
-
-  // ─── Tab B Query ────────────────────────────────────────────────
-  const { data: matrixRes, isLoading: matrixLoading } = useGetReportMatrixQuery({ Year: tabBYear });
-
-  // ─── Tab C Query ────────────────────────────────────────────────
-  const { data: allPaymentsRes, isLoading: paymentsLoading } = useGetPaymentsQuery();
+  const { data: allPaymentsRes } = useGetPaymentsQuery();
   const [reversePayment, { isLoading: isReversing }] = useReversePaymentMutation();
+  const allPayments = useMemo(() => (allPaymentsRes?.data ?? []).map(mapPayment), [allPaymentsRes]);
+  const paymentById = useMemo(() => new Map(allPayments.map((p) => [Number(p.paymentId), p])), [allPayments]);
 
-  const allPayments = useMemo(
-    () => (allPaymentsRes?.data ?? []).map(mapPayment),
-    [allPaymentsRes]
+  // ═══════════════════ TAB A ═══════════════════
+  const { data: reportRes, isFetching: reportLoading } = useGetReportTeacherMonthlyQuery(
+    { UserID: tabATeacherId, YearID: tabAYearId },
+    { skip: !tabATeacherId || !tabAYearId }
   );
 
-  // ─── Tab A Data (from backend report) ───────────────────────────
   const tabARows = useMemo(() => {
-    if (!tabATeacherId) return [];
-    const monthsData = reportRes?.data?.months ?? [];
-    const advanceData = reportRes?.data?.advance ?? [];
-    const detailsData = reportRes?.data?.details ?? [];
-    const paymentsData = reportRes?.data?.payments ?? [];
+    const data = reportRes?.data;
+    if (!data) return [];
+    return (data.months ?? []).map((r) => ({ ...mapMonthRow(r), ...buildMonthExtras(data, r.MonthID, paymentById) }));
+  }, [reportRes, paymentById]);
 
-    // Build lookups
-    const monthsMap = new Map();
-    for (const m of monthsData) monthsMap.set(Number(m.SalaryMonth), m);
-    for (const a of advanceData) monthsMap.set(Number(a.SalaryMonth), a);
-
-    return MONTHS_BN.map((monthName, idx) => {
-      const m = idx + 1;
-      const mData = monthsMap.get(m);
-      const hasSheet = Boolean(mData) && Number(mData.NetAmount) > 0;
-      const net = hasSheet ? Number(mData.NetAmount) : 0;
-      const paid = mData ? Number(mData.PaidAmount) : 0;
-      const due = hasSheet ? Math.max(0, net - paid) : 0;
-
-      // Determine status
-      let status = 'NO_SHEET';
-      if (hasSheet) {
-        status = paid <= 0 ? 'UNPAID' : (paid < net ? 'PARTIAL' : 'PAID');
-      } else if (paid > 0) {
-        status = 'ADVANCE';
-      }
-
-      // Filter payments for this month
-      const monthPayments = paymentsData
-        .filter((p) => Number(p.SalaryMonth) === m)
-        .map((p) => ({ payment: p, monthAmount: Number(p.Amount) }));
-
-      return { month: m, monthName, hasSheet, net, paid, due, status, monthPayments, detailsData };
-    });
-  }, [tabATeacherId, reportRes]);
-
-  const tabATotals = useMemo(() => {
-    return tabARows.reduce(
-      (acc, r) => {
-        acc.net += r.net;
-        acc.paid += r.paid;
-        acc.due += r.due;
-        return acc;
-      },
-      { net: 0, paid: 0, due: 0 }
-    );
-  }, [tabARows]);
+  const tabATotals = useMemo(
+    () => tabARows.reduce((a, r) => ({ net: a.net + r.net, paid: a.paid + r.paid, due: a.due + r.due }), { net: 0, paid: 0, due: 0 }),
+    [tabARows]
+  );
 
   const handleExportTabACsv = () => {
     const teacher = teacherMap.get(Number(tabATeacherId));
     const header = [LABELS.common.month, LABELS.reportsPage.colNet, LABELS.reportsPage.colPaid, LABELS.reportsPage.colDue, LABELS.common.status];
-    const lines = tabARows.map((r) => [
-      `${r.monthName} ${tabAYear}`,
-      String(r.net),
-      String(r.paid),
-      String(r.due),
-      LABELS.monthStatus[r.status] || r.status,
-    ]);
-    lines.push([LABELS.common.total, String(tabATotals.net), String(tabATotals.paid), String(tabATotals.due), '']);
-
-    const csv = '\uFEFF' + [header, ...lines].map((row) => row.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
+    const lines = tabARows.map((r) => [`${r.monthName} ${tabAYearValue}`, r.net, r.paid, r.due, LABELS.monthStatus[r.status] || r.status]);
+    lines.push([LABELS.common.total, tabATotals.net, tabATotals.paid, tabATotals.due, '']);
+    const csv = '﻿' + [header, ...lines].map((row) => row.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
     const a = document.createElement('a');
     a.href = url;
-    a.download = `salary-report-${teacher?.userCode ?? tabATeacherId}-${tabAYear}.csv`;
+    a.download = `salary-report-${teacher?.userCode || tabATeacherId}-${tabAYearValue}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
-  // ─── Tab B Data (from backend matrix) ───────────────────────────
-  const matrixTeachers = useMemo(() => {
-    if (tabBDesignation === 'ALL') return teachers;
-    return teachers.filter((t) => norm(t.designation) === norm(tabBDesignation));
-  }, [teachers, tabBDesignation]);
+  // ═══════════════════ TAB B ═══════════════════
+  const { data: matrixRes, isFetching: matrixLoading } = useGetReportMatrixQuery({ YearID: tabBYearId }, { skip: !tabBYearId });
+  const matrixMonths = useMemo(() => matrixRes?.data?.months ?? [], [matrixRes]);
+  const cellMap = useMemo(() => {
+    const m = new Map();
+    for (const c of matrixRes?.data?.cells ?? []) m.set(`${Number(c.UserID)}-${Number(c.MonthID)}`, c);
+    return m;
+  }, [matrixRes]);
+
+  const getCell = (userId, monthId) => {
+    const c = cellMap.get(`${Number(userId)}-${Number(monthId)}`);
+    const net = toNum(c?.NetAmount);
+    const paid = toNum(c?.PaidAmount);
+    const hasSheet = Boolean(c?.SheetID);
+    return { net, paid, due: hasSheet ? Math.max(0, net - paid) : 0, status: c?.PaymentStatus ?? 'NO_SHEET' };
+  };
+
+  const matrixTeachers = useMemo(
+    () => (tabBDesignation === 'ALL' ? teachers : teachers.filter((t) => norm(t.designation) === norm(tabBDesignation))),
+    [teachers, tabBDesignation]
+  );
 
   const matrixTotals = useMemo(() => {
-    const perMonth = Array.from({ length: 12 }, () => ({ net: 0, paid: 0, due: 0 }));
+    const perMonth = {};
+    for (const m of matrixMonths) perMonth[m.MonthID] = { net: 0, paid: 0, due: 0 };
     let grandNet = 0, grandPaid = 0, grandDue = 0;
-
     for (const t of matrixTeachers) {
-      for (let m = 1; m <= 12; m++) {
-        const net = getMatrixNet(matrixRes, t.userId, m);
-        const paid = getMatrixPaid(matrixRes, t.userId, m);
-        const due = Math.max(0, net - paid);
-        perMonth[m - 1].net += net;
-        perMonth[m - 1].paid += paid;
-        perMonth[m - 1].due += due;
-        grandNet += net; grandPaid += paid; grandDue += due;
+      for (const m of matrixMonths) {
+        const c = getCell(t.userId, m.MonthID);
+        perMonth[m.MonthID].net += c.net;
+        perMonth[m.MonthID].paid += c.paid;
+        perMonth[m.MonthID].due += c.due;
+        grandNet += c.net; grandPaid += c.paid; grandDue += c.due;
       }
     }
     return { perMonth, grandNet, grandPaid, grandDue };
-  }, [matrixTeachers, tabBYear, matrixRes]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matrixTeachers, matrixMonths, cellMap]);
 
-  // ─── Drawer Data (for matrix cell) ──────────────────────────────
+  // Drawer: ক্লিক করা শিক্ষকের রিপোর্ট আলাদা করে আনা
+  const { data: drawerReportRes, isFetching: drawerLoading } = useGetReportTeacherMonthlyQuery(
+    { UserID: drawerCell?.userId, YearID: tabBYearId },
+    { skip: !drawerCell || !tabBYearId }
+  );
+
   const drawerData = useMemo(() => {
     if (!drawerCell) return null;
     const teacher = teacherMap.get(Number(drawerCell.userId));
-    const paid = getMatrixPaid(matrixRes, drawerCell.userId, drawerCell.month);
-    const net = getMatrixNet(matrixRes, drawerCell.userId, drawerCell.month);
-    const due = Math.max(0, net - paid);
+    const cell = getCell(drawerCell.userId, drawerCell.monthId);
+    const extras = buildMonthExtras(drawerReportRes?.data, drawerCell.monthId, paymentById);
+    return { teacher, ...cell, ...extras };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [drawerCell, teacherMap, cellMap, drawerReportRes, paymentById]);
 
-    let status = 'NO_SHEET';
-    if (net > 0) {
-      status = paid <= 0 ? 'UNPAID' : (paid < net ? 'PARTIAL' : 'PAID');
-    } else if (paid > 0) {
-      status = 'ADVANCE';
-    }
+  // ═══════════════════ TAB C ═══════════════════
+  const filteredPayments = useMemo(
+    () =>
+      allPayments
+        .filter((p) => {
+          if (!showReversed && p.isReversed) return false;
+          if (tabCTeacherId && Number(p.userId) !== Number(tabCTeacherId)) return false;
+          if (tabCMethod !== 'ALL' && p.method !== tabCMethod) return false;
+          if (fromDate && p.paymentDate < fromDate) return false;
+          if (toDate && p.paymentDate > toDate) return false;
+          return true;
+        })
+        .sort((a, b) => String(b.paymentDate).localeCompare(String(a.paymentDate))),
+    [allPayments, showReversed, tabCTeacherId, tabCMethod, fromDate, toDate]
+  );
 
-    // Get actual details from Tab A report if available (only for selected teacher)
-    let sheet = null;
-    const detailsData = reportRes?.data?.details ?? [];
-    if (Number(drawerCell.userId) === Number(tabATeacherId) && net > 0) {
-      const monthDetails = detailsData.filter(d => Number(d.SalaryMonth) === drawerCell.month);
-      sheet = {
-        netAmount: net, details: monthDetails.map(d => ({
-          headId: d.HeadID, headName: d.HeadName, headType: d.HeadType, amount: Number(d.Amount)
-        }))
-      };
-    }
+  const validHistoryTotal = useMemo(
+    () => filteredPayments.filter((p) => !p.isReversed).reduce((acc, p) => acc + p.totalAmount, 0),
+    [filteredPayments]
+  );
 
-    // Get payments from allPayments or reportRes
-    const monthPayments = allPayments
-      .filter(p => Number(p.userId) === Number(drawerCell.userId) && !p.isReversed)
-      .flatMap(p => p.details.filter(d => d.month === drawerCell.month && d.year === drawerCell.year).map(d => ({ payment: p, monthAmount: d.amount })));
-
-    return { teacher, sheet, paid, due, status, monthPayments };
-  }, [drawerCell, teacherMap, matrixRes, allPayments, reportRes, tabATeacherId]);
-
-  // ─── Tab C Data ─────────────────────────────────────────────────
-  const filteredPayments = useMemo(() => {
-    return allPayments
-      .filter((p) => {
-        if (!showReversed && p.isReversed) return false;
-        if (tabCTeacherId && Number(p.userId) !== Number(tabCTeacherId)) return false;
-        if (tabCMethod !== 'ALL' && p.method !== tabCMethod) return false;
-        if (fromDate && p.paymentDate < fromDate) return false;
-        if (toDate && p.paymentDate > toDate) return false;
-        return true;
-      })
-      .sort((a, b) => String(b.paymentDate).localeCompare(String(a.paymentDate)));
-  }, [allPayments, showReversed, tabCTeacherId, tabCMethod, fromDate, toDate]);
-
-  const validHistoryTotal = useMemo(() => {
-    return filteredPayments.filter((p) => !p.isReversed).reduce((acc, p) => acc + p.totalAmount, 0);
-  }, [filteredPayments]);
-
-  // ─── Actions ────────────────────────────────────────────────────
   const handleConfirmReverse = async (e) => {
     e.preventDefault();
     if (!reverseTarget) return;
-    if (!reverseReason.trim()) {
-      setReverseError(LABELS.reportsPage.errorReverseReasonRequired);
-      return;
-    }
+    if (!reverseReason.trim()) return setReverseError(LABELS.reportsPage.errorReverseReasonRequired);
     try {
       await reversePayment({ paymentId: reverseTarget.paymentId, ReverseReason: reverseReason }).unwrap();
       addToast('info', LABELS.reportsPage.toastReversed);
@@ -304,121 +226,82 @@ export const ReportsPage = () => {
     }
   };
 
-  // ─── Helper functions for matrix ────────────────────────────────
-  function getMatrixNet(res, userId, month) {
-    const m = res?.data?.months?.find(x => Number(x.UserID) === Number(userId) && Number(x.SalaryMonth) === month);
-    return m ? Number(m.NetAmount) : 0;
-  }
-  function getMatrixPaid(res, userId, month) {
-    const m = res?.data?.months?.find(x => Number(x.UserID) === Number(userId) && Number(x.SalaryMonth) === month);
-    const a = res?.data?.advance?.find(x => Number(x.UserID) === Number(userId) && Number(x.SalaryMonth) === month);
-    return Number(m?.PaidAmount || 0) + Number(a?.PaidAmount || 0);
-  }
-
-  const isLoading = teachersLoading || reportLoading || matrixLoading || paymentsLoading;
+  const ReceiptBtn = ({ payment, compact }) => (
+    <button
+      type="button"
+      onClick={(e) => { e.stopPropagation(); setReceiptPayment(payment); }}
+      className={compact
+        ? 'inline-flex items-center gap-1 text-teal-700 hover:text-teal-900 font-medium'
+        : 'inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-md hover:bg-slate-50'}
+    >
+      <Icon d={IC.receipt} /><span>{LABELS.paymentsPage.viewReceipt}</span>
+    </button>
+  );
 
   return (
     <div className="space-y-5">
-      {/* ================================================ গ্রেডিয়েন্ট হেডার — Reports Page */}
+      {/* ===================== হেডার */}
       <div className="no-print relative overflow-hidden rounded-xl bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-700 px-5 py-4 text-white shadow-lg">
         <div className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full bg-white/10" />
         <div className="pointer-events-none absolute -bottom-20 -left-10 h-48 w-48 rounded-full bg-white/5" />
-
         <div className="relative z-10 flex flex-col gap-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-lg border border-white/20 bg-white/20 backdrop-blur">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 3v18h18" />
-                  <rect x="7" y="12" width="3" height="6" rx="1" />
-                  <rect x="12" y="8" width="3" height="10" rx="1" />
-                  <rect x="17" y="5" width="3" height="13" rx="1" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-base font-bold leading-tight sm:text-[20px]">{LABELS.nav.reports}</h3>
-                <p className="text-xs text-white/80 sm:text-sm">{LABELS.reportsPage.subtitle}</p>
-              </div>
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-lg border border-white/20 bg-white/20 backdrop-blur">
+              <Icon size={20} d={IC.chart} />
+            </div>
+            <div>
+              <h3 className="text-base font-bold leading-tight sm:text-[20px]">{LABELS.nav.reports}</h3>
+              <p className="text-xs text-white/80 sm:text-sm">{LABELS.reportsPage.subtitle}</p>
             </div>
           </div>
-
           <div className="flex flex-wrap items-center gap-1 rounded-lg bg-white/95 p-1 shadow-sm backdrop-blur">
             {[
               ['teacherMonthly', LABELS.reportsPage.tabTeacherMonthly],
               ['matrix', LABELS.reportsPage.tabMatrix],
               ['history', LABELS.reportsPage.tabHistory],
-            ].map(([id, label]) => {
-              const active = activeTab === id;
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  role="tab"
-                  aria-selected={active}
-                  onClick={() => setActiveTab(id)}
-                  className={`px-3.5 py-2 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap shrink-0 ${active ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                    }`}
-                >
-                  {label}
-                </button>
-              );
-            })}
+            ].map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                aria-selected={activeTab === id}
+                onClick={() => setActiveTab(id)}
+                className={`px-3.5 py-2 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap ${activeTab === id ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}`}
+              >
+                {label}
+              </button>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* ==================== TAB A: TEACHER MONTHLY STATEMENT ==================== */}
+      {/* ==================== TAB A ==================== */}
       {activeTab === 'teacherMonthly' && (
         <div className="space-y-5">
           <div className="bg-white border border-slate-200 rounded-xl p-4 flex flex-wrap items-end justify-between gap-4 no-print">
             <div className="flex flex-wrap items-end gap-3">
               <div className="w-64">
                 <label className="block text-xs font-medium text-slate-600 mb-1">{LABELS.common.teacher}</label>
-                <TeacherSelect
-                  teachers={teachers}
-                  value={tabATeacherId}
-                  onChange={(id) => { setTabATeacherId(id); setExpandedMonths({}); }}
-                />
+                <TeacherSelect teachers={teachers} value={tabATeacherId} onChange={(id) => { setTabATeacherId(id); setExpandedMonths({}); }} />
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">{LABELS.common.year}</label>
-                <YearSelect value={tabAYear} onChange={setTabAYear} />
+                <SalaryYearSelect value={tabAYearId} onChange={(id) => { setTabAYearId(id); setExpandedMonths({}); }} />
               </div>
             </div>
-
             <div className="flex items-center gap-2.5">
-              <button
-                type="button"
-                onClick={handleExportTabACsv}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 whitespace-nowrap shrink-0"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <path d="M7 10l5 5 5-5" />
-                  <path d="M12 15V3" />
-                </svg>
-                <span>{LABELS.common.exportCsv}</span>
+              <button type="button" onClick={handleExportTabACsv} className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 whitespace-nowrap">
+                <Icon size={16} d={IC.download} /><span>{LABELS.common.exportCsv}</span>
               </button>
-              <button
-                type="button"
-                onClick={() => window.print()}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 whitespace-nowrap shrink-0"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
-                  <path d="M6 9V3h12v6" />
-                  <rect width="12" height="8" x="6" y="14" rx="1" />
-                </svg>
-                <span>{LABELS.common.print}</span>
+              <button type="button" onClick={() => window.print()} className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 whitespace-nowrap">
+                <Icon size={16} d={IC.print} /><span>{LABELS.common.print}</span>
               </button>
             </div>
           </div>
 
           <div className="hidden print:block border-b border-slate-300 pb-3 mb-4">
             <h2 className="text-lg font-bold">{LABELS.app.schoolName}</h2>
-            <p className="text-sm">
-              {LABELS.reportsPage.tabTeacherMonthly} — {teacherMap.get(Number(tabATeacherId))?.name} ({tabAYear})
-            </p>
+            <p className="text-sm">{LABELS.reportsPage.tabTeacherMonthly} — {teacherMap.get(Number(tabATeacherId))?.name} ({toBengaliDigits(tabAYearValue)})</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -441,50 +324,43 @@ export const ReportsPage = () => {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {reportLoading ? (
-                    <tr><td colSpan={5} className="text-center py-4">Loading...</td></tr>
-                  ) : tabARows.map((row) => {
-                    const isExpanded = Boolean(expandedMonths[row.month]);
-                    return (
-                      <React.Fragment key={row.month}>
-                        <tr
-                          onClick={() => setExpandedMonths((prev) => ({ ...prev, [row.month]: !prev[row.month] }))}
-                          className="cursor-pointer hover:bg-slate-50 transition-colors"
-                        >
-                          <td className="py-3 px-4 font-medium text-slate-900">
-                            <div className="flex items-center gap-2">
-                              {isExpanded ? (
-                                <svg className="w-4 h-4 text-slate-400 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <path d="m6 9 6 6 6-6" />
-                                </svg>
-                              ) : (
-                                <svg className="w-4 h-4 text-slate-400 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <path d="m9 18 6-6-6-6" />
-                                </svg>
-                              )}
-                              <span>{row.monthName}</span>
-                              {row.monthPayments.length > 0 && (
-                                <span className="text-xs text-slate-400">({row.monthPayments.length})</span>
-                              )}
-                            </div>
-                          </td>
-                          <td className="py-3 px-4 text-right font-mono-num">{row.hasSheet ? formatMoney(row.net) : '—'}</td>
-                          <td className="py-3 px-4 text-right font-mono-num font-medium text-emerald-700">{formatMoney(row.paid)}</td>
-                          <td className={`py-3 px-4 text-right font-mono-num font-medium ${row.due > 0 ? 'text-red-700' : 'text-slate-500'}`}>
-                            {row.hasSheet ? formatMoney(row.due) : '—'}
-                          </td>
-                          <td className="py-3 px-4 text-center">
-                            <StatusBadge variant={{ kind: 'month', status: row.status }} />
-                          </td>
-                        </tr>
+                    <tr><td colSpan={5} className="text-center py-6 text-slate-500">লোড হচ্ছে...</td></tr>
+                  ) : tabARows.length === 0 ? (
+                    <tr><td colSpan={5} className="text-center py-6 text-slate-500">এই বছরের কোনো মাস নেই</td></tr>
+                  ) : (
+                    tabARows.map((row) => {
+                      const isExpanded = Boolean(expandedMonths[row.monthId]);
+                      return (
+                        <React.Fragment key={row.monthId}>
+                          <tr onClick={() => setExpandedMonths((p) => ({ ...p, [row.monthId]: !p[row.monthId] }))} className="cursor-pointer hover:bg-slate-50 transition-colors">
+                            <td className="py-3 px-4 font-medium text-slate-900">
+                              <div className="flex items-center gap-2">
+                                <Icon size={16} d={isExpanded ? IC.down : IC.right} className="text-slate-400 shrink-0" />
+                                <span>{row.monthName}</span>
+                                {row.monthPayments.length > 0 && <span className="text-xs text-slate-400">({toBengaliDigits(row.monthPayments.length)})</span>}
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-right font-mono-num">{row.hasSheet ? formatMoney(row.net) : '—'}</td>
+                            <td className="py-3 px-4 text-right font-mono-num font-medium text-emerald-700">{formatMoney(row.paid)}</td>
+                            <td className={`py-3 px-4 text-right font-mono-num font-medium ${row.due > 0 ? 'text-red-700' : 'text-slate-500'}`}>{row.hasSheet ? formatMoney(row.due) : '—'}</td>
+                            <td className="py-3 px-4 text-center"><StatusBadge variant={{ kind: 'month', status: row.status }} /></td>
+                          </tr>
 
-                        {isExpanded && (
-                          <tr className="bg-slate-50/70">
-                            <td colSpan={5} className="px-6 py-3">
-                              {row.monthPayments.length === 0 ? (
-                                <p className="text-xs text-slate-500 py-1">{LABELS.reportsPage.noPaymentsForMonth}</p>
-                              ) : (
-                                <div className="space-y-2">
-                                  <p className="text-xs font-semibold text-slate-600">{LABELS.reportsPage.expandPaymentsHint}</p>
+                          {isExpanded && (
+                            <tr className="bg-slate-50/70">
+                              <td colSpan={5} className="px-6 py-3 space-y-3">
+                                {row.details.some((d) => d.amount > 0) && (
+                                  <div className="flex flex-wrap gap-1.5">
+                                    {row.details.filter((d) => d.amount > 0).map((d) => (
+                                      <span key={d.headId} className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs border ${d.headType === 'EARNING' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-red-50 border-red-200 text-red-700'}`}>
+                                        {d.headName}: <b className="font-mono-num">{d.headType === 'DEDUCTION' ? '-' : ''}{formatMoney(d.amount)}</b>
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                                {row.monthPayments.length === 0 ? (
+                                  <p className="text-xs text-slate-500 py-1">{LABELS.reportsPage.noPaymentsForMonth}</p>
+                                ) : (
                                   <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
                                     <table className="w-full text-xs">
                                       <thead className="bg-slate-50 border-b border-slate-200 text-slate-500">
@@ -498,38 +374,25 @@ export const ReportsPage = () => {
                                       </thead>
                                       <tbody className="divide-y divide-slate-100">
                                         {row.monthPayments.map(({ payment, monthAmount }) => (
-                                          <tr key={payment.paymentId || payment.PaymentID}>
-                                            <td className="py-2 px-3 font-mono-num text-slate-700">{formatDate(payment.paymentDate || payment.PaymentDate)}</td>
-                                            <td className="py-2 px-3 font-mono-num font-medium text-slate-900">{payment.receiptNo || payment.ReceiptNo}</td>
-                                            <td className="py-2 px-3 text-slate-600">{LABELS.paymentMethods[payment.method || payment.PaymentMethod]}</td>
+                                          <tr key={payment.paymentId}>
+                                            <td className="py-2 px-3 font-mono-num text-slate-700">{formatDate(payment.paymentDate)}</td>
+                                            <td className="py-2 px-3 font-mono-num font-medium text-slate-900">{payment.receiptNo}</td>
+                                            <td className="py-2 px-3 text-slate-600">{LABELS.paymentMethods[payment.method]}</td>
                                             <td className="py-2 px-3 text-right font-mono-num font-semibold text-slate-900">{formatMoney(monthAmount)}</td>
-                                            <td className="py-2 px-3 text-right no-print">
-                                              <button
-                                                type="button"
-                                                onClick={(e) => { e.stopPropagation(); setReceiptPayment(payment); }}
-                                                className="inline-flex items-center gap-1 text-teal-700 hover:text-teal-900 font-medium"
-                                              >
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                  <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" />
-                                                  <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
-                                                  <path d="M12 17.5v-11" />
-                                                </svg>
-                                                <span>{LABELS.paymentsPage.viewReceipt}</span>
-                                              </button>
-                                            </td>
+                                            <td className="py-2 px-3 text-right no-print"><ReceiptBtn payment={payment} compact /></td>
                                           </tr>
                                         ))}
                                       </tbody>
                                     </table>
                                   </div>
-                                </div>
-                              )}
-                            </td>
-                          </tr>
-                        )}
-                      </React.Fragment>
-                    );
-                  })}
+                                )}
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
+                      );
+                    })
+                  )}
                 </tbody>
                 <tfoot className="bg-slate-50 border-t-2 border-slate-200 font-bold text-slate-900">
                   <tr>
@@ -546,14 +409,14 @@ export const ReportsPage = () => {
         </div>
       )}
 
-      {/* ==================== TAB B: ALL TEACHERS × 12 MONTHS MATRIX ==================== */}
+      {/* ==================== TAB B ==================== */}
       {activeTab === 'matrix' && (
         <div className="space-y-4">
           <div className="bg-white border border-slate-200 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-3">
               <div className="flex items-center gap-2">
                 <label className="text-sm font-medium text-slate-700">{LABELS.common.year}:</label>
-                <YearSelect value={tabBYear} onChange={setTabBYear} />
+                <SalaryYearSelect value={tabBYearId} onChange={setTabBYearId} />
               </div>
               <div className="flex items-center gap-2">
                 <label className="text-sm font-medium text-slate-700">{LABELS.common.designation}:</label>
@@ -563,148 +426,114 @@ export const ReportsPage = () => {
                   className="h-10 px-3 text-sm bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-600"
                 >
                   <option value="ALL">{LABELS.common.allDesignations}</option>
-                  {designations.map((d) => (<option key={d} value={d}>{d}</option>))}
+                  {designations.map((d) => <option key={d} value={d}>{d}</option>)}
                 </select>
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-xs">
               <span className="text-slate-500 font-medium mr-1">{LABELS.reportsPage.legendTitle}</span>
-              <StatusBadge variant={{ kind: 'month', status: 'PAID' }} />
-              <StatusBadge variant={{ kind: 'month', status: 'PARTIAL' }} />
-              <StatusBadge variant={{ kind: 'month', status: 'UNPAID' }} />
-              <StatusBadge variant={{ kind: 'month', status: 'NO_SHEET' }} />
-              <StatusBadge variant={{ kind: 'month', status: 'ADVANCE' }} />
+              {['PAID', 'PARTIAL', 'UNPAID', 'NO_SHEET', 'ADVANCE'].map((s) => <StatusBadge key={s} variant={{ kind: 'month', status: s }} />)}
             </div>
           </div>
 
           <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-xs text-left border-collapse min-w-[1160px]">
+              <table className="w-full text-xs text-left border-collapse" style={{ minWidth: 300 + matrixMonths.length * 92 }}>
                 <thead className="sticky top-0 z-20 bg-slate-50 border-b border-slate-200 text-slate-700">
                   <tr>
-                    <th className="sticky left-0 z-30 bg-slate-50 py-3 px-4 font-semibold border-r border-slate-200 min-w-[185px]">
-                      {LABELS.common.teacher}
-                    </th>
-                    {MONTHS_SHORT_BN.map((mName, idx) => (
-                      <th key={mName} className="py-3 px-2 font-semibold text-center min-w-[92px]" title={MONTHS_BN[idx]}>
-                        {mName}
-                      </th>
-                    ))}
-                    <th className="py-3 px-3 font-semibold text-right bg-slate-100/70 min-w-[115px]">
-                      {LABELS.reportsPage.matrixRowTotal}
-                    </th>
+                    <th className="sticky left-0 z-30 bg-slate-50 py-3 px-4 font-semibold border-r border-slate-200 min-w-[185px]">{LABELS.common.teacher}</th>
+                    {matrixMonths.map((m) => <th key={m.MonthID} className="py-3 px-2 font-semibold text-center min-w-[92px]">{m.MonthName}</th>)}
+                    <th className="py-3 px-3 font-semibold text-right bg-slate-100/70 min-w-[115px]">{LABELS.reportsPage.matrixRowTotal}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {matrixLoading ? (
-                    <tr><td colSpan={14} className="text-center py-4">Loading...</td></tr>
-                  ) : matrixTeachers.map((teacher) => {
-                    let rowNet = 0;
-                    let rowPaid = 0;
-                    return (
-                      <tr key={teacher.userId} className="hover:bg-slate-50/40">
-                        <td className="sticky left-0 z-10 bg-white py-2.5 px-4 border-r border-slate-200">
-                          <p className="font-semibold text-slate-900 truncate max-w-[165px]">{teacher.name}</p>
-                          <p className="text-[11px] text-slate-500">{teacher.userCode} · {teacher.designation}</p>
-                        </td>
-                        {MONTHS_SHORT_BN.map((_, idx) => {
-                          const m = idx + 1;
-                          const net = getMatrixNet(matrixRes, teacher.userId, m);
-                          const paid = getMatrixPaid(matrixRes, teacher.userId, m);
-
-                          let status = 'NO_SHEET';
-                          if (net > 0) {
-                            status = paid <= 0 ? 'UNPAID' : (paid < net ? 'PARTIAL' : 'PAID');
-                          } else if (paid > 0) {
-                            status = 'ADVANCE';
-                          }
-
-                          rowNet += net;
-                          rowPaid += paid;
-
-                          return (
-                            <td key={m} className="p-1.5 text-center align-middle">
-                              <button
-                                type="button"
-                                onClick={() => setDrawerCell({ userId: teacher.userId, year: tabBYear, month: m })}
-                                className={`w-full px-1.5 py-2 rounded-md border text-[11px] font-mono-num leading-tight transition-colors cursor-pointer ${MATRIX_CELL_CLASSES[status]}`}
-                              >
-                                {status === 'NO_SHEET' ? (
-                                  <span>—</span>
-                                ) : status === 'ADVANCE' ? (
-                                  <span className="font-semibold">
-                                    {LABELS.monthStatus.ADVANCE}<br />{formatMoney(paid)}
-                                  </span>
-                                ) : (
-                                  <span>
-                                    <span className="font-semibold">{formatMoney(paid)}</span>
-                                    <br />
-                                    <span className="opacity-75">/ {formatMoney(net)}</span>
-                                  </span>
-                                )}
-                              </button>
-                            </td>
-                          );
-                        })}
-                        <td className="py-2.5 px-3 text-right font-mono-num bg-slate-50/70">
-                          <p className="font-semibold text-slate-900">{formatMoney(rowPaid)}</p>
-                          <p className="text-[11px] text-slate-500">/ {formatMoney(rowNet)}</p>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                    <tr><td colSpan={matrixMonths.length + 2} className="text-center py-6 text-slate-500">লোড হচ্ছে...</td></tr>
+                  ) : matrixMonths.length === 0 ? (
+                    <tr><td colSpan={2} className="text-center py-6 text-slate-500">এই বছরের কোনো মাস নেই</td></tr>
+                  ) : (
+                    matrixTeachers.map((teacher) => {
+                      let rowNet = 0;
+                      let rowPaid = 0;
+                      return (
+                        <tr key={teacher.userId} className="hover:bg-slate-50/40">
+                          <td className="sticky left-0 z-10 bg-white py-2.5 px-4 border-r border-slate-200">
+                            <p className="font-semibold text-slate-900 truncate max-w-[165px]">{teacher.name}</p>
+                            <p className="text-[11px] text-slate-500">{[teacher.userCode, teacher.designation].filter(Boolean).join(' · ')}</p>
+                          </td>
+                          {matrixMonths.map((m) => {
+                            const c = getCell(teacher.userId, m.MonthID);
+                            rowNet += c.net;
+                            rowPaid += c.paid;
+                            return (
+                              <td key={m.MonthID} className="p-1.5 text-center align-middle">
+                                <button
+                                  type="button"
+                                  onClick={() => setDrawerCell({ userId: teacher.userId, monthId: m.MonthID, monthName: m.MonthName })}
+                                  className={`w-full px-1.5 py-2 rounded-md border text-[11px] font-mono-num leading-tight transition-colors cursor-pointer ${MATRIX_CELL_CLASSES[c.status] ?? MATRIX_CELL_CLASSES.NO_SHEET}`}
+                                >
+                                  {c.status === 'NO_SHEET' ? (
+                                    <span>—</span>
+                                  ) : c.status === 'ADVANCE' ? (
+                                    <span className="font-semibold">{LABELS.monthStatus.ADVANCE}<br />{formatMoney(c.paid)}</span>
+                                  ) : (
+                                    <span><span className="font-semibold">{formatMoney(c.paid)}</span><br /><span className="opacity-75">/ {formatMoney(c.net)}</span></span>
+                                  )}
+                                </button>
+                              </td>
+                            );
+                          })}
+                          <td className="py-2.5 px-3 text-right font-mono-num bg-slate-50/70">
+                            <p className="font-semibold text-slate-900">{formatMoney(rowPaid)}</p>
+                            <p className="text-[11px] text-slate-500">/ {formatMoney(rowNet)}</p>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
-                <tfoot className="bg-slate-50 border-t-2 border-slate-200 font-semibold text-slate-900">
-                  <tr>
-                    <td className="sticky left-0 z-10 bg-slate-50 py-3 px-4 border-r border-slate-200">
-                      <p>{LABELS.common.total}</p>
-                      <p className="text-[11px] font-normal text-slate-500">
-                        {LABELS.reportsPage.matrixGrandPaid} / {LABELS.reportsPage.matrixGrandSalary}
-                      </p>
-                    </td>
-                    {matrixTotals.perMonth.map((mt, idx) => (
-                      <td key={idx} className="py-2.5 px-2 text-center font-mono-num">
-                        <p className="text-emerald-700">{formatMoney(mt.paid)}</p>
-                        <p className="text-[11px] font-normal text-slate-500">/ {formatMoney(mt.net)}</p>
-                        {mt.due > 0 && (
-                          <p className="text-[10px] text-red-600">{LABELS.paymentsPage.colDue}: {formatMoney(mt.due)}</p>
-                        )}
+                {matrixMonths.length > 0 && (
+                  <tfoot className="bg-slate-50 border-t-2 border-slate-200 font-semibold text-slate-900">
+                    <tr>
+                      <td className="sticky left-0 z-10 bg-slate-50 py-3 px-4 border-r border-slate-200">
+                        <p>{LABELS.common.total}</p>
+                        <p className="text-[11px] font-normal text-slate-500">{LABELS.reportsPage.matrixGrandPaid} / {LABELS.reportsPage.matrixGrandSalary}</p>
                       </td>
-                    ))}
-                    <td className="py-2.5 px-3 text-right font-mono-num bg-teal-50/70 text-teal-900">
-                      <p className="font-bold">{formatMoney(matrixTotals.grandPaid)}</p>
-                      <p className="text-[11px] font-normal">/ {formatMoney(matrixTotals.grandNet)}</p>
-                      <p className="text-[11px] text-red-700">{LABELS.reportsPage.matrixGrandDue}: {formatMoney(matrixTotals.grandDue)}</p>
-                    </td>
-                  </tr>
-                </tfoot>
+                      {matrixMonths.map((m) => {
+                        const mt = matrixTotals.perMonth[m.MonthID] ?? { net: 0, paid: 0, due: 0 };
+                        return (
+                          <td key={m.MonthID} className="py-2.5 px-2 text-center font-mono-num">
+                            <p className="text-emerald-700">{formatMoney(mt.paid)}</p>
+                            <p className="text-[11px] font-normal text-slate-500">/ {formatMoney(mt.net)}</p>
+                            {mt.due > 0 && <p className="text-[10px] text-red-600">{LABELS.paymentsPage.colDue}: {formatMoney(mt.due)}</p>}
+                          </td>
+                        );
+                      })}
+                      <td className="py-2.5 px-3 text-right font-mono-num bg-teal-50/70 text-teal-900">
+                        <p className="font-bold">{formatMoney(matrixTotals.grandPaid)}</p>
+                        <p className="text-[11px] font-normal">/ {formatMoney(matrixTotals.grandNet)}</p>
+                        <p className="text-[11px] text-red-700">{LABELS.reportsPage.matrixGrandDue}: {formatMoney(matrixTotals.grandDue)}</p>
+                      </td>
+                    </tr>
+                  </tfoot>
+                )}
               </table>
             </div>
           </div>
         </div>
       )}
 
-      {/* ==================== TAB C: PAYMENT HISTORY ==================== */}
+      {/* ==================== TAB C ==================== */}
       {activeTab === 'history' && (
         <div className="space-y-4">
           <div className="bg-white border border-slate-200 rounded-xl p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
             <div>
               <label className="block text-xs font-medium text-slate-600 mb-1">{LABELS.reportsPage.filterFromDate}</label>
-              <input
-                type="date"
-                value={fromDate}
-                onChange={(e) => setFromDate(e.target.value)}
-                className="w-full h-10 px-3 text-sm bg-white border border-slate-300 rounded-lg text-slate-900 tabular-nums focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-600"
-              />
+              <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} className="w-full h-10 px-3 text-sm bg-white border border-slate-300 rounded-lg text-slate-900 tabular-nums focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-600" />
             </div>
             <div>
               <label className="block text-xs font-medium text-slate-600 mb-1">{LABELS.reportsPage.filterToDate}</label>
-              <input
-                type="date"
-                value={toDate}
-                onChange={(e) => setToDate(e.target.value)}
-                className="w-full h-10 px-3 text-sm bg-white border border-slate-300 rounded-lg text-slate-900 tabular-nums focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-600"
-              />
+              <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} className="w-full h-10 px-3 text-sm bg-white border border-slate-300 rounded-lg text-slate-900 tabular-nums focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-600" />
             </div>
             <div>
               <label className="block text-xs font-medium text-slate-600 mb-1">{LABELS.common.teacher}</label>
@@ -712,25 +541,14 @@ export const ReportsPage = () => {
             </div>
             <div>
               <label className="block text-xs font-medium text-slate-600 mb-1">{LABELS.reportsPage.colMethod}</label>
-              <select
-                value={tabCMethod}
-                onChange={(e) => setTabCMethod(e.target.value)}
-                className="w-full h-10 px-3 text-sm bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-600"
-              >
+              <select value={tabCMethod} onChange={(e) => setTabCMethod(e.target.value)} className="w-full h-10 px-3 text-sm bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-600">
                 <option value="ALL">{LABELS.reportsPage.filterAllMethods}</option>
-                {['CASH', 'BANK', 'BKASH', 'OTHER'].map((m) => (
-                  <option key={m} value={m}>{LABELS.paymentMethods[m]}</option>
-                ))}
+                {['CASH', 'BANK', 'BKASH', 'OTHER'].map((m) => <option key={m} value={m}>{LABELS.paymentMethods[m]}</option>)}
               </select>
             </div>
             <div className="flex items-center h-10">
               <label className="inline-flex items-center gap-2.5 cursor-pointer select-none text-sm font-medium text-slate-700">
-                <input
-                  type="checkbox"
-                  checked={showReversed}
-                  onChange={(e) => setShowReversed(e.target.checked)}
-                  className="w-4 h-4 accent-teal-600 rounded"
-                />
+                <input type="checkbox" checked={showReversed} onChange={(e) => setShowReversed(e.target.checked)} className="w-4 h-4 accent-teal-600 rounded" />
                 <span>{LABELS.reportsPage.showReversedToggle}</span>
               </label>
             </div>
@@ -757,12 +575,13 @@ export const ReportsPage = () => {
                   <tbody className="divide-y divide-slate-100">
                     {filteredPayments.map((p) => {
                       const teacher = teacherMap.get(Number(p.userId));
+                      const strike = p.isReversed ? 'line-through' : '';
                       return (
                         <tr key={p.paymentId} className={`hover:bg-slate-50/80 transition-colors ${p.isReversed ? 'bg-slate-50/60 text-slate-400' : ''}`}>
-                          <td className={`py-3 px-4 font-mono-num whitespace-nowrap ${p.isReversed ? 'line-through' : 'text-slate-700'}`}>{formatDate(p.paymentDate)}</td>
-                          <td className={`py-3 px-4 font-mono-num font-medium whitespace-nowrap ${p.isReversed ? 'line-through' : 'text-slate-900'}`}>{p.receiptNo}</td>
-                          <td className={`py-3 px-4 ${p.isReversed ? 'line-through' : 'text-slate-900'}`}>
-                            <p className="font-medium">{teacher?.name ?? p.userId}</p>
+                          <td className={`py-3 px-4 font-mono-num whitespace-nowrap ${strike || 'text-slate-700'}`}>{formatDate(p.paymentDate)}</td>
+                          <td className={`py-3 px-4 font-mono-num font-medium whitespace-nowrap ${strike || 'text-slate-900'}`}>{p.receiptNo}</td>
+                          <td className={`py-3 px-4 ${strike || 'text-slate-900'}`}>
+                            <p className="font-medium">{teacher?.name ?? `#${p.userId}`}</p>
                             <p className="text-xs text-slate-500">{teacher?.designation}</p>
                           </td>
                           <td className={`py-3 px-4 text-right font-mono-num font-semibold whitespace-nowrap ${p.isReversed ? 'line-through text-slate-400' : 'text-slate-900'}`}>{formatMoney(p.totalAmount)}</td>
@@ -770,44 +589,27 @@ export const ReportsPage = () => {
                             <div className="flex flex-wrap gap-1.5">
                               {p.details.map((d, idx) => (
                                 <span key={idx} className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs border ${p.isReversed ? 'bg-slate-100 border-slate-200 text-slate-400 line-through' : 'bg-slate-50 border-slate-200 text-slate-700'}`}>
-                                  <span>{getMonthNameBn(d.month)}</span>
+                                  <span>{d.monthName}{d.year ? ` ${toBengaliDigits(d.year)}` : ''}</span>
                                   <span className="font-mono-num font-medium">{formatMoney(d.amount)}</span>
                                 </span>
                               ))}
                             </div>
-                            {p.isReversed && p.reverseReason && (
-                              <p className="text-xs text-red-500 mt-1">{LABELS.receipt.reverseReason}: {p.reverseReason}</p>
-                            )}
+                            {p.isReversed && p.reverseReason && <p className="text-xs text-red-500 mt-1">{LABELS.receipt.reverseReason}: {p.reverseReason}</p>}
                           </td>
                           <td className="py-3 px-4 whitespace-nowrap">{LABELS.paymentMethods[p.method]}</td>
                           <td className="py-3 px-4 text-center">
-                            {p.isReversed ? <StatusBadge variant={{ kind: 'reversed' }} /> : <StatusBadge variant={{ kind: 'valid' }} />}
+                            <StatusBadge variant={{ kind: p.isReversed ? 'reversed' : 'valid' }} />
                           </td>
                           <td className="py-3 px-4 text-right whitespace-nowrap">
                             <div className="inline-flex items-center gap-1.5">
-                              <button
-                                type="button"
-                                onClick={() => setReceiptPayment(p)}
-                                className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-md hover:bg-slate-50"
-                              >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" />
-                                  <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
-                                  <path d="M12 17.5v-11" />
-                                </svg>
-                                <span>{LABELS.paymentsPage.viewReceipt}</span>
-                              </button>
+                              <ReceiptBtn payment={p} />
                               {!p.isReversed && (
                                 <button
                                   type="button"
                                   onClick={() => { setReverseTarget(p); setReverseReason(''); setReverseError(''); }}
                                   className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-red-700 bg-red-50 border border-red-200 rounded-md hover:bg-red-100"
                                 >
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                                    <path d="M3 3v5h5" />
-                                  </svg>
-                                  <span>{LABELS.reportsPage.reverseAction}</span>
+                                  <Icon d={IC.undo} /><span>{LABELS.reportsPage.reverseAction}</span>
                                 </button>
                               )}
                             </div>
@@ -830,60 +632,51 @@ export const ReportsPage = () => {
         </div>
       )}
 
-      {/* Side Drawer for Matrix Cell Breakdown */}
+      {/* ==================== Drawer (ম্যাট্রিক্স সেল) ==================== */}
       <Drawer
         isOpen={Boolean(drawerCell && drawerData)}
         onClose={() => setDrawerCell(null)}
         title={LABELS.reportsPage.drawerTitle}
-        subtitle={drawerCell && drawerData ? `${drawerData.teacher?.name ?? ''} · ${getMonthNameBn(drawerCell.month)} ${drawerCell.year}` : ''}
+        subtitle={drawerCell && drawerData ? `${drawerData.teacher?.name ?? ''} · ${drawerCell.monthName} ${toBengaliDigits(tabBYearValue)}` : ''}
       >
         {drawerCell && drawerData && (
           <div className="space-y-6">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200">
               <div>
                 <p className="text-xs text-slate-500">{drawerData.teacher?.designation}</p>
-                <p className="text-sm font-semibold text-slate-900">{getMonthNameBn(drawerCell.month)} {drawerCell.year}</p>
+                <p className="text-sm font-semibold text-slate-900">{drawerCell.monthName} {toBengaliDigits(tabBYearValue)}</p>
               </div>
               <StatusBadge variant={{ kind: 'month', status: drawerData.status }} />
             </div>
 
-            {drawerData.sheet ? (
+            {drawerLoading ? (
+              <p className="text-sm text-slate-500">লোড হচ্ছে...</p>
+            ) : drawerData.details.length > 0 ? (
               <div className="space-y-4">
-                <div>
-                  <h4 className="text-xs font-semibold text-emerald-700 mb-2">{LABELS.reportsPage.drawerEarnings}</h4>
-                  <div className="divide-y divide-slate-100 border border-slate-200 rounded-lg">
-                    {drawerData.sheet.details.filter((d) => d.headType === 'EARNING' && d.amount > 0).map((d) => (
-                      <div key={d.headId} className="flex items-center justify-between px-3 py-2 text-sm">
-                        <span className="text-slate-700">{d.headName}</span>
-                        <span className="font-mono-num font-medium text-slate-900">{formatMoney(d.amount)}</span>
+                {['EARNING', 'DEDUCTION'].map((type) => {
+                  const list = drawerData.details.filter((d) => d.headType === type && d.amount > 0);
+                  if (list.length === 0) return null;
+                  return (
+                    <div key={type}>
+                      <h4 className={`text-xs font-semibold mb-2 ${type === 'EARNING' ? 'text-emerald-700' : 'text-red-700'}`}>
+                        {type === 'EARNING' ? LABELS.reportsPage.drawerEarnings : LABELS.reportsPage.drawerDeductions}
+                      </h4>
+                      <div className="divide-y divide-slate-100 border border-slate-200 rounded-lg">
+                        {list.map((d) => (
+                          <div key={d.headId} className="flex items-center justify-between px-3 py-2 text-sm">
+                            <span className="text-slate-700">{d.headName}</span>
+                            <span className={`font-mono-num font-medium ${type === 'EARNING' ? 'text-slate-900' : 'text-red-700'}`}>
+                              {type === 'DEDUCTION' ? '-' : ''}{formatMoney(d.amount)}
+                            </span>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </div>
-
-                {drawerData.sheet.details.some((d) => d.headType === 'DEDUCTION' && d.amount > 0) && (
-                  <div>
-                    <h4 className="text-xs font-semibold text-red-700 mb-2">{LABELS.reportsPage.drawerDeductions}</h4>
-                    <div className="divide-y divide-slate-100 border border-slate-200 rounded-lg">
-                      {drawerData.sheet.details.filter((d) => d.headType === 'DEDUCTION' && d.amount > 0).map((d) => (
-                        <div key={d.headId} className="flex items-center justify-between px-3 py-2 text-sm">
-                          <span className="text-slate-700">{d.headName}</span>
-                          <span className="font-mono-num font-medium text-red-700">-{formatMoney(d.amount)}</span>
-                        </div>
-                      ))}
                     </div>
-                  </div>
-                )}
-
+                  );
+                })}
                 <div className="bg-slate-50 border border-slate-200 rounded-lg p-3.5 space-y-1.5 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-slate-600">{LABELS.reportsPage.drawerNet}</span>
-                    <span className="font-mono-num font-bold text-slate-900">{formatMoney(drawerData.sheet.netAmount)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-600">{LABELS.reportsPage.colPaid}</span>
-                    <span className="font-mono-num font-semibold text-emerald-700">{formatMoney(drawerData.paid)}</span>
-                  </div>
+                  <div className="flex justify-between"><span className="text-slate-600">{LABELS.reportsPage.drawerNet}</span><span className="font-mono-num font-bold text-slate-900">{formatMoney(drawerData.net)}</span></div>
+                  <div className="flex justify-between"><span className="text-slate-600">{LABELS.reportsPage.colPaid}</span><span className="font-mono-num font-semibold text-emerald-700">{formatMoney(drawerData.paid)}</span></div>
                   <div className="flex justify-between border-t border-slate-200 pt-1.5">
                     <span className="text-slate-700 font-medium">{LABELS.reportsPage.colDue}</span>
                     <span className={`font-mono-num font-bold ${drawerData.due > 0 ? 'text-red-700' : 'text-slate-700'}`}>{formatMoney(drawerData.due)}</span>
@@ -893,9 +686,7 @@ export const ReportsPage = () => {
             ) : (
               <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 text-sm text-slate-600">
                 <p>{LABELS.reportsPage.drawerNoSheet}</p>
-                {drawerData.paid > 0 && (
-                  <p className="mt-2 font-semibold text-blue-700">{LABELS.monthStatus.ADVANCE}: {formatMoney(drawerData.paid)}</p>
-                )}
+                {drawerData.paid > 0 && <p className="mt-2 font-semibold text-blue-700">{LABELS.monthStatus.ADVANCE}: {formatMoney(drawerData.paid)}</p>}
               </div>
             )}
 
@@ -913,9 +704,7 @@ export const ReportsPage = () => {
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-mono-num font-bold text-emerald-700">{formatMoney(monthAmount)}</p>
-                        <button type="button" onClick={() => setReceiptPayment(payment)} className="text-xs text-teal-700 hover:underline mt-0.5">
-                          {LABELS.paymentsPage.viewReceipt}
-                        </button>
+                        <button type="button" onClick={() => setReceiptPayment(payment)} className="text-xs text-teal-700 hover:underline mt-0.5">{LABELS.paymentsPage.viewReceipt}</button>
                       </div>
                     </div>
                   ))}
@@ -926,7 +715,7 @@ export const ReportsPage = () => {
         )}
       </Drawer>
 
-      {/* Reverse Payment Modal */}
+      {/* ==================== Reverse Modal ==================== */}
       <Modal
         isOpen={Boolean(reverseTarget)}
         onClose={() => setReverseTarget(null)}
@@ -934,9 +723,7 @@ export const ReportsPage = () => {
         size="sm"
         footer={
           <>
-            <button type="button" onClick={() => setReverseTarget(null)} className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">
-              {LABELS.common.cancel}
-            </button>
+            <button type="button" onClick={() => setReverseTarget(null)} className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">{LABELS.common.cancel}</button>
             <button type="submit" form="reverse-form" disabled={isReversing} className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50">
               {isReversing ? '...' : LABELS.reportsPage.reverseAction}
             </button>
@@ -950,9 +737,7 @@ export const ReportsPage = () => {
               .replace('{amount}', formatMoney(reverseTarget?.totalAmount ?? 0))}
           </p>
           <div>
-            <label htmlFor="reverse-reason-input" className="block text-sm font-medium text-slate-700 mb-1.5">
-              {LABELS.reportsPage.reverseReasonLabel}
-            </label>
+            <label htmlFor="reverse-reason-input" className="block text-sm font-medium text-slate-700 mb-1.5">{LABELS.reportsPage.reverseReasonLabel}</label>
             <textarea
               id="reverse-reason-input"
               rows={3}
@@ -967,7 +752,6 @@ export const ReportsPage = () => {
         </form>
       </Modal>
 
-      {/* Shared Receipt Modal */}
       <ReceiptView
         payment={receiptPayment}
         teacher={teachers.find((t) => Number(t.userId) === Number(receiptPayment?.userId))}
@@ -975,11 +759,8 @@ export const ReportsPage = () => {
         onClose={() => setReceiptPayment(null)}
       />
 
-      {/* Lightweight inline toast */}
       {toast && (
-        <div className="fixed bottom-5 right-5 z-50 rounded-lg bg-slate-900 text-white px-4 py-2.5 text-sm shadow-lg">
-          {toast.text}
-        </div>
+        <div className="fixed bottom-5 right-5 z-50 rounded-lg bg-slate-900 text-white px-4 py-2.5 text-sm shadow-lg">{toast.text}</div>
       )}
     </div>
   );
