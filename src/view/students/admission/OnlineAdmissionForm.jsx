@@ -401,7 +401,6 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
                 label={translate('User Name')}
                 placeholder="পূর্ণ নাম লিখুন"
                 require="This field is required!"
-                unicode={true}
                 defaultValue={studentData?.UserName ?? ''}
               />
 
@@ -411,7 +410,6 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
                 label={translate('Father Name')}
                 placeholder="পিতার নাম লিখুন"
                 require="This field is required!"
-                unicode={true}
                 defaultValue={studentData?.FatherName ?? ''}
               />
 
@@ -421,7 +419,6 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
                 label={translate('Mother Name')}
                 placeholder="মাতার নাম লিখুন"
                 require="This field is required!"
-                unicode={true}
                 defaultValue={studentData?.MotherName ?? ''}
               />
 
@@ -526,7 +523,6 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
                 label={translate('Village')}
                 placeholder="গ্রামের নাম লিখুন"
                 require="This field is required!"
-                unicode={true}
                 defaultValue={studentData?.permanentVill ?? ''}
               />
 
@@ -536,7 +532,6 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
                 label={translate('Post Office')}
                 placeholder="ডাকঘরের নাম লিখুন"
                 require="This field is required!"
-                unicode={true}
                 defaultValue={studentData?.permanentPost ?? ''}
               />
 
@@ -579,7 +574,6 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
                 registerKey="TransientVill"
                 label={translate('Village')}
                 placeholder="গ্রামের নাম লিখুন"
-                unicode={true}
                 require="This field is required!"
                 defaultValue={studentData?.TransientVill ?? ''}
               />
@@ -589,7 +583,6 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
                 registerKey="TransientPost"
                 label={translate('Post Office')}
                 placeholder="ডাকঘরের নাম লিখুন"
-                unicode={true}
                 require="This field is required!"
                 defaultValue={studentData?.TransientPost ?? ''}
               />
@@ -646,7 +639,6 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
                 nameField="ClassName"
                 registerKey="ClassID"
                 require="This field is required!"
-                unicode
               />
               {/* asdfas  */}
               <DefaultSelect
@@ -656,7 +648,6 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
                 nameField="SubClass"
                 registerKey="SubClassID"
                 require="This field is required!"
-                unicode
               />
 
               <div className="flex items-center gap-2">

@@ -150,6 +150,8 @@ const ResultReport = () => {
     error,
   } = useGetResultReportDataQuery(queryParams, { skip: !queryParams });
 
+  console.log(reportData, "reportData")
+
   const shouldShowFields = (fieldName) => {
     switch (Number(selectedReportID)) {
       case 1:

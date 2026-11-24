@@ -760,56 +760,56 @@ const Router = createBrowserRouter([
                   </RequirePermission>
                 ),
               },
-              // {
-              //   path: 'payRole',
-              //   element: (
-              //     // <RequirePermission
-              //     //   permissionId={permissionsDataList.teacher_payroll}
-              //     // >
-              //     <SalaryHeadsPage pageTitle="Pay Role" />
-              //     // </RequirePermission>
-              //   ),
-              // },
-              // {
-              //   path: 'payStructure',
-              //   element: (
-              //     // <RequirePermission
-              //     //   permissionId={permissionsDataList.teacher_payroll}
-              //     // >
-              //     <SalaryStructurePage pageTitle="Pay Role" />
-              //     // </RequirePermission>
-              //   ),
-              // },
-              // {
-              //   path: 'monthlySalary',
-              //   element: (
-              //     // <RequirePermission
-              //     //   permissionId={permissionsDataList.teacher_payroll}
-              //     // >
-              //     <GenerateSalaryPage pageTitle="Pay Role" />
-              //     // </RequirePermission>
-              //   ),
-              // },
-              // {
-              //   path: 'salaryPayment',
-              //   element: (
-              //     // <RequirePermission
-              //     //   permissionId={permissionsDataList.teacher_payroll}
-              //     // >
-              //     <PaymentsPage pageTitle="Pay Role" />
-              //     // </RequirePermission>
-              //   ),
-              // },
-              // {
-              //   path: 'salaryReport',
-              //   element: (
-              //     // <RequirePermission
-              //     //   permissionId={permissionsDataList.teacher_payroll}
-              //     // >
-              //     <ReportsPage pageTitle="Pay Role" />
-              //     // </RequirePermission>
-              //   ),
-              // },
+              {
+                path: 'payRole',
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.teacher_payroll}
+                  // >
+                  <SalaryHeadsPage pageTitle="Pay Role" />
+                  // </RequirePermission>
+                ),
+              },
+              {
+                path: 'payStructure',
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.teacher_payroll}
+                  // >
+                  <SalaryStructurePage pageTitle="Pay Role" />
+                  // </RequirePermission>
+                ),
+              },
+              {
+                path: 'monthlySalary',
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.teacher_payroll}
+                  // >
+                  <GenerateSalaryPage pageTitle="Pay Role" />
+                  // </RequirePermission>
+                ),
+              },
+              {
+                path: 'salaryPayment',
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.teacher_payroll}
+                  // >
+                  <PaymentsPage pageTitle="Pay Role" />
+                  // </RequirePermission>
+                ),
+              },
+              {
+                path: 'salaryReport',
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.teacher_payroll}
+                  // >
+                  <ReportsPage pageTitle="Pay Role" />
+                  // </RequirePermission>
+                ),
+              },
               // {
               //   path: 'payRole',
               //   element: (

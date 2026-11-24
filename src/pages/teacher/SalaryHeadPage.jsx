@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Modal } from './Modal';
 import { StatusBadge } from './StatusBadge';
 import { LABELS } from '../../helper/labels';
@@ -11,6 +11,7 @@ import {
   useUpdateHeadMutation,
   useToggleHeadActiveMutation,
 } from '../../features/teachers/teachersSlice';
+import { useGetGeneralLedgersByFundQuery, useGetFundNamesQuery, useGetSubLedgerQuery } from '../../features/feeCollection/feeCollectionSlice';
 
 // Backend row → frontend shape
 const mapHead = (h) => ({
@@ -19,11 +20,13 @@ const mapHead = (h) => ({
   headType: h.HeadType,
   sortOrder: h.SortOrder,
   isActive: Boolean(h.IsActive),
+  // চাইলে ডাটাবেস থেকে আসা SLID, FundID ইত্যাদিও এখানে ম্যাপ করতে পারেন
 });
 
 export const SalaryHeadsPage = () => {
   // ---- Query ----
   const { data: res, isLoading: isLoadingHeads, isFetching, refetch } = useGetHeadsQuery();
+  const { data: fundNamesData } = useGetFundNamesQuery();
 
   // ---- Mutations ----
   const [createHead, { isLoading: isCreating }] = useCreateHeadMutation();
@@ -48,8 +51,23 @@ export const SalaryHeadsPage = () => {
   const [sortOrder, setSortOrder] = useState(1);
   const [formError, setFormError] = useState('');
 
+  // ✅ নতুন স্টেট: Fund, GL, SL
+  const [selectedFundID, setSelectedFundID] = useState('');
+  const [selectedGLID, setSelectedGLID] = useState('');
+  const [selectedSLID, setSelectedSLID] = useState('');
+
   const [deactivateTarget, setDeactivateTarget] = useState(null);
   const [toast, setToast] = useState(null);
+
+  // ✅ Fund, GL, SL ডাটা ফেচিং
+  const { data: generalLedgersData } = useGetGeneralLedgersByFundQuery(
+    { fundId: selectedFundID },
+    { skip: !selectedFundID }
+  );
+
+  const { data: gSLData } = useGetSubLedgerQuery(selectedGLID, {
+    skip: !selectedGLID,
+  });
 
   const addToast = (kind, text) => {
     setToast({ kind, text });
@@ -77,6 +95,12 @@ export const SalaryHeadsPage = () => {
     const maxOrder = heads.reduce((m, h) => Math.max(m, h.sortOrder), 0);
     setSortOrder(maxOrder + 1);
     setFormError('');
+
+    // ✅ নতুন ফিল্ড রিসেট
+    setSelectedFundID('');
+    setSelectedGLID('');
+    setSelectedSLID('');
+
     setModalOpen(true);
   };
 
@@ -86,6 +110,12 @@ export const SalaryHeadsPage = () => {
     setHeadType(head.headType);
     setSortOrder(head.sortOrder);
     setFormError('');
+
+    // ✅ এডিটের সময় ডাটাবেস থেকে আসা ভ্যালু সেট করতে পারেন (যদি ম্যাপ করা থাকে)
+    // setSelectedFundID(head.fundId || '');
+    // setSelectedGLID(head.glId || '');
+    // setSelectedSLID(head.slId || '');
+
     setModalOpen(true);
   };
 
@@ -99,11 +129,18 @@ export const SalaryHeadsPage = () => {
       setFormError(LABELS.headsPage.errorOrderInvalid);
       return;
     }
+    // ✅ SLID সিলেক্ট করা বাধ্যতামূলক করতে চাইলে
+    if (!selectedSLID) {
+      setFormError('অনুগ্রহ করে সাব-লেজার (Sub-Ledger) সিলেক্ট করুন');
+      return;
+    }
 
+    // ✅ পে-লোডে SLID, FundID, GLID যুক্ত করা হলো
     const payload = {
       HeadName: headName.trim(),
       HeadType: headType,
       SortOrder: sortOrder,
+      SLID: Number(selectedSLID),
     };
 
     try {
@@ -116,7 +153,7 @@ export const SalaryHeadsPage = () => {
       }
       setModalOpen(false);
     } catch (err) {
-      setFormError(err?.data?.error ?? LABELS.headsPage.errorNameRequired);
+      setFormError(err?.data?.error ?? 'কিছু ভুল হয়েছে, আবার চেষ্টা করুন');
     }
   };
 
@@ -154,17 +191,7 @@ export const SalaryHeadsPage = () => {
         <div className="relative z-10 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-lg border border-white/20 bg-white/20 backdrop-blur">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" />
                 <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" />
                 <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" />
@@ -182,16 +209,10 @@ export const SalaryHeadsPage = () => {
 
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2 rounded-lg bg-white/20 px-3 py-2 backdrop-blur">
-              <span className="text-[13px] font-medium">
-                {LABELS.headsPage.activeCountLabel}
-              </span>
-              <span className="text-[17px] font-bold leading-none">
-                {toBengaliDigits(activeCount)}
-              </span>
+              <span className="text-[13px] font-medium">{LABELS.headsPage.activeCountLabel}</span>
+              <span className="text-[17px] font-bold leading-none">{toBengaliDigits(activeCount)}</span>
               <span className="text-[13px] font-medium text-white/70">/</span>
-              <span className="text-[13px] font-medium text-white/80">
-                {toBengaliDigits(heads.length)}
-              </span>
+              <span className="text-[13px] font-medium text-white/80">{toBengaliDigits(heads.length)}</span>
             </div>
 
             <button
@@ -200,17 +221,7 @@ export const SalaryHeadsPage = () => {
               disabled={isSaving}
               className="flex items-center gap-2 whitespace-nowrap rounded-lg bg-white px-4 py-2 text-sm font-bold text-indigo-700 shadow transition hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 5v14" />
                 <path d="M5 12h14" />
               </svg>
@@ -231,23 +242,16 @@ export const SalaryHeadsPage = () => {
         emptyDescription={LABELS.headsPage.emptyDesc}
         skeletonCols={5}
         toolbarRight={
-          <div
-            className="flex items-center gap-1 p-1 bg-slate-100 rounded-lg"
-            role="group"
-            aria-label={LABELS.headsPage.colType}
-          >
+          <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-lg" role="group" aria-label={LABELS.headsPage.colType}>
             {['ALL', 'EARNING', 'DEDUCTION'].map((t) => {
               const active = typeFilter === t;
-              const label =
-                t === 'ALL' ? LABELS.headsPage.filterAll : LABELS.headTypes[t];
+              const label = t === 'ALL' ? LABELS.headsPage.filterAll : LABELS.headTypes[t];
               return (
                 <button
                   key={t}
                   type="button"
                   onClick={() => setTypeFilter(t)}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap shrink-0 ${active
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap shrink-0 ${active ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
                     }`}
                 >
                   {label}
@@ -264,21 +268,16 @@ export const SalaryHeadsPage = () => {
               <th className="py-3 px-4 font-semibold">{LABELS.headsPage.colName}</th>
               <th className="py-3 px-4 font-semibold w-32">{LABELS.headsPage.colType}</th>
               <th className="py-3 px-4 font-semibold w-36">{LABELS.headsPage.colStatus}</th>
-              <th className="py-3 px-4 font-semibold text-right w-28">
-                {LABELS.common.actions}
-              </th>
+              <th className="py-3 px-4 font-semibold text-right w-28">{LABELS.common.actions}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {filteredHeads.map((head) => (
               <tr
                 key={head.headId}
-                className={`hover:bg-slate-50/80 transition-colors ${!head.isActive ? 'opacity-65 bg-slate-50/40' : ''
-                  }`}
+                className={`hover:bg-slate-50/80 transition-colors ${!head.isActive ? 'opacity-65 bg-slate-50/40' : ''}`}
               >
-                <td className="py-3 px-4 font-mono-num text-slate-600">
-                  {head.sortOrder}
-                </td>
+                <td className="py-3 px-4 font-mono-num text-slate-600">{head.sortOrder}</td>
                 <td className="py-3 px-4 font-medium text-slate-900">{head.headName}</td>
                 <td className="py-3 px-4">
                   <StatusBadge variant={{ kind: 'head', type: head.headType }} />
@@ -301,9 +300,7 @@ export const SalaryHeadsPage = () => {
                       />
                     </button>
                     <span className="text-xs text-slate-600">
-                      {head.isActive
-                        ? LABELS.headsPage.activeLabel
-                        : LABELS.headsPage.inactiveLabel}
+                      {head.isActive ? LABELS.headsPage.activeLabel : LABELS.headsPage.inactiveLabel}
                     </span>
                   </div>
                 </td>
@@ -313,17 +310,7 @@ export const SalaryHeadsPage = () => {
                     onClick={() => openEditModal(head)}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 hover:border-slate-300 transition-colors whitespace-nowrap shrink-0"
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M12 20h9" />
                       <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z" />
                     </svg>
@@ -340,9 +327,7 @@ export const SalaryHeadsPage = () => {
       <Modal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={
-          editingHead ? LABELS.headsPage.modalEditTitle : LABELS.headsPage.modalAddTitle
-        }
+        title={editingHead ? LABELS.headsPage.modalEditTitle : LABELS.headsPage.modalAddTitle}
         size="sm"
         footer={
           <>
@@ -371,12 +356,77 @@ export const SalaryHeadsPage = () => {
               {formError}
             </div>
           )}
+          {/* ================= ✅ নতুন সিলেক্ট ট্যাগগুলো এখানে যুক্ত করা হয়েছে ================= */}
+          <div className="grid grid-cols-1 gap-4 pt-2 border-t border-slate-100">
+            {/* Fund Select */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                ফান্ড<span className="text-red-500">*</span>
+              </label>
+              <select
+                value={selectedFundID}
+                onChange={(e) => {
+                  setSelectedFundID(e.target.value);
+                  setSelectedGLID('');
+                  setSelectedSLID('');
+                }}
+                className="w-full h-10 px-3 text-sm bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-600"
+              >
+                <option value="">-- ফান্ড সিলেক্ট করুন --</option>
+                {fundNamesData?.map((fund) => (
+                  <option key={fund.FundID} value={fund.FundID}>
+                    {fund.FundName}
+                  </option>
+                ))}
+              </select>
+            </div>
 
+            {/* General Ledger Select */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                জেনারেল লেজার<span className="text-red-500">*</span>
+              </label>
+              <select
+                value={selectedGLID}
+                onChange={(e) => {
+                  setSelectedGLID(e.target.value);
+                  setSelectedSLID('');
+                }}
+                disabled={!selectedFundID}
+                className="w-full h-10 px-3 text-sm bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-600 disabled:bg-slate-50 disabled:cursor-not-allowed"
+              >
+                <option value="">-- জেনারেল লেজার সিলেক্ট করুন --</option>
+                {generalLedgersData?.map((gl) => (
+                  <option key={gl.GLID} value={gl.GLID}>
+                    {gl.GlName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Sub Ledger Select */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                সাব-লেজার<span className="text-red-500">*</span>
+              </label>
+              <select
+                value={selectedSLID}
+                onChange={(e) => setSelectedSLID(e.target.value)}
+                disabled={!selectedGLID}
+                className="w-full h-10 px-3 text-sm bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-600 disabled:bg-slate-50 disabled:cursor-not-allowed"
+              >
+                <option value="">-- সাব-লেজার সিলেক্ট করুন --</option>
+                {gSLData?.map((sl) => (
+                  <option key={sl.SLID} value={sl.SLID}>
+                    {sl.SlName}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          {/* ================= নতুন সিলেক্ট ট্যাগ শেষ ================= */}
           <div>
-            <label
-              htmlFor="head-name-input"
-              className="block text-sm font-medium text-slate-700 mb-1.5"
-            >
+            <label htmlFor="head-name-input" className="block text-sm font-medium text-slate-700 mb-1.5">
               {LABELS.headsPage.fieldName} <span className="text-red-500">*</span>
             </label>
             <input
@@ -425,22 +475,8 @@ export const SalaryHeadsPage = () => {
             </div>
           </div>
 
-          {/* <div>
-            <label
-              htmlFor="head-order-input"
-              className="block text-sm font-medium text-slate-700 mb-1.5"
-            >
-              {LABELS.headsPage.fieldOrder}
-            </label>
-            <input
-              id="head-order-input"
-              type="number"
-              min={1}
-              value={sortOrder}
-              onChange={(e) => setSortOrder(Number(e.target.value))}
-              className="w-full h-10 px-3 text-sm bg-white border border-slate-300 rounded-lg text-slate-900 tabular-nums focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-600"
-            />
-          </div> */}
+
+
         </form>
       </Modal>
 

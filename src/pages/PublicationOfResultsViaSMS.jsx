@@ -397,6 +397,8 @@ const PublicationOfResultsViaSMS = () => {
     { skip: !SessionID || !ExamID || !SubClassID }
   );
 
+  console.log(smsResultData, "smsResultData")
+
   // ======================================================
   // ✅ SMS Balance (dynamic)
   // ======================================================
