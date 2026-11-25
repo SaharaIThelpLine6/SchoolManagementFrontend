@@ -752,7 +752,6 @@ export const menuData = [
   //   icon: "HiDotsCircleHorizontal",
   //   subMenu: [],
   // },
-
   {
     id: '16',
     name: 'Settings',

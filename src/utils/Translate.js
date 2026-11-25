@@ -547,6 +547,11 @@ const useTranslate = () => {
     Online: 'অনলাইন',
     'Set Status': 'অবস্থা নির্ধারণ',
     Settings: 'সেটিংস',
+    Device: 'ডিভাইস',
+    'Attendance Device': 'হাজিরা ডিভাইস',
+    'Device User': 'ডিভাইস ইউজার',
+    'Device Time Settings': 'টাইম সেটিংস',
+    'Live Attendance': 'লাইভ হাজিরা',
     'Share Your Opinion': 'আপনার মতামত শেয়ার করুন',
     Class: 'ক্লাস',
     Branch: 'শাখা',
@@ -1337,7 +1342,11 @@ const useTranslate = () => {
     "Reset": "রিসেট",
     "Saving...": "সংরক্ষণ হচ্ছে...",
     "Save": "সংরক্ষণ",
+<<<<<<< HEAD
     "Notice Board": "নোটিশ বোর্ড",
+=======
+    "Attendance Device": "হাজিরা ডিভাইস",
+>>>>>>> 988e9d59522c5775f6b1dc003fdcf0624a47af91
   };
 
   return (key) =>

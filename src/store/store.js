@@ -52,6 +52,7 @@ import { adminPaymentSlice } from "../features/Admin/adminPaymentSlice";
 import { domainManageSlice } from "../features/Admin/domainManage/domainManageSlice";
 import { adminDashboardSlice } from "../features/Admin/adminDashboardSlice";
 import { madrasahUpdateSlice } from "../features/Admin/madrasahUpdateSlice";
+import { attendanceDeviceSlice } from "../features/attendance/attendanceDeviceSlice";
 
 const store = configureStore({
   reducer: {
@@ -109,6 +110,7 @@ const store = configureStore({
     [domainManageSlice.reducerPath]: domainManageSlice.reducer,
     [adminDashboardSlice.reducerPath]: adminDashboardSlice.reducer,
     [madrasahUpdateSlice.reducerPath]: madrasahUpdateSlice.reducer,
+    [attendanceDeviceSlice.reducerPath]: attendanceDeviceSlice.reducer,
 
   },
   middleware: (getDefaultMiddleware) =>
@@ -152,6 +154,7 @@ const store = configureStore({
       .concat(adminPaymentSlice.middleware)
       .concat(adminDashboardSlice.middleware)
       .concat(madrasahUpdateSlice.middleware)
+      .concat(attendanceDeviceSlice.middleware)
 
 });
 

@@ -212,6 +212,9 @@ import { SalaryHeadsPage } from '../pages/teacher/SalaryHeadPage';
 import { GenerateSalaryPage } from '../pages/teacher/GenerateSalaryPage';
 import { PaymentsPage } from '../pages/teacher/PaymentsPage';
 import { ReportsPage } from '../pages/teacher/ReportsPage';
+import LiveAttendence from '../pages/LiveAttendence';
+import DeviceTimeSettings from '../pages/DeviceTimeSettings';
+import AttendanceDevices from '../pages/AttendanceDevices';
 
 const Router = createBrowserRouter([
   {
@@ -1522,6 +1525,51 @@ const Router = createBrowserRouter([
                   // >
                   <DonationReport pageTitle="Donation Report" />
                   // </RequirePermission>
+                ),
+              },
+            ],
+          },
+          {
+            path: 'device',
+            children: [
+              {
+                index: true,
+                element: (
+                  <RequirePermission permissionId={permissionsDataList.settings}>
+                    <AttendanceDevices pageTitle="হাজিরা ডিভাইস" />
+                  </RequirePermission>
+                ),
+              },
+              // {
+              //   path: 'attendance-devices',
+              //   element: (
+              //     <RequirePermission permissionId={permissionsDataList.settings}>
+              //       <AttendanceDevices pageTitle="হাজিরা ডিভাইস" />
+              //     </RequirePermission>
+              //   ),
+              // },
+              // {
+              //   path: 'device-users',
+              //   element: (
+              //     <RequirePermission permissionId={permissionsDataList.settings}>
+              //       <DeviceUsers pageTitle="ডিভাইস ইউজার" />
+              //     </RequirePermission>
+              //   ),
+              // },
+              {
+                path: 'time-settings',
+                element: (
+                  <RequirePermission permissionId={permissionsDataList.settings}>
+                    <DeviceTimeSettings pageTitle="টাইম সেটিংস" />
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: 'live-attendence',
+                element: (
+                  <RequirePermission permissionId={permissionsDataList.settings}>
+                    <LiveAttendence pageTitle="লাইভ হাজিরা" />
+                  </RequirePermission>
                 ),
               },
             ],
