@@ -1,10 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Buffer } from "buffer";
 import PropTypes from "prop-types";
-import {
-  useGetLiveAttendancePhotoQuery,
-  useGetLiveAttendanceQuery,
-} from "../features/attendance/attendanceSlice";
+import { useGetLiveAttendancePhotoQuery, useGetLiveAttendanceQuery } from "../features/attendance/attendanceSlice";
 import { useGetInstitutionInfoQuery } from "../features/settings/settingsQuerySlice";
 import bnBijoy2Unicode from "../utils/conveter";
 import { toBnDigits, toBnDisplay, toHHMM } from "../view/deviceTimeSettings/timeUtils";
@@ -13,15 +10,21 @@ const POLL_MS = 5000;
 
 const AVATAR_FALLBACK = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 300'%3E%3Crect width='300' height='300' fill='%23e8f0ea'/%3E%3Ccircle cx='150' cy='112' r='58' fill='%2399b5a5'/%3E%3Cpath d='M48 292c8-75 47-112 102-112s94 37 102 112' fill='%2399b5a5'/%3E%3C/svg%3E`;
 
+const CARD = "rounded-2xl border border-[#e4ebe5] bg-white shadow-[0_5px_20px_#18352d08] sm:rounded-[20px]";
+const FIELD =
+  "h-[38px] min-w-0 rounded-[10px] border border-[#dbe5de] bg-white px-[10px] text-[14px] text-[#18352d] outline-none focus:border-[#087354]";
+
 // ব্রাউজারের লোকাল তারিখ "YYYY-MM-DD"
 const localDate = (d = new Date()) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
 const isLate = (r) => Boolean(r.LateTime) && r.LateTime !== "00:00:00";
 
-// "01:21:48" → "১ ঘণ্টা ২১ মিনিট"
+// "01:21:48" → "১ ঘণ্টা ২১ মিনিট" 
 const lateText = (hms) => {
-  const [h, m] = String(hms || "").split(":").map(Number);
+  const [h, m] = String(hms || "")
+    .split(":")
+    .map(Number);
   const parts = [];
   if (h) parts.push(`${toBnDigits(h)} ঘণ্টা`);
   if (m || !h) parts.push(`${toBnDigits(m || 0)} মিনিট`);
@@ -33,13 +36,15 @@ const classOf = (u) => u.ClassName || u.UserTypeName || "";
 
 function StatCard({ label, value, tone, sub }) {
   return (
-    <div className="relative min-h-[118px] overflow-hidden rounded-[20px] border border-[#e4ebe5] bg-white px-[17px] py-[18px] shadow-[0_5px_20px_#18352d08] max-[850px]:px-[12px] max-[850px]:py-[14px]">
+    <div
+      className={`${CARD} relative min-w-0 overflow-hidden px-[14px] py-[12px] sm:min-h-[118px] sm:px-[17px] sm:py-[18px]`}
+    >
       <div className="pointer-events-none absolute -bottom-[28px] -right-[22px] h-[70px] w-[70px] rounded-full bg-[#0b76580d]" />
-      <div className="text-[15px] text-[#71827b]">{label}</div>
-      <div className={`mt-[6px] text-[34px] font-bold leading-[1.3] max-[850px]:text-[28px] ${tone}`}>
+      <div className="truncate text-[14px] text-[#71827b] sm:text-[15px]">{label}</div>
+      <div className={`mt-[4px] text-[26px] font-bold leading-[1.3] sm:mt-[6px] sm:text-[34px] ${tone}`}>
         {toBnDigits(value)}
       </div>
-      {sub && <div className="text-[12px] text-[#71827b]">{sub}</div>}
+      {sub && <div className="truncate text-[12px] text-[#71827b]">{sub}</div>}
     </div>
   );
 }
@@ -50,17 +55,24 @@ StatCard.propTypes = {
   tone: PropTypes.string,
   sub: PropTypes.string,
 };
+/*
 
+
+*/
 function LatestCard({ latest, isToday }) {
   const { data: photoData } = useGetLiveAttendancePhotoQuery(latest?.UserID, { skip: !latest?.UserID });
   const photo = photoData?.photo || AVATAR_FALLBACK;
 
   if (!latest) {
     return (
-      <div className="flex flex-col items-center text-center text-[#71827b]">
-        <img className="mb-[18px] h-[160px] w-[160px] rounded-[24px] opacity-70" alt="" src={AVATAR_FALLBACK} />
-        <p className="m-0 text-[20px] font-semibold text-[#18352d]">এখনও কোনো হাজিরা আসেনি</p>
-        <p className="m-0 mt-[6px] text-[15px]">
+      <div className="flex flex-col items-center py-[10px] text-center text-[#71827b]">
+        <img
+          className="mb-[14px] h-[110px] w-[110px] rounded-[20px] opacity-70 sm:mb-[18px] sm:h-[160px] sm:w-[160px] sm:rounded-[24px]"
+          alt=""
+          src={AVATAR_FALLBACK}
+        />
+        <p className="m-0 text-[17px] font-semibold text-[#18352d] sm:text-[20px]">এখনও কোনো হাজিরা আসেনি</p>
+        <p className="m-0 mt-[6px] text-[14px] sm:text-[15px]">
           {isToday ? "ডিভাইসে আঙুল / কার্ড দিলেই এখানে দেখা যাবে" : "এই দিনে কোনো হাজিরা নেই"}
         </p>
       </div>
@@ -69,10 +81,13 @@ function LatestCard({ latest, isToday }) {
 
   const late = isLate(latest);
   return (
-    <div key={latest.ID} className="flex w-full flex-col items-center animate-[liveIn_.5s_ease-out]">
-      <div className="aspect-square w-[min(330px,70%)] rounded-[24px] bg-gradient-to-br from-[#d6b76e] to-[#087354] p-[7px] shadow-[0_12px_28px_#075b4620]">
+    <div
+      key={latest.ID}
+      className="flex w-full animate-live-in items-center gap-[14px] text-left flex-col sm:gap-0 sm:text-center"
+    >
+      <div className="aspect-square w-[96px] flex-none rounded-[18px] bg-gradient-to-br from-[#d6b76e] to-[#087354] p-[4px] shadow-[0_12px_28px_#075b4620] sm:w-[min(240px,55%)] sm:rounded-[24px] sm:p-[7px] xl:w-[min(380px,75%)]">
         <img
-          className="block h-full w-full rounded-[19px] bg-[#eaf1ec] object-cover"
+          className="block h-full w-full rounded-[14px] bg-[#eaf1ec] object-cover sm:rounded-[19px]"
           alt="ছবি"
           src={photo}
           onError={(e) => {
@@ -80,31 +95,38 @@ function LatestCard({ latest, isToday }) {
           }}
         />
       </div>
-      <h2 className="mb-[3px] mt-[20px] text-center text-[30px] font-bold max-[480px]:text-[24px]">
-        {latest.UserName}
-      </h2>
-      <p className="m-0 text-center text-[20px] text-[#71827b] max-[480px]:text-[16px]">
-        আইডি নং: <strong>{toBnDigits(latest.UserCode)}</strong>
-        {classOf(latest) && (
-          <>
-            {" "}&nbsp;|&nbsp; <strong>{classOf(latest)}</strong>
-          </>
-        )}
-      </p>
-      <p className="m-0 mt-[8px] text-center text-[16px] text-[#71827b]">
-        {[latest.ShiftName, latest.SwitchName].filter(Boolean).join(" · ")}
-        {" — "}
-        <strong className="text-[#075b46]">{timeOf(latest.Time)}</strong>
-      </p>
-      <div className="mt-[16px] flex flex-wrap justify-center gap-[8px]">
-        <span className="rounded-[30px] bg-[#e7f7ee] px-[22px] py-[8px] font-bold text-[#087849]">✓ উপস্থিত</span>
-        {late ? (
-          <span className="rounded-[30px] bg-[#fdf0e6] px-[18px] py-[8px] font-bold text-[#c06a1e]">
-            দেরি: {lateText(latest.LateTime)}
+      <div className="min-w-0 flex-1 sm:flex-none">
+        <h2 className="mb-[3px] break-words text-[20px] font-bold leading-[1.3] sm:mt-[18px] sm:text-[26px] xl:mt-[20px] xl:text-[30px]">
+          {latest.UserName}
+        </h2>
+        <p className="m-0 text-[14px] text-[#71827b] sm:text-[17px] xl:text-[20px]">
+          আইডি নং: <strong>{toBnDigits(latest.UserCode)}</strong>
+          {classOf(latest) && (
+            <>
+              {" "}
+              &nbsp;|&nbsp; <strong>{classOf(latest)}</strong>
+            </>
+          )}
+        </p>
+        <p className="m-0 mt-[6px] text-[13px] text-[#71827b] sm:text-[18px]">
+          {[latest.ShiftName, latest.SwitchName].filter(Boolean).join(" · ")}
+          {" — "}
+          <strong className="text-[#075b46]">{timeOf(latest.Time)}</strong>
+        </p>
+        <div className="mt-[10px] flex flex-wrap justify-start gap-[8px] text-[13px] sm:mt-[16px] sm:justify-center sm:text-[16px]">
+          <span className="rounded-[30px] bg-[#e7f7ee] px-[12px] py-[5px] font-bold text-[#087849] sm:px-[22px] sm:py-[8px]">
+            ✓ উপস্থিত
           </span>
-        ) : (
-          <span className="rounded-[30px] bg-[#eef4fb] px-[18px] py-[8px] font-bold text-[#2c6aa8]">সময়মতো</span>
-        )}
+          {late ? (
+            <span className="rounded-[30px] bg-[#fdf0e6] px-[12px] py-[5px] font-bold text-[#c06a1e] sm:px-[18px] sm:py-[8px]">
+              দেরি: {lateText(latest.LateTime)}
+            </span>
+          ) : (
+            <span className="rounded-[30px] bg-[#eef4fb] px-[12px] py-[5px] font-bold text-[#2c6aa8] sm:px-[18px] sm:py-[8px]">
+              সময়মতো
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -126,13 +148,45 @@ LatestCard.propTypes = {
 
 function Avatar({ name, tone = "bg-[#e8f1eb] text-[#075b46]" }) {
   return (
-    <div className={`grid h-[43px] w-[43px] flex-none place-items-center rounded-full font-bold ${tone}`}>
-      {String(name || "?").trim().charAt(0)}
+    <div
+      className={`grid h-[38px] w-[38px] flex-none place-items-center rounded-full font-bold sm:h-[43px] sm:w-[43px] ${tone}`}
+    >
+      {String(name || "?")
+        .trim()
+        .charAt(0)}
     </div>
   );
 }
 
 Avatar.propTypes = { name: PropTypes.string, tone: PropTypes.string };
+
+function Row({ name, meta, avatarTone, flash, children }) {
+  return (
+    <div
+      className={`flex items-center gap-[10px] rounded-[10px] border-b border-[#edf1ed] px-[2px] py-[10px] last:border-b-0 sm:gap-[12px] sm:px-[6px] sm:py-[11px] ${
+        flash ? "animate-live-flash" : ""
+      }`}
+    >
+      <Avatar name={name} tone={avatarTone} />
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-[15px] font-semibold sm:text-[16px]">{name}</div>
+        <div className="truncate text-[13px] text-[#71827b]">{meta}</div>
+      </div>
+      <div className="flex flex-none flex-col items-end gap-[4px]">{children}</div>
+    </div>
+  );
+}
+
+Row.propTypes = {
+  name: PropTypes.string,
+  meta: PropTypes.string,
+  avatarTone: PropTypes.string,
+  flash: PropTypes.bool,
+  children: PropTypes.node,
+};
+
+const TIME_BADGE =
+  "whitespace-nowrap rounded-[9px] px-[8px] py-[4px] text-[12px] font-semibold sm:px-[9px] sm:py-[5px] sm:text-[13px]";
 
 export default function LiveAttendence() {
   const [date, setDate] = useState(localDate);
@@ -205,7 +259,11 @@ export default function LiveAttendence() {
 
   const q = search.trim().toLowerCase();
   const matches = (u) =>
-    !q || String(u.UserName || "").toLowerCase().includes(q) || String(u.UserCode || "").includes(q);
+    !q ||
+    String(u.UserName || "")
+      .toLowerCase()
+      .includes(q) ||
+    String(u.UserCode || "").includes(q);
   const list = (tab === "present" ? present : absent).filter(matches);
 
   const dateText = useMemo(
@@ -222,42 +280,44 @@ export default function LiveAttendence() {
     ? new Date(fulfilledTimeStamp).toLocaleTimeString("bn-BD", { hour: "2-digit", minute: "2-digit", second: "2-digit" })
     : null;
 
+  const metaOf = (u, extra) => [`আইডি: ${toBnDigits(u.UserCode)}`, classOf(u), extra].filter(Boolean).join(" · ");
+
   return (
-    <div className="min-h-screen bg-[#f4f7f3] text-[#18352d] antialiased font-default">
-      <style>{`
-        @keyframes liveIn { from { opacity: 0; transform: translateY(10px) scale(.98) } to { opacity: 1; transform: none } }
-        @keyframes liveFlash { 0% { background: #d9f5e6 } 100% { background: transparent } }
-      `}</style>
-      <div className="mx-auto max-w-[1440px] p-[28px] max-[850px]:p-[15px]">
+    <div className="min-h-screen bg-[#f4f7f3] font-default text-[#18352d] antialiased">
+      <div className="mx-auto max-w-[1440px] p-[12px] sm:p-[20px] xl:p-[28px]">
         {/* Header */}
-        <header className="relative flex items-center justify-center gap-[20px] overflow-hidden rounded-[22px] bg-gradient-to-br from-[#064b3b] to-[#087354] px-[32px] py-[25px] text-white shadow-[0_12px_32px_#064b3b20] max-[480px]:gap-[11px] max-[480px]:rounded-[16px] max-[480px]:px-[12px] max-[480px]:py-[20px]">
+        <header className="relative flex flex-col items-center justify-center gap-[10px] overflow-hidden rounded-2xl bg-gradient-to-br from-[#064b3b] to-[#087354] px-[14px] py-[18px] text-white shadow-[0_12px_32px_#064b3b20] sm:flex-row sm:gap-[20px] sm:rounded-[22px] sm:px-[32px] sm:py-[25px]">
           <div className="pointer-events-none absolute -right-[80px] -top-[170px] h-[300px] w-[300px] rounded-full border border-white/10 shadow-[0_0_0_25px_#ffffff08,0_0_0_55px_#ffffff06]" />
           <div
-            className="grid h-[76px] w-[76px] flex-none place-items-center overflow-hidden rounded-full border-2 border-[#e8c879] bg-white max-[480px]:h-[56px] max-[480px]:w-[56px]"
+            className="z-[1] grid h-[58px] w-[58px] flex-none place-items-center overflow-hidden rounded-full border-2 border-[#e8c879] bg-white sm:h-[76px] sm:w-[76px]"
             aria-label="প্রতিষ্ঠানের লোগো"
           >
             {logo ? (
               <img src={logo} alt="লোগো" className="h-full w-full object-contain p-[4px]" />
             ) : (
-              <svg viewBox="0 0 64 64" fill="none" aria-hidden="true" className="h-[48px] w-[48px] max-[480px]:h-[37px] max-[480px]:w-[37px]">
-                <path d="M32 5 38 20 54 21 42 32 46 48 32 39 18 48 22 32 10 21 26 20 32 5Z" stroke="#087354" strokeWidth="2.2" />
+              <svg viewBox="0 0 64 64" fill="none" aria-hidden="true" className="h-[65%] w-[65%]">
+                <path
+                  d="M32 5 38 20 54 21 42 32 46 48 32 39 18 48 22 32 10 21 26 20 32 5Z"
+                  stroke="#087354"
+                  strokeWidth="2.2"
+                />
                 <path d="M20 28h24v17H20z" stroke="#087354" strokeWidth="2" />
               </svg>
             )}
           </div>
-          <div className="z-[1] text-center">
-            <h1 className="m-0 mb-[5px] text-[clamp(22px,3vw,36px)] font-bold tracking-[0.2px] max-[480px]:text-[20px]">
+          <div className="z-[1] min-w-0 text-center">
+            <h1 className="m-0 mb-[5px] break-words text-[21px] font-bold leading-[1.3] tracking-[0.2px] sm:text-[28px] xl:text-[36px]">
               {institutionName || "লাইভ হাজিরা"}
             </h1>
             {institutionAddress && (
-              <p className="m-0 text-[17px] text-[#d8eee5] max-[480px]:text-[13px]">{institutionAddress}</p>
+              <p className="m-0 break-words text-[13px] text-[#d8eee5] sm:text-[17px]">{institutionAddress}</p>
             )}
           </div>
         </header>
 
         {/* Topline */}
-        <div className="mx-[2px] mb-[15px] mt-[22px] flex flex-wrap items-center justify-between gap-[12px]">
-          <div className="flex items-center gap-[9px] font-semibold text-[#075b46]">
+        <div className="mx-[2px] mb-[15px] mt-[14px] flex flex-col gap-[12px] sm:mt-[22px] sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-x-[9px] gap-y-[4px] font-semibold text-[#075b46]">
             {isToday ? (
               <>
                 <span
@@ -286,13 +346,13 @@ export default function LiveAttendence() {
               </>
             )}
           </div>
-          <div className="flex flex-wrap items-center gap-[10px]">
-            <span className="text-[15px] text-[#71827b]">{dateText}</span>
+          <div className="flex w-full flex-wrap items-center gap-[10px] sm:w-auto">
+            <span className="basis-full text-[15px] text-[#71827b] sm:basis-auto">{dateText}</span>
             {userTypes.length > 1 && (
               <select
                 value={typeId}
                 onChange={(e) => setTypeId(e.target.value)}
-                className="h-[38px] rounded-[10px] border border-[#dbe5de] bg-white px-[10px] text-[14px] text-[#18352d] outline-none focus:border-[#087354]"
+                className={`${FIELD} flex-1 sm:flex-none`}
               >
                 <option value="">সকল ইউজার</option>
                 {userTypes.map((t) => (
@@ -307,17 +367,19 @@ export default function LiveAttendence() {
               value={date}
               max={localDate()}
               onChange={(e) => e.target.value && setDate(e.target.value)}
-              className="h-[38px] rounded-[10px] border border-[#dbe5de] bg-white px-[10px] text-[14px] text-[#18352d] outline-none focus:border-[#087354]"
+              className={`${FIELD} flex-1 sm:flex-none`}
             />
           </div>
         </div>
 
         {/* Dashboard */}
-        <main className="grid grid-cols-[minmax(300px,0.92fr)_minmax(420px,1.35fr)] items-stretch gap-[22px] max-[850px]:grid-cols-1">
+        <main className="grid grid-cols-1 items-stretch gap-[14px] sm:gap-[20px] xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.35fr)] xl:gap-[22px]">
           {/* Latest */}
-          <section className="relative flex min-h-[590px] flex-col items-center justify-center overflow-hidden rounded-[20px] border border-[#e4ebe5] bg-white p-[25px] shadow-[0_5px_20px_#18352d08] max-[850px]:min-h-[460px]">
-            <div className="absolute inset-x-0 top-0 h-[8px] bg-gradient-to-r from-[#075b46] to-[#d7ad58]" />
-            <div className="absolute left-[18px] top-[22px] rounded-[20px] bg-[#eaf5ee] px-[11px] py-[4px] text-[13px] font-semibold text-[#075b46]">
+          <section
+            className={`${CARD} relative flex min-w-0 flex-col items-center justify-center overflow-hidden px-[14px] pb-[16px] pt-[52px] sm:p-[25px] sm:pt-[60px] xl:min-h-[590px] xl:pt-[25px]`}
+          >
+            <div className="absolute inset-x-0 top-0 h-[6px] bg-gradient-to-r from-[#075b46] to-[#d7ad58] sm:h-[8px]" />
+            <div className="absolute left-[14px] top-[18px] rounded-[20px] bg-[#eaf5ee] px-[11px] py-[4px] text-[13px] font-semibold text-[#075b46] sm:left-[18px] sm:top-[22px]">
               সর্বশেষ হাজিরা
             </div>
             {isLoading ? (
@@ -328,8 +390,8 @@ export default function LiveAttendence() {
           </section>
 
           {/* Right Column */}
-          <section className="flex min-w-0 flex-col gap-[20px]">
-            <div className="grid grid-cols-4 gap-[14px] max-[850px]:gap-[9px] max-[600px]:grid-cols-2">
+          <section className="flex min-w-0 flex-col gap-[14px] sm:gap-[20px]">
+            <div className="grid grid-cols-2 gap-[9px] sm:grid-cols-4 sm:gap-[14px]">
               <StatCard label="মোট" value={stats.total} tone="text-[#075b46]" sub="শিফটে যুক্ত" />
               <StatCard label="উপস্থিত" value={stats.present} tone="text-[#13945e]" />
               <StatCard label="দেরিতে" value={stats.late} tone="text-[#c06a1e]" />
@@ -337,9 +399,11 @@ export default function LiveAttendence() {
             </div>
 
             {/* Day list */}
-            <div className="flex min-h-[440px] flex-1 flex-col rounded-[20px] border border-[#e4ebe5] bg-white px-[22px] pb-[16px] pt-[20px] shadow-[0_5px_20px_#18352d08] max-[480px]:px-[14px] max-[480px]:pt-[16px]">
-              <div className="mb-[14px] flex flex-wrap items-center justify-between gap-[10px]">
-                <div className="flex rounded-[12px] bg-[#f0f5f1] p-[4px]">
+            <div
+              className={`${CARD} flex min-w-0 flex-1 flex-col px-[12px] pb-[10px] pt-[14px] sm:min-h-[440px] sm:px-[22px] sm:pb-[16px] sm:pt-[20px]`}
+            >
+              <div className="mb-[14px] flex flex-col gap-[10px] sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+                <div className="flex w-full rounded-[12px] bg-[#f0f5f1] p-[4px] sm:w-auto">
                   {[
                     { key: "present", label: "উপস্থিত", count: present.length, tone: "text-[#087849]" },
                     { key: "absent", label: "অনুপস্থিত", count: absent.length, tone: "text-[#d05a4c]" },
@@ -348,7 +412,7 @@ export default function LiveAttendence() {
                       key={t.key}
                       type="button"
                       onClick={() => setTab(t.key)}
-                      className={`rounded-[9px] px-[14px] py-[7px] text-[15px] font-semibold transition ${
+                      className={`flex-1 whitespace-nowrap rounded-[9px] px-[8px] py-[7px] text-[14px] font-semibold transition sm:flex-none sm:px-[14px] sm:text-[15px] ${
                         tab === t.key ? `bg-white shadow-sm ${t.tone}` : "text-[#71827b] hover:text-[#18352d]"
                       }`}
                     >
@@ -361,11 +425,11 @@ export default function LiveAttendence() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="নাম বা আইডি দিয়ে খুঁজুন"
-                  className="h-[38px] w-[220px] rounded-[10px] border border-[#dbe5de] px-[12px] text-[14px] outline-none focus:border-[#087354] max-[480px]:w-full"
+                  className={`${FIELD} w-full px-[12px] sm:w-[220px]`}
                 />
               </div>
 
-              <div className="max-h-[520px] flex-1 overflow-y-auto pr-[5px] [&::-webkit-scrollbar-thumb]:rounded-[10px] [&::-webkit-scrollbar-thumb]:bg-[#cbd9d0] [&::-webkit-scrollbar]:w-[6px]">
+              <div className="max-h-[70vh] flex-1 overflow-y-auto pr-[5px] scrollbar-thin scrollbar-thumb-[#cbd9d0] scrollbar-thumb-rounded-full sm:max-h-[65vh] xl:max-h-[520px]">
                 {isLoading ? (
                   <p className="py-[40px] text-center text-[#71827b]">লোড হচ্ছে…</p>
                 ) : isError && !data ? (
@@ -380,56 +444,25 @@ export default function LiveAttendence() {
                   </p>
                 ) : tab === "present" ? (
                   list.map((r) => (
-                    <div
-                      key={r.ID}
-                      className={`flex items-center gap-[12px] rounded-[10px] border-b border-[#edf1ed] px-[6px] py-[11px] last:border-b-0 ${
-                        freshIds.has(r.ID) ? "animate-[liveFlash_3s_ease-out]" : ""
-                      }`}
-                    >
-                      <Avatar name={r.UserName} />
-                      <div className="min-w-0 flex-1">
-                        <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[16px] font-semibold">
-                          {r.UserName}
+                    <Row key={r.ID} name={r.UserName} meta={metaOf(r, r.SwitchName)} flash={freshIds.has(r.ID)}>
+                      <div className={`${TIME_BADGE} bg-[#f0f7f2] text-[#075b46]`}>{timeOf(r.Time)}</div>
+                      {isLate(r) && (
+                        <div className="whitespace-nowrap text-[12px] font-semibold text-[#c06a1e]">
+                          দেরি {lateText(r.LateTime)}
                         </div>
-                        <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[13px] text-[#71827b]">
-                          আইডি: {toBnDigits(r.UserCode)}
-                          {classOf(r) && ` · ${classOf(r)}`}
-                          {r.SwitchName && ` · ${r.SwitchName}`}
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-[4px]">
-                        <div className="whitespace-nowrap rounded-[9px] bg-[#f0f7f2] px-[9px] py-[5px] text-[13px] font-semibold text-[#075b46]">
-                          {timeOf(r.Time)}
-                        </div>
-                        {isLate(r) && (
-                          <div className="whitespace-nowrap text-[12px] font-semibold text-[#c06a1e]">
-                            দেরি {lateText(r.LateTime)}
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                      )}
+                    </Row>
                   ))
                 ) : (
                   list.map((u) => (
-                    <div
+                    <Row
                       key={u.UserID}
-                      className="flex items-center gap-[12px] border-b border-[#edf1ed] px-[6px] py-[11px] last:border-b-0"
+                      name={u.UserName}
+                      meta={metaOf(u, u.ShiftName)}
+                      avatarTone="bg-[#fdf0ee] text-[#d05a4c]"
                     >
-                      <Avatar name={u.UserName} tone="bg-[#fdf0ee] text-[#d05a4c]" />
-                      <div className="min-w-0 flex-1">
-                        <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[16px] font-semibold">
-                          {u.UserName}
-                        </div>
-                        <div className="overflow-hidden text-ellipsis whitespace-nowrap text-[13px] text-[#71827b]">
-                          আইডি: {toBnDigits(u.UserCode)}
-                          {classOf(u) && ` · ${classOf(u)}`}
-                          {u.ShiftName && ` · ${u.ShiftName}`}
-                        </div>
-                      </div>
-                      <div className="whitespace-nowrap rounded-[9px] bg-[#fdf0ee] px-[9px] py-[5px] text-[13px] font-semibold text-[#d05a4c]">
-                        অনুপস্থিত
-                      </div>
-                    </div>
+                      <div className={`${TIME_BADGE} bg-[#fdf0ee] text-[#d05a4c]`}>অনুপস্থিত</div>
+                    </Row>
                   ))
                 )}
               </div>

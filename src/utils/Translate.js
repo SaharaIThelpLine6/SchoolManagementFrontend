@@ -1342,11 +1342,8 @@ const useTranslate = () => {
     "Reset": "রিসেট",
     "Saving...": "সংরক্ষণ হচ্ছে...",
     "Save": "সংরক্ষণ",
-<<<<<<< HEAD
     "Notice Board": "নোটিশ বোর্ড",
-=======
     "Attendance Device": "হাজিরা ডিভাইস",
->>>>>>> 988e9d59522c5775f6b1dc003fdcf0624a47af91
   };
 
   return (key) =>
