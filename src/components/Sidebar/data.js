@@ -773,6 +773,38 @@ export const menuData = [
   // },
 
   {
+    id: '18',
+    name: 'Device',
+    route: '/device',
+    icon: 'SubDevice',
+    subMenu: [
+      {
+        id: '1',
+        name: 'Attendance Device',
+        route: 'device',
+        icon: 'SubDevice',
+      },
+      // {
+      //   id: '2',
+      //   name: 'Device User',
+      //   route: 'device/device-users',
+      //   icon: 'SubUser',
+      // },
+      {
+        id: '3',
+        name: 'Device Time Settings',
+        route: 'device/time-settings',
+        icon: 'SubCalendar',
+      },
+      {
+        id: '4',
+        name: 'Live Attendance',
+        route: 'device/live-attendence',
+        icon: 'SubReport',
+      },
+    ],
+  },
+  {
     id: '16',
     name: 'Settings',
     route: '/settings',

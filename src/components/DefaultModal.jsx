@@ -83,6 +83,7 @@ import AdmissionFormModal from './Forms/AdmissionFormModal';
 import ExamConditionModal from '../view/exam/examCondition/ExamConditionModal';
 import StudentCardModel from '../view/students/id-card-model/StudentCardModel';
 import ShiftEntry from '../view/attendance/ShiftEntry';
+import CheckTypeEntry from '../view/deviceTimeSettings/CheckTypeEntry';
 import ScheduleShiftEntry from '../view/attendance/ScheduleShiftEntry';
 import TimeSettingEntry from '../view/attendance/TimeSettingEntry';
 import ExamConditionEditModal from '../view/exam/examCondition/ExamConditionEditModal';
@@ -325,6 +326,7 @@ const DefaultModal = () => {
                 {modalType === 'SUCCESSANDERROR' && <SuccessAndError />}
                 {modalType === 'ADD_BOOK' && <AddEditBook />}
                 {modalType === 'SHIFT_ENTRY' && <ShiftEntry />}
+                {modalType === 'CHECK_TYPE_ENTRY' && <CheckTypeEntry />}
                 {modalType === 'SCHEDULE_SHIFT_ENTRY' && <ScheduleShiftEntry />}
                 {modalType === 'SHIFT_TIME_SETTING' && <TimeSettingEntry />}
                 {modalType === 'CREATE_PAYMENT_INFO' && (

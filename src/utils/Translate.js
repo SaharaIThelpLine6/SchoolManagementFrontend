@@ -526,6 +526,11 @@ const useTranslate = () => {
     Online: 'অনলাইন',
     'Set Status': 'অবস্থা নির্ধারণ',
     Settings: 'সেটিংস',
+    Device: 'ডিভাইস',
+    'Attendance Device': 'হাজিরা ডিভাইস',
+    'Device User': 'ডিভাইস ইউজার',
+    'Device Time Settings': 'টাইম সেটিংস',
+    'Live Attendance': 'লাইভ হাজিরা',
     'Share Your Opinion': 'আপনার মতামত শেয়ার করুন',
     Class: 'ক্লাস',
     Branch: 'শাখা',
@@ -1280,6 +1285,7 @@ const useTranslate = () => {
     "Failed to load data": "তথ্য লোড করা যায়নি",
     "Retry": "আবার চেষ্টা করুন",
     "Joint Result Publication": "যৌথ ফলাফল প্রকাশনা",
+    "Attendance Device": "হাজিরা ডিভাইস",
   };
 
   return (key) =>
