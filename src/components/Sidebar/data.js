@@ -764,12 +764,12 @@ export const menuData = [
         route: 'settings/add-login-users',
         icon: 'SubRole',
       },
-      {
-        id: '6',
-        name: 'Notice Board',
-        route: 'notice-board',
-        icon: 'SubNoticeBoard',
-      },
+      // {
+      //   id: '6',
+      //   name: 'Notice Board',
+      //   route: 'notice-board',
+      //   icon: 'SubNoticeBoard',
+      // },
       {
         id: '2',
         name: 'Settings',
