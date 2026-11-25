@@ -480,10 +480,10 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
                     <DefaultInput type='text' registerKey={"DivisionName"} placeholder={"বিভাগ (বাংলা)"} required />
                   </div>
                   <div>
-                    <DefaultInput registerKey={"DivisionArabic"} placeholder={"বিভাগ (আরবি)"} />
+                    <DefaultInput type='text' registerKey={"DivisionArabic"} placeholder={"বিভাগ (আরবি)"} />
                   </div>
                   <div>
-                    <DefaultInput registerKey={"DivisionEnglish"} placeholder={"বিভাগ (ইংরেজি)"} />
+                    <DefaultInput type='text' registerKey={"DivisionEnglish"} placeholder={"বিভাগ (ইংরেজি)"} />
                   </div>
                   <div className='relative'>
                     <DefaultInput registerKey={"Note"} placeholder={"মন্তব্য"} />
