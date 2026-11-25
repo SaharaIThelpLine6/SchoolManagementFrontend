@@ -218,6 +218,32 @@ export const userTypeSlice = createApi({
 
       providesTags: ["Users"],
     }),
+    getTeacherInfoBySearch: builder.query({
+      query: ({
+        page = 1,
+        limit = 10,
+        search,
+        FilterTypeId,
+      }) => {
+
+        const params = new URLSearchParams();
+
+        params.append("page", page);
+        params.append("limit", limit);
+
+        if (search) {
+          params.append("search", search);
+        }
+
+        if (FilterTypeId) {
+          params.append("FilterTypeId", FilterTypeId);
+        }
+
+        return `/get_teacher_by_filter?${params.toString()}`;
+      },
+
+      providesTags: ["Users"],
+    }),
     getNewAccessToken: builder.mutation({
       query: ({ user_code }) => {
         const params = new URLSearchParams();
@@ -269,5 +295,6 @@ export const {
   useUpdateUserStatusMutation,
   useGetGuardianOccupationTypeQuery,
   useGetUserFullInfoQuery,
-  useUpdatePasswordMutation
+  useUpdatePasswordMutation,
+  useLazyGetTeacherInfoBySearchQuery
 } = userTypeSlice;

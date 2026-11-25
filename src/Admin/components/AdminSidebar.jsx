@@ -84,6 +84,9 @@ const AdminSidebar = () => {
             if (subItem.name === 'Query Manage') {
               return typeof permissionType === 'number' && permissionType <= 4;
             }
+            if (subItem.name === 'Madrasah Update Management') {
+              return typeof permissionType === 'number' && permissionType <= 4;
+            }
             return true; // Default allow
           });
 

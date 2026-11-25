@@ -171,17 +171,18 @@ const TableScaleSample = ({ rowGap = 100, font = 100 }) => {
 };
 
 /** Live sample of the institution name and address at the chosen size. */
-const HeaderScaleSample = ({ scale, name, address }) => {
-  const pct = (Number(scale) || 100) / 100;
+const HeaderScaleSample = ({ nameScale, addressScale, name, address }) => {
+  const namePct = (Number(nameScale) || 100) / 100;
+  const addressPct = (Number(addressScale) || 100) / 100;
   return (
     <div
       className="mt-2 overflow-hidden rounded-md px-3 py-2 text-center text-white"
       style={{ backgroundImage: 'linear-gradient(to right,#0b3d26,#14694a,#0b3d26)' }}
     >
-      <p className="font-bold leading-tight" style={{ fontSize: 15 * pct }}>
+      <p className="font-bold leading-tight" style={{ fontSize: 15 * namePct }}>
         {name || 'প্রতিষ্ঠানের নাম'}
       </p>
-      <p className="text-emerald-100" style={{ fontSize: 10 * pct }}>
+      <p className="text-emerald-100" style={{ fontSize: 10 * addressPct }}>
         {address || 'ঠিকানা'}
       </p>
     </div>
@@ -256,7 +257,7 @@ const TemplateMiniature = ({
   paperSize, orientation, studentInfoFields, colorMode,
   showClassTeacherSign, showGuardianSign,
   najemShowSign, najemShowName, najemShowDate, principalShowSign, principalShowName, principalShowDate,
-  headerScale, contentFontScale, rowGapScale,
+  nameScale, addressScale, contentFontScale, rowGapScale,
   language,
   pressPrint, pressHidePreview, pressExamOffset, pressBodyOffset, pressSignOffset,
 }) => {
@@ -297,7 +298,8 @@ const TemplateMiniature = ({
           principalShowSign={principalShowSign}
           principalShowName={principalShowName}
           principalShowDate={principalShowDate}
-          headerScale={headerScale}
+          nameScale={nameScale}
+          addressScale={addressScale}
           contentFontScale={contentFontScale}
           rowGapScale={rowGapScale}
           language={language}
@@ -357,9 +359,11 @@ const MarkSheet = () => {
   // The control sits on the toolbar AND inside the settings modal.
   const [fontScale, setFontScale] = useState('100');
 
-  // Institution name and address size, independent of the rest of the
-  // sheet, so a long name can be shrunk or a short one enlarged.
-  const [headerScale, setHeaderScale] = useState('100');
+  // Institution name and address, each sized on its own and both
+  // independent of the rest of the sheet — a long name can be brought down
+  // without the address shrinking with it.
+  const [nameScale, setNameScale] = useState('100');
+  const [addressScale, setAddressScale] = useState('100');
 
   // Subject table (বিষয়ভিত্তিক ফলাফল), two separate controls:
   //   rowGapScale    how much air each row has — cell padding
@@ -544,7 +548,12 @@ const MarkSheet = () => {
     if (s.printScale) setPrintScale(String(s.printScale));
     if (s.sideScale) setSideScale(String(s.sideScale));
     if (s.fontScale) setFontScale(String(s.fontScale));
-    if (s.headerScale) setHeaderScale(String(s.headerScale));
+    // headerScale is what these two replaced — a setup saved before the
+    // split still carries it, so it seeds both until they are saved once.
+    if (s.nameScale) setNameScale(String(s.nameScale));
+    else if (s.headerScale) setNameScale(String(s.headerScale));
+    if (s.addressScale) setAddressScale(String(s.addressScale));
+    else if (s.headerScale) setAddressScale(String(s.headerScale));
     if (s.rowGapScale) setRowGapScale(String(s.rowGapScale));
     if (s.contentFontScale) setContentFontScale(String(s.contentFontScale));
     if (s.pressHidePreview !== null && s.pressHidePreview !== undefined) setPressHidePreview(Boolean(s.pressHidePreview));
@@ -628,7 +637,8 @@ const MarkSheet = () => {
         printScale: Number(printScale),
         sideScale: Number(sideScale),
         fontScale: Number(fontScale),
-        headerScale: Number(headerScale),
+        nameScale: Number(nameScale),
+        addressScale: Number(addressScale),
         rowGapScale: Number(rowGapScale),
         contentFontScale: Number(contentFontScale),
         pressHidePreview,
@@ -690,7 +700,8 @@ const MarkSheet = () => {
         principalShowSign={principalShowSign}
         principalShowName={principalShowName}
         principalShowDate={principalShowDate}
-        headerScale={headerScale}
+        nameScale={nameScale}
+        addressScale={addressScale}
         contentFontScale={contentFontScale}
         rowGapScale={rowGapScale}
         language={sheetLanguage}
@@ -721,7 +732,8 @@ const MarkSheet = () => {
     principalShowSign,
     principalShowName,
     principalShowDate,
-    headerScale,
+    nameScale,
+    addressScale,
     contentFontScale,
     rowGapScale,
     language: sheetLanguage,
@@ -1252,10 +1264,16 @@ const MarkSheet = () => {
                         hint="পুরো মার্কশিট ছোট/বড় হয়।"
                       />
                       <ScaleSlider
-                        label="নাম ও ঠিকানার আকার"
-                        value={headerScale}
-                        onChange={setHeaderScale}
-                        hint="শুধু প্রতিষ্ঠানের নাম ও ঠিকানা।"
+                        label="প্রতিষ্ঠানের নামের আকার"
+                        value={nameScale}
+                        onChange={setNameScale}
+                        hint="শুধু উপরের নামটা।"
+                      />
+                      <ScaleSlider
+                        label="ঠিকানার আকার"
+                        value={addressScale}
+                        onChange={setAddressScale}
+                        hint="শুধু নামের নিচের ঠিকানা।"
                       />
                       <ScaleSlider
                         label="ফলাফলের সারির ফাঁক"
@@ -1455,13 +1473,20 @@ const MarkSheet = () => {
 
                   <div>
                     <ScaleSlider
-                      label="প্রতিষ্ঠানের নাম ও ঠিকানার আকার"
-                      value={headerScale}
-                      onChange={setHeaderScale}
-                      hint="শুধু উপরের নাম ও ঠিকানা — বাকি লেখা অপরিবর্তিত থাকবে।"
+                      label="প্রতিষ্ঠানের নামের আকার"
+                      value={nameScale}
+                      onChange={setNameScale}
+                      hint="শুধু উপরের নামটা — ঠিকানা ও বাকি লেখা অপরিবর্তিত থাকবে।"
+                    />
+                    <ScaleSlider
+                      label="ঠিকানার আকার"
+                      value={addressScale}
+                      onChange={setAddressScale}
+                      hint="শুধু নামের নিচের ঠিকানা — নাম ও বাকি লেখা অপরিবর্তিত থাকবে।"
                     />
                     <HeaderScaleSample
-                      scale={headerScale}
+                      nameScale={nameScale}
+                      addressScale={addressScale}
                       name={data?.institution?.InstitutionName}
                       address={data?.institution?.Address}
                     />
@@ -1846,7 +1871,8 @@ const MarkSheet = () => {
                     principalShowSign={principalShowSign}
                     principalShowName={principalShowName}
                     principalShowDate={principalShowDate}
-                    headerScale={headerScale}
+                    nameScale={nameScale}
+                    addressScale={addressScale}
                     contentFontScale={contentFontScale}
                     rowGapScale={rowGapScale}
                     language={sheetLanguage}

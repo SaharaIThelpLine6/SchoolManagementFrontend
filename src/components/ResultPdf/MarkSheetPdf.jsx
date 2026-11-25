@@ -83,14 +83,20 @@ const getPrintCss = (paperSize, orientation, templateId, sizes = {}) => {
   // Each one is a percentage. At 100 nothing is emitted at all, so an
   // untouched sheet renders exactly as its template designed it.
   const {
-    headerScale = 100, contentFontScale = 100, rowGapScale = 100,
+    headerScale = 100, nameScale, addressScale,
+    contentFontScale = 100, rowGapScale = 100,
     totalSubjects = 0, scopeId = null,
   } = sizes;
   const m = TYPE_METRICS[templateId] || TYPE_METRICS['template-1'];
   const density = getDensity(totalSubjects);
 
   const px = (value) => `${Math.round(value * 100) / 100}px`;
-  const headerPct = (Number(headerScale) || 100) / 100;
+  // The institution name and the address are sized on their own, so a long
+  // name can be brought down without shrinking the address with it.
+  // headerScale is the single control these two replaced; it is still read
+  // as the fallback so settings saved before the split keep working.
+  const namePct = (Number(nameScale ?? headerScale) || 100) / 100;
+  const addressPct = (Number(addressScale ?? headerScale) || 100) / 100;
   const fontPct = (Number(contentFontScale) || 100) / 100;
   const gapPct = (Number(rowGapScale) || 100) / 100;
 
@@ -98,8 +104,8 @@ const getPrintCss = (paperSize, orientation, templateId, sizes = {}) => {
   // header block keeps its own spacing while the text grows or shrinks.
   // One size for both media, for the same reason as the body text above.
   const headerCss = `
-.marksheet-page .marksheet-inst-name { font-size: ${px(m.name * headerPct)} !important; }
-.marksheet-page .marksheet-inst-address { font-size: ${px(m.addr * headerPct)} !important; }
+.marksheet-page .marksheet-inst-name { font-size: ${px(m.name * namePct)} !important; }
+.marksheet-page .marksheet-inst-address { font-size: ${px(m.addr * addressPct)} !important; }
 `;
 
   // Text size for the whole sheet: the student information, the division
@@ -3834,7 +3840,8 @@ const MarkSheetPdf = ({
   // image, the name with the line above it, and the date under it.
   najemShowSign = true, najemShowName = true, najemShowDate = true,
   principalShowSign = true, principalShowName = true, principalShowDate = true,
-  headerScale = 100, contentFontScale = 100, rowGapScale = 100,
+  headerScale = 100, nameScale, addressScale,
+  contentFontScale = 100, rowGapScale = 100,
   language = 1,
   // Press-printed mark sheet (report 2) — only template 8 uses these
   pressPrint = false, pressHidePreview = true,
@@ -3972,6 +3979,8 @@ const MarkSheetPdf = ({
     <>
       <style>{getPrintCss(paperSize, orientation, templateId, {
         headerScale,
+        nameScale,
+        addressScale,
         contentFontScale,
         rowGapScale,
         totalSubjects: examSubjects.length,

@@ -43,24 +43,76 @@ const AdmissionFormPdf = ({ student, admissionStatus, SubClassID, SessionID }) =
     }
   };
 
-  // 🟢 admissionStatus ("IsActive" ফিল্টার) অনুযায়ী বিগত/বর্তমান বক্সের ডাটা ঠিক হবে:
-  // "1" ভর্তির আগে -> শুধু "বিগত তথ্য" (ছাত্রের বিদ্যমান শ্রেণি/সেশন) দেখাবে, "বর্তমান" ফাঁকা
-  // "2" ভর্তির পরে -> "বিগত তথ্য" (বিদ্যমান শ্রেণি) + "বর্তমান" (ফিল্টারে বাছাই করা নতুন শ্রেণি/সেশন) দুটোই
-  // ""  খালি      -> সম্পূর্ণ ফাঁকা প্রিন্ট টেমপ্লেট
-  const showPast = admissionStatus === "1" || admissionStatus === "2";
-  const showCurrent = admissionStatus === "2";
+  // Admission Status
+  const showPast =
+    String(admissionStatus) === "1" ||
+    String(admissionStatus) === "2";
 
-  // বিগত তথ্য (LEFT) — সবসময় ছাত্রের নিজের রেকর্ড থেকে
-  const pastSubClassName = showPast ? conv(student?.SubClass) : "";
-  const pastSessionName = showPast ? conv(student?.SessionName) : "";
-  const pastStudentCode = showPast ? conv(student?.StudentCode) : "";
-  const pastResidentialStatus = showPast ? student?.ResidentialStatusId : undefined;
+  const showCurrent = String(admissionStatus) === "2";
 
-  // বর্তমান (RIGHT) — ফিল্টার সাইডবারে বাছাই করা SubClassID/SessionID থেকে
-  const currentSubClassName = showCurrent ? conv(subClasData?.SubClass) : "";
-  const currentSessionName = showCurrent ? conv(sessionData?.SessionName) : "";
-  const currentStudentCode = showCurrent ? conv(student?.StudentCode) : "";
-  const currentResidentialStatus = showCurrent ? student?.ResidentialStatusId : undefined;
+  // সব শিক্ষাবর্ষের ভর্তি তথ্য
+  const allAdmissions = Array.isArray(student?.AllAdmissions)
+    ? student.AllAdmissions
+    : [];
+
+  // নির্বাচিত বর্তমান শিক্ষাবর্ষ
+  const selectedSessionID = Number(SessionID);
+
+  // বর্তমান শিক্ষাবর্ষের আগের সর্বশেষ ভর্তি তথ্য বের করা
+  const pastAdmission = showPast
+    ? allAdmissions
+        .filter(
+          (item) => Number(item.SessionID) < selectedSessionID
+        )
+        .sort(
+          (a, b) => Number(b.SessionID) - Number(a.SessionID)
+        )[0] || null
+    : null;
+
+  // ================= বিগত তথ্য =================
+
+  const pastSubClassName = showPast
+    ? conv(pastAdmission?.SubClass)
+    : "";
+
+  const pastSessionName = showPast
+    ? conv(pastAdmission?.SessionName)
+    : "";
+
+  const pastStudentCode = showPast
+    ? conv(student?.StudentCode)
+    : "";
+
+  const pastAdmissionSerial = showPast
+    ? conv(pastAdmission?.AdmissionSerial)
+    : "";
+
+  const pastResidentialStatus = showPast
+    ? Number(pastAdmission?.ResidentialStatusId)
+    : undefined;
+
+
+  // ================= বর্তমান তথ্য =================
+
+  const currentSubClassName = showCurrent
+    ? conv(subClasData?.SubClass)
+    : "";
+
+  const currentSessionName = showCurrent
+    ? conv(sessionData?.SessionName)
+    : "";
+
+  const currentAdmissionSerial = showCurrent
+    ? conv(student?.AdmissionSerial)
+    : "";
+
+  const currentStudentCode = showCurrent
+    ? conv(student?.StudentCode)
+    : "";
+
+  const currentResidentialStatus = showCurrent
+    ? Number(student?.ResidentialStatusId)
+    : undefined;
 
   const studentName = conv(student?.StudentName);
   const fatherName = conv(student?.FatherName);
@@ -182,6 +234,11 @@ const AdmissionFormPdf = ({ student, admissionStatus, SubClassID, SessionID }) =
               <span className="">আইডি নং : </span>
               <span>{pastStudentCode}</span>
             </div>
+            <div>
+              <span className="">ভর্তি সিরিয়াল : </span>
+              <span> </span>
+              <span>{pastAdmissionSerial}</span>
+            </div>
             <div style={{ display: "flex", alignItems: "center" }}>
               <span className="">আবাসিক </span>
               <input
@@ -230,6 +287,10 @@ const AdmissionFormPdf = ({ student, admissionStatus, SubClassID, SessionID }) =
             <div style={{ }}>
               <span className="">আইডি নং : </span>
               <span>{currentStudentCode}</span>
+            </div>
+            <div>
+              <span className="">ভর্তি সিরিয়াল : </span>
+              <span>{currentAdmissionSerial}</span>
             </div>
             {/* 🟢 ভর্তির পরে (IsActive === "2") অবস্থায় বর্তমান বক্সেও আবাসিক/অনাবাসিক/ডে-কেয়ার দেখাবে */}
             {showCurrent && (
@@ -368,7 +429,7 @@ const AdmissionFormPdf = ({ student, admissionStatus, SubClassID, SessionID }) =
           </div>
 
           {/* Right Box */}
-          <div className="w-1/2 border border-black p-2 h-40">
+          {/* <div className="w-1/2 border border-black p-2 h-40">
             <div className="text-center border-b border-black text-xs mb-1">
               <h2 className="font-bold">স্থায়ী ঠিকানা</h2>
             </div>
@@ -387,7 +448,7 @@ const AdmissionFormPdf = ({ student, admissionStatus, SubClassID, SessionID }) =
               <p className="font-bold">ডাক: </p>
               <p className="font-bold">জেলা: </p>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* ================= GUARDIAN INFO ================= */}

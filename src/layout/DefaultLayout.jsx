@@ -23,7 +23,10 @@ const DefaultLayout = () => {
   const dispatch = useDispatch();
   const location = useLocation();
 
-  const sidebarOpen = useSelector((state) => state.sideBar?.isOpen ?? false);
+  // ✅ single source of truth
+  const isMobileOpen = useSelector((state) => state.sideBar.isOpen);
+  const isDesktopOpen = useSelector((state) => state.sideBar.isDesktopOpen);
+
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const token = useSelector((state) => state.auth.token);
   const pageName = useSelector((state) => state.auth.pageName);
@@ -34,31 +37,25 @@ const DefaultLayout = () => {
   const school_id = user?.schoolId ? Number(user.schoolId) : null;
 
   const { data: institutionInfo, isSuccess } = useGetInstitutionInfoQuery();
-  // Madrasah list fetch
 
-  const { data: currentMadrasah, isLoading: isLoadingMadrasah } =
-    useGetCurrentMadrasahQuery(school_id, {
-      skip: !school_id,
-    });
+  const { data: currentMadrasah } = useGetCurrentMadrasahQuery(school_id, {
+    skip: !school_id,
+  });
 
-  // 🌟 Get Redirect Status
   const { data: redirectStatus } = useGetRedirectStatusQuery(school_id, {
     skip: !school_id,
   });
 
-  // ✅ Set default title
   useEffect(() => {
     document.title = "Qmmsoft - কওমী মাদরাসা ম্যানেজমেন্ট";
   }, []);
 
-  // ✅ Update title when institution info loads
   useEffect(() => {
     if (isSuccess && institutionInfo?.InstitutionCode) {
       document.title = `Qmmsoft - কওমী মাদরাসা ম্যানেজমেন্ট : ${institutionInfo.InstitutionCode}`;
     }
   }, [isSuccess, institutionInfo?.InstitutionCode]);
 
-  // ✅ Token verification on route change
   useEffect(() => {
     const lang = localStorage.getItem("lang");
     if (lang && lang !== currectLanguage) {
@@ -79,31 +76,25 @@ const DefaultLayout = () => {
     }
   }, [dispatch, navigate, token, location.pathname]);
 
-  // ✅ Check Madrasah Action
   useEffect(() => {
     if (!currentMadrasah || !school_id) return;
-
     if (currentMadrasah.action === "Inactive" && permissionType > 4) {
       dispatch(logout());
       navigate("/login");
     }
   }, [currentMadrasah, permissionType, dispatch, navigate, school_id]);
 
-  // 🌟 Check and Apply Redirect logic
   useEffect(() => {
-
-
     if (redirectStatus && redirectStatus.onTestStatus === 1) {
-      console.log(window.location.hostname);
-      console.log(window.location.hostname !== "testbda.qmmsoft.com");
-      console.log(window.location.hostname !== "localhost");
-      if (window.location.hostname !== "testbda.qmmsoft.com" && window.location.hostname !== "localhost") {
+      if (
+        window.location.hostname !== "testbda.qmmsoft.com" &&
+        window.location.hostname !== "localhost"
+      ) {
         window.location.href = `https://testbda.qmmsoft.com/login?token=${token}`;
       }
     }
   }, [redirectStatus, token, school_id]);
 
-  // ✅ Handle multi-tab logout
   useEffect(() => {
     const handleStorageChange = (e) => {
       if (e.key === "token") {
@@ -114,7 +105,6 @@ const DefaultLayout = () => {
         }
       }
     };
-
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
   }, [dispatch, navigate, token]);
@@ -127,17 +117,31 @@ const DefaultLayout = () => {
       </div>
 
       <div className="flex flex-1 overflow-hidden relative print:overflow-visible">
-        {/* Sidebar */}
+        {/* ✅ Sidebar — comment class-এর বাইরে */}
         <div
-          className={`fixed top-20 sm:top-16 left-0 z-30 w-[250px] h-[calc(100vh-64px)] bg-white shadow-[2px_0_8px_rgba(0,0,0,0.15)] transform transition-transform duration-300 ease-in-out print:hidden
-            ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
-            lg:top-0 lg:h-full lg:static lg:translate-x-0 lg:transform-none`}
+          className={[
+            "fixed top-20 sm:top-16 left-0 z-30",
+            "w-[250px] h-[calc(100vh-64px)]",
+            "bg-white shadow-[2px_0_8px_rgba(0,0,0,0.15)]",
+            "transform transition-all duration-300 ease-in-out",
+            "print:hidden",
+            // মোবাইল এবং ট্যাবলেটের জন্য (lg এর নিচে)
+            isMobileOpen ? "translate-x-0" : "-translate-x-full",
+            // ডেস্কটপের জন্য (lg এবং তার উপরে)
+            "lg:top-0 lg:h-full lg:static lg:translate-x-0 lg:transform-none",
+            "lg:shrink-0 lg:overflow-hidden lg:transition-[width,opacity]",
+            isDesktopOpen
+              ? "lg:w-[250px] lg:opacity-100"
+              : "lg:w-0 lg:opacity-0 lg:invisible",
+          ].join(" ")}
         >
-          <SideBar />
+          <div className="w-[250px] h-full">
+            <SideBar />
+          </div>
         </div>
 
         {/* Overlay for mobile */}
-        {sidebarOpen && (
+        {isMobileOpen && (
           <div
             className="fixed inset-0 bg-black opacity-30 z-20 lg:hidden"
             onClick={() => dispatch(closeSidebar())}
@@ -150,17 +154,15 @@ const DefaultLayout = () => {
             <div className="relative">
               <Outlet key={location.pathname} />
             </div>
-
             <DefaultModal />
           </div>
           <DeveloperCredit />
         </main>
       </div>
-      {isAuthenticated && !isOpen && <DashboardQuickActions key={location.pathname} />}
-      {/* ✅ Show Tawk chat only when logged in */}
-      {/* {isAuthenticated && (
-        <TawkMessenger propertyId={tawkPropertyId} widgetId={tawkWidgetId} />
-      )} */}
+
+      {isAuthenticated && !isOpen && (
+        <DashboardQuickActions key={location.pathname} />
+      )}
     </div>
   );
 };
