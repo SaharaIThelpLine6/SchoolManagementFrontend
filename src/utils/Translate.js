@@ -1336,7 +1336,8 @@ const useTranslate = () => {
     "New password and confirm password do not match!": "নতুন পাসওয়ার্ড এবং নিশ্চিতকরণ পাসওয়ার্ড মিলেনি!",
     "Reset": "রিসেট",
     "Saving...": "সংরক্ষণ হচ্ছে...",
-    "Save": "সংরক্ষণ"
+    "Save": "সংরক্ষণ",
+    "Notice Board": "নোটিশ বোর্ড",
   };
 
   return (key) =>

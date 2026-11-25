@@ -664,55 +664,6 @@ export const menuData = [
   // },
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   // {
   //   id: '18',
   //   name: 'Talimat',
@@ -813,6 +764,12 @@ export const menuData = [
         name: 'User Roles',
         route: 'settings/add-login-users',
         icon: 'SubRole',
+      },
+      {
+        id: '6',
+        name: 'Notice Board',
+        route: 'notice-board',
+        icon: 'SubNoticeBoard',
       },
       {
         id: '2',

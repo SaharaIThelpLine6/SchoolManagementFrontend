@@ -139,6 +139,7 @@ import UserProfile from '../pages/userpanel/UserProfile';
 import UserRegistration from '../pages/userpanel/UserRegistration';
 import VideoTutorialLink from '../pages/userpanel/VideoTutorialLink';
 import WebsiteSettings from '../pages/userpanel/WebsiteSettings';
+import NoticeBoard from '../pages/userpanel/NoticeBoard';
 import PaymentCancel from '../pages/userpanel/payment/PaymentCancel';
 import PaymentFail from '../pages/userpanel/payment/PaymentFail';
 import OwenGuide from './OwenGuide';
@@ -1543,6 +1544,10 @@ const Router = createBrowserRouter([
 
                   // </RequirePermission>
                 ),
+              },
+              {
+                path: 'notice-board',
+                element: <NoticeBoard pageTitle="Notice Board" />,
               },
               {
                 path: 'website-settings',
