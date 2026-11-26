@@ -552,6 +552,7 @@ const useTranslate = () => {
     'Device User': 'ডিভাইস ইউজার',
     'Device Time Settings': 'টাইম সেটিংস',
     'Live Attendance': 'লাইভ হাজিরা',
+    'Attendance Report': 'হাজিরা রিপোর্ট',
     'Share Your Opinion': 'আপনার মতামত শেয়ার করুন',
     Class: 'ক্লাস',
     Branch: 'শাখা',

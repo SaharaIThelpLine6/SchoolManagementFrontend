@@ -81,7 +81,8 @@ const SideBar = () => {
               subItem.name === 'Attendance Device' ||
               subItem.name === 'Device User' ||
               subItem.name === 'Device Time Settings' ||
-              subItem.name === 'Live Attendance'
+              subItem.name === 'Live Attendance' ||
+              subItem.name === 'Attendance Report'
             ) {
               return hasPermission(permissionsDataList.settings);
             }

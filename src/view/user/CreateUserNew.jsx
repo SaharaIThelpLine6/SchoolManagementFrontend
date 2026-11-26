@@ -107,10 +107,10 @@ const CreateUser = ({ pageTitle }) => {
 
   const editMode = useSelector((state) => state.userInfo.editMode);
 
-  useEffect(() => {
-    console.log(editMode);
-    console.log("=================");
-  }, [editMode]);
+  // useEffect(() => {
+  //   console.log(editMode);
+  //   console.log("=================");
+  // }, [editMode]);
 
   const ageValue = calculateAge(DateOfBirth);
 
@@ -297,7 +297,7 @@ const CreateUser = ({ pageTitle }) => {
   };
 
   const onSubmit = async (data) => {
-    console.log('Submitting data:', data);
+    // console.log('Submitting data:', data);
     try {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -329,7 +329,7 @@ const CreateUser = ({ pageTitle }) => {
       });
 
       reset();
-      console.log('User created:', response);
+      // console.log('User created:', response);
     } catch (err) {
       console.log(err)
       Swal.fire({

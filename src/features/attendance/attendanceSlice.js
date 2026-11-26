@@ -311,6 +311,12 @@ export const attendanceSlice = createApi({
     }),
 
     // একজন ইউজারের ছবি (data URL বা null)
+    // হাজিরা রিপোর্ট — তারিখের পরিসর + ফিল্টারের সব ডাটা (রিপোর্ট পেজ নিজেই সব ধরনের রিপোর্ট বানায়)
+    getAttendanceReport: builder.query({
+      query: (params) => ({ url: '/attendance_report', params }),
+      keepUnusedDataFor: 120,
+    }),
+
     getLiveAttendancePhoto: builder.query({
       query: (userId) => `/live_attendance/photo/${userId}`,
       keepUnusedDataFor: 600,
@@ -356,4 +362,5 @@ export const {
   useGetTimeSettingsFilteredAttendanceQuery,
   useGetLiveAttendanceQuery,
   useGetLiveAttendancePhotoQuery,
+  useGetAttendanceReportQuery,
 } = attendanceSlice;
