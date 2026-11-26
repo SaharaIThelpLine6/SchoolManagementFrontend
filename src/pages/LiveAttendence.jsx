@@ -85,7 +85,7 @@ function LatestCard({ latest, isToday }) {
       key={latest.ID}
       className="flex w-full animate-live-in items-center gap-[14px] text-left flex-col sm:gap-0 sm:text-center"
     >
-      <div className="aspect-square w-[96px] flex-none rounded-[18px] bg-gradient-to-br from-[#d6b76e] to-[#087354] p-[4px] shadow-[0_12px_28px_#075b4620] sm:w-[min(240px,55%)] sm:rounded-[24px] sm:p-[7px] xl:w-[min(380px,75%)]">
+      <div className="aspect-square w-[96px] flex-none rounded-[18px] bg-gradient-to-br from-[#d6b76e] to-[#087354] p-[4px] shadow-[0_12px_28px_#075b4620] sm:w-[min(240px,55%)] sm:rounded-[24px] sm:p-[7px] xl:w-[min(450px,75%)]">
         <img
           className="block h-full w-full rounded-[14px] bg-[#eaf1ec] object-cover sm:rounded-[19px]"
           alt="ছবি"
@@ -99,7 +99,7 @@ function LatestCard({ latest, isToday }) {
         <h2 className="mb-[3px] break-words text-[20px] font-bold leading-[1.3] sm:mt-[18px] sm:text-[26px] xl:mt-[20px] xl:text-[30px]">
           {latest.UserName}
         </h2>
-        <p className="m-0 text-[14px] text-[#71827b] sm:text-[17px] xl:text-[20px]">
+        <p className="m-0 text-[14px] text-[#71827b] sm:text-[17px] xl:text-[26px]">
           আইডি নং: <strong>{toBnDigits(latest.UserCode)}</strong>
           {classOf(latest) && (
             <>
@@ -108,7 +108,7 @@ function LatestCard({ latest, isToday }) {
             </>
           )}
         </p>
-        <p className="m-0 mt-[6px] text-[13px] text-[#71827b] sm:text-[18px]">
+        <p className="m-0 mt-[6px] text-[13px] text-[#71827b] sm:text-[26px]">
           {[latest.ShiftName, latest.SwitchName].filter(Boolean).join(" · ")}
           {" — "}
           <strong className="text-[#075b46]">{timeOf(latest.Time)}</strong>
@@ -284,37 +284,7 @@ export default function LiveAttendence() {
 
   return (
     <div className="min-h-screen bg-[#f4f7f3] font-default text-[#18352d] antialiased">
-      <div className="mx-auto max-w-[1440px] p-[12px] sm:p-[20px] xl:p-[28px]">
-        {/* Header */}
-        <header className="relative flex flex-col items-center justify-center gap-[10px] overflow-hidden rounded-2xl bg-gradient-to-br from-[#064b3b] to-[#087354] px-[14px] py-[18px] text-white shadow-[0_12px_32px_#064b3b20] sm:flex-row sm:gap-[20px] sm:rounded-[22px] sm:px-[32px] sm:py-[25px]">
-          <div className="pointer-events-none absolute -right-[80px] -top-[170px] h-[300px] w-[300px] rounded-full border border-white/10 shadow-[0_0_0_25px_#ffffff08,0_0_0_55px_#ffffff06]" />
-          <div
-            className="z-[1] grid h-[58px] w-[58px] flex-none place-items-center overflow-hidden rounded-full border-2 border-[#e8c879] bg-white sm:h-[76px] sm:w-[76px]"
-            aria-label="প্রতিষ্ঠানের লোগো"
-          >
-            {logo ? (
-              <img src={logo} alt="লোগো" className="h-full w-full object-contain p-[4px]" />
-            ) : (
-              <svg viewBox="0 0 64 64" fill="none" aria-hidden="true" className="h-[65%] w-[65%]">
-                <path
-                  d="M32 5 38 20 54 21 42 32 46 48 32 39 18 48 22 32 10 21 26 20 32 5Z"
-                  stroke="#087354"
-                  strokeWidth="2.2"
-                />
-                <path d="M20 28h24v17H20z" stroke="#087354" strokeWidth="2" />
-              </svg>
-            )}
-          </div>
-          <div className="z-[1] min-w-0 text-center">
-            <h1 className="m-0 mb-[5px] break-words text-[21px] font-bold leading-[1.3] tracking-[0.2px] sm:text-[28px] xl:text-[36px]">
-              {institutionName || "লাইভ হাজিরা"}
-            </h1>
-            {institutionAddress && (
-              <p className="m-0 break-words text-[13px] text-[#d8eee5] sm:text-[17px]">{institutionAddress}</p>
-            )}
-          </div>
-        </header>
-
+      <div className="mx-auto p-[12px] sm:p-[20px] xl:p-[28px]">
         {/* Topline */}
         <div className="mx-[2px] mb-[15px] mt-[14px] flex flex-col gap-[12px] sm:mt-[22px] sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-x-[9px] gap-y-[4px] font-semibold text-[#075b46]">

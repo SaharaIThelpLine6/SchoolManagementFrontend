@@ -202,7 +202,7 @@ const UpdateUser = ({ singleUserData }) => {
   };
 
   const onSubmit = async (data) => {
-    console.log("Submitting data:", data);
+    // console.log("Submitting data:", data);
 
     // ✅ Date format fix
     const formattedDate = data.DateOfBirth
@@ -215,7 +215,7 @@ const UpdateUser = ({ singleUserData }) => {
       DateOfBirth: formattedDate,
     };
 
-    console.log("payload:", payload);
+    // console.log("payload:", payload);
 
     try {
       const response = await updateUser({
@@ -234,7 +234,7 @@ const UpdateUser = ({ singleUserData }) => {
       reset();
       dispatch(setEditUserID(null));
 
-      console.log("User updated:", response);
+      // console.log("User updated:", response);
     } catch (err) {
       Swal.fire({
         icon: "error",

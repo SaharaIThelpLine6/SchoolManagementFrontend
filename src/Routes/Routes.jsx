@@ -213,6 +213,7 @@ import { GenerateSalaryPage } from '../pages/teacher/GenerateSalaryPage';
 import { PaymentsPage } from '../pages/teacher/PaymentsPage';
 import { ReportsPage } from '../pages/teacher/ReportsPage';
 import LiveAttendence from '../pages/LiveAttendence';
+import AttendenceReport from '../pages/AttendenceReport';
 import DeviceTimeSettings from '../pages/DeviceTimeSettings';
 import AttendanceDevices from '../pages/AttendanceDevices';
 
@@ -1569,6 +1570,14 @@ const Router = createBrowserRouter([
                 element: (
                   <RequirePermission permissionId={permissionsDataList.settings}>
                     <LiveAttendence pageTitle="লাইভ হাজিরা" />
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: 'attendence-report',
+                element: (
+                  <RequirePermission permissionId={permissionsDataList.settings}>
+                    <AttendenceReport pageTitle="হাজিরা রিপোর্ট" />
                   </RequirePermission>
                 ),
               },
