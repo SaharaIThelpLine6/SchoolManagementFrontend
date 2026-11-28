@@ -526,11 +526,11 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                   </div>
 
                   <div>
-                    <DefaultInput registerKey={"DivisionEnglish"} placeholder={"বিভাগ (ইংরেজি)"} />
+                    <DefaultInput type='text' registerKey={"DivisionEnglish"} placeholder={"বিভাগ (ইংরেজি)"} />
                   </div>
 
                   <div className='relative'>
-                    <DefaultInput registerKey={"DivisionArabic"} placeholder={"বিভাগ (আরবি)"} />
+                    <DefaultInput type='text' registerKey={"DivisionArabic"} placeholder={"বিভাগ (আরবি)"} />
                   </div>
                   <div className='relative'>
                     <DefaultInput registerKey={"Note"} placeholder={"মন্তব্য"} />

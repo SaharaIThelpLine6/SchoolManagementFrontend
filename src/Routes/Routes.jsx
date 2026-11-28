@@ -11,6 +11,8 @@ import Result from '../pages/public/Result';
 import ResultRequest from '../pages/public/ResultRequest';
 import StudentAdmissionForm from '../pages/public/studentAddmitionForm';
 import PrivateRoute from './PrivateRoute';
+import About from '../pages/public/About';
+import Gallery from '../pages/public/Gallery';
 
 // Public Pages
 const LandingPage = lazy(() => import('../pages/LandingPage/Home'));
@@ -137,6 +139,7 @@ import UserProfile from '../pages/userpanel/UserProfile';
 import UserRegistration from '../pages/userpanel/UserRegistration';
 import VideoTutorialLink from '../pages/userpanel/VideoTutorialLink';
 import WebsiteSettings from '../pages/userpanel/WebsiteSettings';
+import NoticeBoard from '../pages/userpanel/NoticeBoard';
 import PaymentCancel from '../pages/userpanel/payment/PaymentCancel';
 import PaymentFail from '../pages/userpanel/payment/PaymentFail';
 import OwenGuide from './OwenGuide';
@@ -209,6 +212,10 @@ import { SalaryHeadsPage } from '../pages/teacher/SalaryHeadPage';
 import { GenerateSalaryPage } from '../pages/teacher/GenerateSalaryPage';
 import { PaymentsPage } from '../pages/teacher/PaymentsPage';
 import { ReportsPage } from '../pages/teacher/ReportsPage';
+import LiveAttendence from '../pages/LiveAttendence';
+import AttendenceReport from '../pages/AttendenceReport';
+import DeviceTimeSettings from '../pages/DeviceTimeSettings';
+import AttendanceDevices from '../pages/AttendanceDevices';
 
 const Router = createBrowserRouter([
   {
@@ -1524,6 +1531,59 @@ const Router = createBrowserRouter([
             ],
           },
           {
+            path: 'device',
+            children: [
+              {
+                index: true,
+                element: (
+                  <RequirePermission permissionId={permissionsDataList.settings}>
+                    <AttendanceDevices pageTitle="হাজিরা ডিভাইস" />
+                  </RequirePermission>
+                ),
+              },
+              // {
+              //   path: 'attendance-devices',
+              //   element: (
+              //     <RequirePermission permissionId={permissionsDataList.settings}>
+              //       <AttendanceDevices pageTitle="হাজিরা ডিভাইস" />
+              //     </RequirePermission>
+              //   ),
+              // },
+              // {
+              //   path: 'device-users',
+              //   element: (
+              //     <RequirePermission permissionId={permissionsDataList.settings}>
+              //       <DeviceUsers pageTitle="ডিভাইস ইউজার" />
+              //     </RequirePermission>
+              //   ),
+              // },
+              {
+                path: 'time-settings',
+                element: (
+                  <RequirePermission permissionId={permissionsDataList.settings}>
+                    <DeviceTimeSettings pageTitle="টাইম সেটিংস" />
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: 'live-attendence',
+                element: (
+                  <RequirePermission permissionId={permissionsDataList.settings}>
+                    <LiveAttendence pageTitle="লাইভ হাজিরা" />
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: 'attendence-report',
+                element: (
+                  <RequirePermission permissionId={permissionsDataList.settings}>
+                    <AttendenceReport pageTitle="হাজিরা রিপোর্ট" />
+                  </RequirePermission>
+                ),
+              },
+            ],
+          },
+          {
             path: 'settings',
             children: [
               {
@@ -1541,6 +1601,10 @@ const Router = createBrowserRouter([
 
                   // </RequirePermission>
                 ),
+              },
+              {
+                path: 'notice-board',
+                element: <NoticeBoard pageTitle="Notice Board" />,
               },
               {
                 path: 'website-settings',
@@ -1606,6 +1670,8 @@ const Router = createBrowserRouter([
       { path: 'support_video', element: <Video /> },
       { path: 'donation', element: <Donation /> },
       { path: 'donation/payment-success', element: <OnlineDonationInvoice /> },
+      { path: 'about', element: <About /> },
+      { path: 'gallery', element: <Gallery /> },
 
     ],
   },

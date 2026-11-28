@@ -664,69 +664,19 @@ export const menuData = [
   // },
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  {
-    id: '18',
-    name: 'Talimat',
-    route: '/talimat',
-    icon: 'IoMdSettings',
-    subMenu: [
-      {
-        id: '1',
-        name: 'Complaint Box Terms and Conditions',
-        route: '/talimat',
-      },
-    ],
-  },
-
+  // {
+  //   id: '18',
+  //   name: 'Talimat',
+  //   route: '/talimat',
+  //   icon: 'IoMdSettings',
+  //   subMenu: [
+  //     {
+  //       id: '1',
+  //       name: 'Complaint Box Terms and Conditions',
+  //       route: '/talimat',
+  //     },
+  //   ],
+  // },
   {
     id: '12',
     name: 'Payment',
@@ -802,7 +752,44 @@ export const menuData = [
   //   icon: "HiDotsCircleHorizontal",
   //   subMenu: [],
   // },
-
+  {
+    id: '18',
+    name: 'Device',
+    route: '/device',
+    icon: 'SubDevice',
+    subMenu: [
+      {
+        id: '1',
+        name: 'Attendance Device',
+        route: 'device',
+        icon: 'SubDevice',
+      },
+      // {
+      //   id: '2',
+      //   name: 'Device User',
+      //   route: 'device/device-users',
+      //   icon: 'SubUser',
+      // },
+      {
+        id: '3',
+        name: 'Device Time Settings',
+        route: 'device/time-settings',
+        icon: 'SubCalendar',
+      },
+      {
+        id: '4',
+        name: 'Live Attendance',
+        route: 'device/live-attendence',
+        icon: 'SubReport',
+      },
+      {
+        id: '5',
+        name: 'Attendance Report',
+        route: 'device/attendence-report',
+        icon: 'SubReport',
+      },
+    ],
+  },
   {
     id: '16',
     name: 'Settings',
@@ -815,6 +802,12 @@ export const menuData = [
         route: 'settings/add-login-users',
         icon: 'SubRole',
       },
+      // {
+      //   id: '6',
+      //   name: 'Notice Board',
+      //   route: 'notice-board',
+      //   icon: 'SubNoticeBoard',
+      // },
       {
         id: '2',
         name: 'Settings',

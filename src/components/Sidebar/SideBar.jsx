@@ -77,6 +77,15 @@ const SideBar = () => {
             if (subItem.name === 'All Madrasah') {
               return typeof permissionType === 'number' && permissionType <= 4;
             }
+            if (
+              subItem.name === 'Attendance Device' ||
+              subItem.name === 'Device User' ||
+              subItem.name === 'Device Time Settings' ||
+              subItem.name === 'Live Attendance' ||
+              subItem.name === 'Attendance Report'
+            ) {
+              return hasPermission(permissionsDataList.settings);
+            }
             if (subItem.name === 'RFID Card') {
               return typeof permissionType === 'number' && permissionType <= 4;
             }
@@ -294,16 +303,20 @@ const SideBar = () => {
   // 1) In the useEffect that auto-expands the matching parent menu:
   useEffect(() => {
     if (!permissions?.data || !user) return;
+    // Match whole path segments (not plain text): "/dashboard/device/time-settings" must not
+    // match the Settings menu's "settings" route. The longest matching sub-route wins.
+    const pathname = location.pathname.replace(/\/+$/, '');
+    let best = null;
     filteredMenuData.forEach((menu) => {
-      if (Array.isArray(menu.subMenu)) {
-        const activeSubMenu = menu.subMenu.find((item) =>
-          location.pathname.includes(item.route) // was: .startsWith(item.route)
-        );
-        if (activeSubMenu) {
-          setOpenMenuId(menu.id);
+      if (!Array.isArray(menu.subMenu)) return;
+      menu.subMenu.forEach((item) => {
+        const path = getDashboardPath(item.route);
+        if (pathname === path || pathname.startsWith(`${path}/`)) {
+          if (!best || path.length > best.length) best = { id: menu.id, length: path.length };
         }
-      }
+      });
     });
+    if (best) setOpenMenuId(best.id);
   }, [location.pathname, filteredMenuData, permissions?.data, user]);
 
   const handleToggle = (id) => {

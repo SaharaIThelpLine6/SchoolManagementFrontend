@@ -118,6 +118,7 @@ const PublicLayout = () => {
               label: l.title,
               external: true,
             })),
+            { href: `/${schoolid}/gallery`, label: "গ্যালারি" },
             { href: `/${schoolid}/support_video`, label: "ভিডিও" },
             { href: `/${schoolid}/donation`, label: "অনুদান" },
           ]
@@ -163,7 +164,7 @@ const PublicLayout = () => {
               <img
                 src={bufferConveter(schoolData?.Logo?.data)}
                 alt={schoolData?.InstitutionName}
-                className="w-12 h-12 object-cover rounded-xl"
+                className="w-14 h-14 object-cover rounded-xl"
               />
               <h1 className="text-[24px] md:text-[26px] font-[500] text-theme-color text-gray-800">
                 {schoolData?.InstitutionName}
@@ -219,6 +220,9 @@ const PublicLayout = () => {
                 </div>
               </div>
               {/* --- ড্রপডাউন শেষ --- */}
+              <Link to={`/${schoolid}/gallery`} className="text-gray-600 hover:text-green-700 transition text-[18px] font-bold">
+                গ্যালারি
+              </Link>
 
               <Link to={`/${schoolid}/support_video`} className="text-gray-600 hover:text-green-700 transition text-[18px] font-bold">
                 ভিডিও

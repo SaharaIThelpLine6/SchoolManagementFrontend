@@ -1006,13 +1006,13 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
 
                     <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 [&>div]:min-w-0">
                       <div>
-                        <DefaultInput type="number" registerKey={"DivisionName"} placeholder={"বিভাগ (বাংলা)"} required />
+                        <DefaultInput type="text" registerKey={"DivisionName"} placeholder={"বিভাগ (বাংলা)"} required />
                       </div>
                       <div>
-                        <DefaultInput type="number" registerKey={"DivisionArabic"} placeholder={"বিভাগ (আরবি)"} />
+                        <DefaultInput type="text" registerKey={"DivisionArabic"} placeholder={"বিভাগ (আরবি)"} />
                       </div>
                       <div>
-                        <DefaultInput type="number" registerKey={"DivisionEnglish"} placeholder={"বিভাগ (ইংরেজি)"} />
+                        <DefaultInput type="text" registerKey={"DivisionEnglish"} placeholder={"বিভাগ (ইংরেজি)"} />
                       </div>
                     </div>
 

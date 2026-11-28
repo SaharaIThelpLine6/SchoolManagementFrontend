@@ -353,6 +353,15 @@ export default {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.5' },
         },
+        // ===== Live attendance =====
+        'live-in': {
+          from: { opacity: '0', transform: 'translateY(10px) scale(0.98)' },
+          to: { opacity: '1', transform: 'none' },
+        },
+        'live-flash': {
+          '0%': { backgroundColor: '#d9f5e6' },
+          '100%': { backgroundColor: 'transparent' },
+        },
       },
       animation: {
         shimmer: 'shimmer 1s ease-in-out infinite',
@@ -367,6 +376,9 @@ export default {
         'bounce-in':
           'bounce-in 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) both',
         'pulse-slow': 'pulse-slow 3s infinite',
+        // ===== Live attendance =====
+        'live-in': 'live-in 0.5s ease-out',
+        'live-flash': 'live-flash 3s ease-out',
       },
     },
   },

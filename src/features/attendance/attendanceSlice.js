@@ -16,7 +16,7 @@ export const attendanceSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Attendance', "TimeShifting", "TimeSwitch", "TimeSettings", "AttendanceList"],
+  tagTypes: ['Attendance', "TimeShifting", "TimeSwitch", "TimeSettings", "AttendanceList", "TimeCheckType"],
   endpoints: (builder) => ({
     // ================= Get All Users =================
     getAllUserForAttendances: builder.query({
@@ -68,7 +68,20 @@ export const attendanceSlice = createApi({
     }),
     getTimeCheckTypes: builder.query({
       query: () => '/time_check_types',
-      providesTags: ['TimeShifting'],
+      providesTags: ['TimeCheckType'],
+    }),
+    createTimeCheckType: builder.mutation({
+      query: (body) => ({ url: '/time_check_type_create', method: 'POST', body }),
+      invalidatesTags: ['TimeCheckType'],
+    }),
+    updateTimeCheckType: builder.mutation({
+      query: (body) => ({ url: '/time_check_type_update', method: 'PUT', body }),
+      // সুইচ তালিকায় ধরনের নাম দেখায়, তাই সেটিও রিফ্রেশ
+      invalidatesTags: ['TimeCheckType', 'TimeSwitch'],
+    }),
+    deleteTimeCheckType: builder.mutation({
+      query: (id) => ({ url: `/time_check_type_delete/${id}`, method: 'DELETE' }),
+      invalidatesTags: ['TimeCheckType'],
     }),
     getTimeShiftingById: builder.query({
       query: (id) => ({
@@ -116,7 +129,7 @@ export const attendanceSlice = createApi({
         method: 'POST',
         body,
       }),
-      invalidatesTags: ['TimeSwitch'],
+      invalidatesTags: ['TimeSwitch', 'TimeCheckType'],
     }),
 
     updateTimeSwitch: builder.mutation({
@@ -125,7 +138,7 @@ export const attendanceSlice = createApi({
         method: 'PUT',
         body,
       }),
-      invalidatesTags: ['TimeSwitch'],
+      invalidatesTags: ['TimeSwitch', 'TimeCheckType'],
     }),
 
     deleteTimeSwitch: builder.mutation({
@@ -133,7 +146,7 @@ export const attendanceSlice = createApi({
         url: `/time_switch_delete/${id}`,
         method: 'DELETE',
       }),
-      invalidatesTags: ['TimeSwitch'],
+      invalidatesTags: ['TimeSwitch', 'TimeCheckType'],
     }),
 
     createTimeSetting: builder.mutation({
@@ -292,6 +305,23 @@ export const attendanceSlice = createApi({
 
     // একজন স্টুডেন্টের একদিনের status manually মার্ক করা
     // list বড় হতে পারে বলে পুরো cache invalidate না করে UI তে optimistic update ব্যবহার করা হয়েছে
+    // লাইভ হাজিরা — একদিনের ডিভাইস হাজিরা (Time_Attendence) + অনুপস্থিত তালিকা
+    getLiveAttendance: builder.query({
+      query: (date) => ({ url: '/live_attendance', params: date ? { date } : {} }),
+    }),
+
+    // একজন ইউজারের ছবি (data URL বা null)
+    // হাজিরা রিপোর্ট — তারিখের পরিসর + ফিল্টারের সব ডাটা (রিপোর্ট পেজ নিজেই সব ধরনের রিপোর্ট বানায়)
+    getAttendanceReport: builder.query({
+      query: (params) => ({ url: '/attendance_report', params }),
+      keepUnusedDataFor: 120,
+    }),
+
+    getLiveAttendancePhoto: builder.query({
+      query: (userId) => `/live_attendance/photo/${userId}`,
+      keepUnusedDataFor: 600,
+    }),
+
     markManualAttendance: builder.mutation({
       query: (body) => ({
         url: "/manual-attendance/mark",
@@ -313,6 +343,9 @@ export const {
   useDeleteTimeShiftingMutation,
   useGetTimeShiftingByIdQuery,
   useGetTimeCheckTypesQuery,
+  useCreateTimeCheckTypeMutation,
+  useUpdateTimeCheckTypeMutation,
+  useDeleteTimeCheckTypeMutation,
   useGetTimeSwitchesQuery,
   useCreateTimeSwitchMutation,
   useUpdateTimeSwitchMutation,
@@ -326,5 +359,8 @@ export const {
   useUpdateAttendanceMutation,
   useGetManualAttendanceListQuery,
   useMarkManualAttendanceMutation,
-  useGetTimeSettingsFilteredAttendanceQuery
+  useGetTimeSettingsFilteredAttendanceQuery,
+  useGetLiveAttendanceQuery,
+  useGetLiveAttendancePhotoQuery,
+  useGetAttendanceReportQuery,
 } = attendanceSlice;

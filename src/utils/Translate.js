@@ -547,6 +547,12 @@ const useTranslate = () => {
     Online: 'অনলাইন',
     'Set Status': 'অবস্থা নির্ধারণ',
     Settings: 'সেটিংস',
+    Device: 'ডিভাইস',
+    'Attendance Device': 'হাজিরা ডিভাইস',
+    'Device User': 'ডিভাইস ইউজার',
+    'Device Time Settings': 'টাইম সেটিংস',
+    'Live Attendance': 'লাইভ হাজিরা',
+    'Attendance Report': 'হাজিরা রিপোর্ট',
     'Share Your Opinion': 'আপনার মতামত শেয়ার করুন',
     Class: 'ক্লাস',
     Branch: 'শাখা',
@@ -1336,7 +1342,9 @@ const useTranslate = () => {
     "New password and confirm password do not match!": "নতুন পাসওয়ার্ড এবং নিশ্চিতকরণ পাসওয়ার্ড মিলেনি!",
     "Reset": "রিসেট",
     "Saving...": "সংরক্ষণ হচ্ছে...",
-    "Save": "সংরক্ষণ"
+    "Save": "সংরক্ষণ",
+    "Notice Board": "নোটিশ বোর্ড",
+    "Attendance Device": "হাজিরা ডিভাইস",
   };
 
   return (key) =>
