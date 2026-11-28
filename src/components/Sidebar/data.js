@@ -713,19 +713,20 @@ export const menuData = [
 
 
 
-  // {
-  //   id: '18',
-  //   name: 'Talimat',
-  //   route: '/talimat',
-  //   icon: 'IoMdSettings',
-  //   subMenu: [
-  //     {
-  //       id: '1',
-  //       name: 'Complaint Box Terms and Conditions',
-  //       route: '/talimat',
-  //     },
-  //   ],
-  // },
+  {
+    id: '18',
+    name: 'Talimat',
+    route: '/talimat',
+    icon: 'IoMdSettings',
+    subMenu: [
+      {
+        id: '1',
+        name: 'Complaint Box Terms and Conditions',
+        route: '/talimat',
+      },
+    ],
+  },
+
   {
     id: '12',
     name: 'Payment',

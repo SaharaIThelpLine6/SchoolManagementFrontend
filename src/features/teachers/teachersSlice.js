@@ -305,13 +305,17 @@ export const teachersSlice = createApi({
        E) PAYMENTS
        ============================================================ */
     getPayments: builder.query({
-      query: ({ UserID, From, To, PaymentMethod, IsReversed } = {}) => {
+      query: ({ UserID, From, To, SLID, GLID, IsReversed, Page, Limit } = {}) => {
         const params = new URLSearchParams();
         if (UserID) params.append("UserID", String(UserID));
         if (From) params.append("From", From);
         if (To) params.append("To", To);
-        if (PaymentMethod) params.append("PaymentMethod", PaymentMethod);
-        if (IsReversed !== undefined && IsReversed !== null && IsReversed !== "") params.append("IsReversed", String(IsReversed));
+        if (SLID) params.append("SLID", String(SLID));
+        if (GLID) params.append("GLID", String(GLID));
+        if (IsReversed !== undefined && IsReversed !== null && IsReversed !== "")
+          params.append("IsReversed", String(IsReversed));
+        if (Page) params.append("Page", String(Page));
+        if (Limit) params.append("Limit", String(Limit));
         const qs = params.toString();
         return `payments${qs ? `?${qs}` : ""}`;
       },
@@ -322,9 +326,9 @@ export const teachersSlice = createApi({
       providesTags: ["Payment"],
     }),
     createPayment: builder.mutation({
-      // body: { UserID, PaymentDate, PaymentMethod, Note, Details: [{ YearID, MonthID, Amount }] }
+      // body: { UserID, PaymentDate, Note, SLID, GLID, Details: [{ YearID, MonthID, Amount }] }
       query: (body) => ({ url: "payments", method: "POST", body }),
-      invalidatesTags: ["Payment", ...SALARY_VIEW_TAGS],
+      invalidatesTags: ["Payment"],
     }),
     reversePayment: builder.mutation({
       query: ({ paymentId, ReverseReason }) => ({

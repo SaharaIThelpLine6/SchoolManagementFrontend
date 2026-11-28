@@ -341,16 +341,16 @@ export const GenerateSalaryPage = () => {
   const selectedYearValue = years.find((y) => Number(y.YearID) === Number(selectedYearId))?.YearValue || '';
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-3 sm:space-y-5 min-w-0">
       {/* ===================== হেডার */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-700 px-5 py-4 text-white shadow-lg">
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-700 px-3 py-3 sm:px-5 sm:py-4 text-white shadow-lg">
         <div className="pointer-events-none absolute -right-10 -top-16 h-56 w-56 rounded-full bg-white/10" />
         <div className="pointer-events-none absolute -bottom-20 -left-10 h-48 w-48 rounded-full bg-white/5" />
 
         <div className="relative z-10 flex flex-col gap-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-lg border border-white/20 bg-white/20 backdrop-blur">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-3">
+            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+              <div className="flex h-9 w-9 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-lg border border-white/20 bg-white/20 backdrop-blur">
                 <Icon size={20} d={IC.file} />
               </div>
               <div>
@@ -358,12 +358,12 @@ export const GenerateSalaryPage = () => {
                 <p className="text-xs text-white/80 sm:text-sm">{LABELS.generatePage.subtitle}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-2 rounded-lg bg-white/20 px-3 py-2 backdrop-blur">
+            <div className="grid grid-cols-2 gap-2 w-full sm:w-auto">
+              <div className="flex items-center justify-between gap-2 rounded-lg bg-white/20 px-2.5 sm:px-3 py-2 backdrop-blur">
                 <span className="text-[13px] font-medium">খসড়া</span>
                 <span className="text-[17px] font-bold leading-none">{toBengaliDigits(draftCount)}</span>
               </div>
-              <div className="flex items-center gap-2 rounded-lg bg-white/20 px-3 py-2 backdrop-blur">
+              <div className="flex items-center justify-between gap-2 rounded-lg bg-white/20 px-2.5 sm:px-3 py-2 backdrop-blur">
                 <span className="text-[13px] font-medium">চূড়ান্ত</span>
                 <span className="text-[17px] font-bold leading-none">{toBengaliDigits(finalCount)}</span>
               </div>
@@ -371,13 +371,13 @@ export const GenerateSalaryPage = () => {
           </div>
 
           {/* বছর ও মাস */}
-          <div className="flex flex-wrap items-center gap-2.5">
-            <div className="flex items-center gap-2 rounded-lg bg-white/15 px-3 py-2 backdrop-blur">
+          <div className="grid grid-cols-1 sm:flex sm:flex-wrap items-stretch sm:items-center gap-2">
+            <div className="flex min-w-0 items-center justify-between sm:justify-start gap-1.5 sm:gap-2 rounded-lg bg-white/15 px-2 sm:px-3 py-2 backdrop-blur">
               <span className="text-xs font-medium text-white/80">বছর:</span>
               <select
                 value={selectedYearId || ''}
                 onChange={(e) => setSelectedYearId(e.target.value ? Number(e.target.value) : null)}
-                className="h-8 min-w-[110px] px-2 text-sm font-semibold text-slate-900 bg-white rounded-md border-0 focus:ring-2 focus:ring-white/50 focus:outline-none"
+                className="h-8 min-w-0 w-full sm:w-auto sm:min-w-[110px] px-1.5 sm:px-2 text-xs sm:text-sm font-semibold text-slate-900 bg-white rounded-md border-0 focus:ring-2 focus:ring-white/50 focus:outline-none"
               >
                 <option value="">বছর সিলেক্ট</option>
                 {years.map((y) => (
@@ -388,13 +388,13 @@ export const GenerateSalaryPage = () => {
               </select>
             </div>
 
-            <div className="flex items-center gap-2 rounded-lg bg-white/15 px-3 py-2 backdrop-blur">
+            <div className="flex min-w-0 items-center justify-between sm:justify-start gap-1.5 sm:gap-2 rounded-lg bg-white/15 px-2 sm:px-3 py-2 backdrop-blur">
               <span className="text-xs font-medium text-white/80">মাস:</span>
               <select
                 value={selectedMonthId || ''}
                 onChange={(e) => setSelectedMonthId(e.target.value ? Number(e.target.value) : null)}
                 disabled={!selectedYearId}
-                className="h-8 min-w-[130px] px-2 text-sm font-semibold text-slate-900 bg-white rounded-md border-0 focus:ring-2 focus:ring-white/50 focus:outline-none disabled:opacity-50"
+                className="h-8 min-w-0 w-full sm:w-auto sm:min-w-[130px] px-1.5 sm:px-2 text-xs sm:text-sm font-semibold text-slate-900 bg-white rounded-md border-0 focus:ring-2 focus:ring-white/50 focus:outline-none disabled:opacity-50"
               >
                 <option value="">মাস সিলেক্ট</option>
                 {months.map((m) => (
@@ -405,27 +405,27 @@ export const GenerateSalaryPage = () => {
               </select>
             </div>
 
-            <button type="button" onClick={() => setYearModalOpen(true)} className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-white bg-white/20 border border-white/30 rounded-lg hover:bg-white/30 transition-colors backdrop-blur">
+            <button type="button" onClick={() => setYearModalOpen(true)} className="inline-flex justify-center items-center gap-1 px-2 sm:px-3 py-2 text-[10px] sm:text-xs font-medium text-white bg-white/20 border border-white/30 rounded-lg hover:bg-white/30 transition-colors backdrop-blur whitespace-nowrap">
               <Icon d={IC.cal} /> বছর ম্যানেজ
             </button>
-            <button type="button" onClick={() => setMonthModalOpen(true)} disabled={!selectedYearId} className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-white bg-white/20 border border-white/30 rounded-lg hover:bg-white/30 transition-colors backdrop-blur disabled:opacity-50 disabled:cursor-not-allowed">
+            <button type="button" onClick={() => setMonthModalOpen(true)} disabled={!selectedYearId} className="inline-flex justify-center items-center gap-1 px-2 sm:px-3 py-2 text-[10px] sm:text-xs font-medium text-white bg-white/20 border border-white/30 rounded-lg hover:bg-white/30 transition-colors backdrop-blur whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed">
               <Icon d={IC.cal} /> মাস ম্যানেজ
             </button>
           </div>
 
           {/* অ্যাকশন বার */}
-          <div className="flex flex-wrap items-center justify-between gap-2.5 rounded-lg bg-white/95 px-3 py-2.5 text-slate-800 shadow-sm backdrop-blur">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-2.5 rounded-lg bg-white/95 px-2.5 sm:px-3 py-2.5 text-slate-800 shadow-sm backdrop-blur">
             <p className="text-xs text-slate-500">
               {selectedMonthName && selectedYearValue
                 ? `${selectedMonthName} ${toBengaliDigits(selectedYearValue)} · মোট ${toBengaliDigits(monthSheets.length)} জনের শিট`
                 : 'বছর ও মাস সিলেক্ট করুন'}
             </p>
-            <div className="flex flex-wrap items-center gap-2.5">
+            <div className="grid grid-cols-1 sm:flex sm:flex-wrap items-stretch sm:items-center gap-2">
               <button
                 type="button"
                 onClick={handleGenerate}
                 disabled={isBusy || !selectedYearId || !selectedMonthId}
-                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-indigo-700 bg-white border border-indigo-100 rounded-lg shadow hover:bg-indigo-50 transition-colors whitespace-nowrap disabled:opacity-60"
+                className="inline-flex w-full sm:w-auto justify-center items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-bold text-indigo-700 bg-white border border-indigo-100 rounded-lg shadow hover:bg-indigo-50 transition-colors whitespace-nowrap disabled:opacity-60"
                 title="যাদের এই মাসের শিট নেই, শুধু তাদের জন্য কাঠামো থেকে নতুন শিট তৈরি হবে"
               >
                 <Icon size={16} d={IC.file} />
@@ -436,7 +436,7 @@ export const GenerateSalaryPage = () => {
                 type="button"
                 onClick={() => setSyncConfirmOpen(true)}
                 disabled={isBusy || draftCount === 0}
-                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-amber-800 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition-colors whitespace-nowrap disabled:opacity-45 disabled:cursor-not-allowed"
+                className="inline-flex w-full sm:w-auto justify-center items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-amber-800 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition-colors whitespace-nowrap disabled:opacity-45 disabled:cursor-not-allowed"
                 title="সব খসড়া শিটে কাঠামোর বর্তমান টাকা আবার বসানো হবে"
               >
                 <Icon size={16} d={IC.refresh} />
@@ -447,7 +447,7 @@ export const GenerateSalaryPage = () => {
                 type="button"
                 disabled={draftCount === 0 || isBusy}
                 onClick={() => setFinalizeAllConfirmOpen(true)}
-                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-indigo-800 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition-colors disabled:opacity-45 disabled:cursor-not-allowed whitespace-nowrap"
+                className="inline-flex w-full sm:w-auto justify-center items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-indigo-800 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition-colors disabled:opacity-45 disabled:cursor-not-allowed whitespace-nowrap"
               >
                 <Icon size={16} d={IC.checks} className="text-indigo-600" />
                 <span>{LABELS.generatePage.finalizeAllBtn}</span>
@@ -473,20 +473,21 @@ export const GenerateSalaryPage = () => {
         }
         skeletonCols={7}
       >
-        <table className="w-full text-sm text-left border-collapse min-w-[960px]">
+        <table className="w-full text-xs sm:text-sm text-left border-collapse min-w-[900px]">
           <thead className="sticky top-0 z-20 bg-slate-50 border-b border-slate-200 text-slate-700">
             <tr>
-              <th className="sticky left-0 z-30 bg-slate-50 py-3 px-4 font-semibold border-r border-slate-200 min-w-[190px]">{LABELS.common.teacher}</th>
-              <th className="py-3 px-3 font-semibold whitespace-nowrap min-w-[120px]">{LABELS.common.designation}</th>
+              {/* ✅ Mobile-এ sticky নয়, desktop (sm+) এ sticky */}
+              <th className="sm:sticky sm:left-0 sm:z-30 bg-slate-50 py-2 sm:py-3 px-2 sm:px-4 font-semibold border-r border-slate-200 min-w-[150px] sm:min-w-[190px]">{LABELS.common.teacher}</th>
+              <th className="py-2 sm:py-3 px-2 sm:px-3 font-semibold whitespace-nowrap min-w-[100px] sm:min-w-[120px]">{LABELS.common.designation}</th>
               {displayHeads.map((h) => (
-                <th key={h.headId} className={`py-3 px-3 font-semibold text-right whitespace-nowrap min-w-[130px] ${h.headType === 'EARNING' ? 'text-emerald-700 bg-emerald-50/40' : 'text-red-700 bg-red-50/40'}`}>
+                <th key={h.headId} className={`py-2 sm:py-3 px-2 sm:px-3 font-semibold text-right whitespace-nowrap min-w-[110px] sm:min-w-[130px] ${h.headType === 'EARNING' ? 'text-emerald-700 bg-emerald-50/40' : 'text-red-700 bg-red-50/40'}`}>
                   {h.headName}
                   {!h.isActive && <span className="ml-1 text-[10px] font-normal text-slate-400">(নিষ্ক্রিয়)</span>}
                 </th>
               ))}
-              <th className="py-3 px-4 font-semibold text-right whitespace-nowrap min-w-[120px] bg-slate-100/70">{LABELS.generatePage.colNet}</th>
-              <th className="py-3 px-3 font-semibold text-center whitespace-nowrap min-w-[100px]">{LABELS.common.status}</th>
-              <th className="py-3 px-4 font-semibold text-right whitespace-nowrap min-w-[200px]">{LABELS.common.actions}</th>
+              <th className="py-2 sm:py-3 px-2 sm:px-4 font-semibold text-right whitespace-nowrap min-w-[105px] sm:min-w-[120px] bg-slate-100/70">{LABELS.generatePage.colNet}</th>
+              <th className="py-2 sm:py-3 px-2 sm:px-3 font-semibold text-center whitespace-nowrap min-w-[90px] sm:min-w-[100px]">{LABELS.common.status}</th>
+              <th className="py-2 sm:py-3 px-2 sm:px-4 font-semibold text-right whitespace-nowrap min-w-[170px] sm:min-w-[200px]">{LABELS.common.actions}</th>
             </tr>
           </thead>
 
@@ -499,7 +500,8 @@ export const GenerateSalaryPage = () => {
 
               return (
                 <tr key={sheet.sheetId} className={`hover:bg-slate-50/80 transition-colors ${isFinal ? 'bg-slate-50/30' : 'bg-white'}`}>
-                  <td className="sticky left-0 z-10 bg-white py-2.5 px-4 border-r border-slate-200">
+                  {/* ✅ Mobile-এ sticky নয়, desktop (sm+) এ sticky */}
+                  <td className="sm:sticky sm:left-0 sm:z-10 bg-white py-2 sm:py-2.5 px-2 sm:px-4 border-r border-slate-200">
                     <div className="flex items-center justify-between gap-2">
                       <div className="min-w-0">
                         <p className="font-medium text-slate-900 truncate">{teacher?.name ?? `#${sheet.userId}`}</p>
@@ -510,10 +512,10 @@ export const GenerateSalaryPage = () => {
                       )}
                     </div>
                   </td>
-                  <td className="py-2.5 px-3 text-xs text-slate-600 whitespace-nowrap">{teacher?.designation || '—'}</td>
+                  <td className="py-2 sm:py-2.5 px-2 sm:px-3 text-[10px] sm:text-xs text-slate-600 whitespace-nowrap">{teacher?.designation || '—'}</td>
 
                   {displayHeads.map((h) => (
-                    <td key={h.headId} className="py-2 px-2.5">
+                    <td key={h.headId} className="py-1.5 sm:py-2 px-1.5 sm:px-2.5">
                       <MoneyInput
                         compact
                         disabled={isFinal}
@@ -524,10 +526,10 @@ export const GenerateSalaryPage = () => {
                     </td>
                   ))}
 
-                  <td className="py-2.5 px-4 text-right font-mono-num font-bold text-slate-900 bg-slate-50/60 whitespace-nowrap">{formatMoney(liveNet)}</td>
-                  <td className="py-2.5 px-3 text-center"><StatusBadge variant={{ kind: 'sheet', status: sheet.status }} /></td>
-                  <td className="py-2.5 px-4 text-right">
-                    <div className="inline-flex items-center justify-end gap-1.5">
+                  <td className="py-2 sm:py-2.5 px-2 sm:px-4 text-right text-xs sm:text-sm font-mono-num font-bold text-slate-900 bg-slate-50/60 whitespace-nowrap">{formatMoney(liveNet)}</td>
+                  <td className="py-2 sm:py-2.5 px-2 sm:px-3 text-center"><StatusBadge variant={{ kind: 'sheet', status: sheet.status }} /></td>
+                  <td className="py-2 px-2.5 sm:py-2.5 sm:px-4 text-right">
+                    <div className="inline-flex items-center justify-end gap-1">
                       {!isFinal ? (
                         <>
                           <button type="button" onClick={() => handleSaveRow(sheet)} disabled={isBusy || !isRowEdited} className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 whitespace-nowrap disabled:opacity-50">
@@ -551,15 +553,16 @@ export const GenerateSalaryPage = () => {
 
           <tfoot className="bg-slate-50 border-t-2 border-slate-200 font-semibold text-slate-900">
             <tr>
-              <td className="sticky left-0 z-10 bg-slate-50 py-3 px-4 border-r border-slate-200">
+              {/* ✅ Mobile-এ sticky নয়, desktop (sm+) এ sticky */}
+              <td className="sm:sticky sm:left-0 sm:z-10 bg-slate-50 py-3 px-4 border-r border-slate-200">
                 {LABELS.generatePage.totalRowLabel} ({toBengaliDigits(monthSheets.length)} জন)
               </td>
-              <td className="py-3 px-3" />
+              <td className="py-2 sm:py-3 px-2 sm:px-3" />
               {displayHeads.map((h) => (
-                <td key={h.headId} className="py-3 px-3 text-right font-mono-num whitespace-nowrap">{formatMoney(columnTotals.headSums[h.headId] ?? 0)}</td>
+                <td key={h.headId} className="py-2 sm:py-3 px-2 sm:px-3 text-right text-xs sm:text-sm font-mono-num whitespace-nowrap">{formatMoney(columnTotals.headSums[h.headId] ?? 0)}</td>
               ))}
-              <td className="py-3 px-4 text-right font-mono-num font-bold text-teal-800 bg-teal-50/70 whitespace-nowrap">{formatMoney(columnTotals.grandNet)}</td>
-              <td className="py-3 px-3" />
+              <td className="py-2 sm:py-3 px-2 sm:px-4 text-right text-xs sm:text-sm font-mono-num font-bold text-teal-800 bg-teal-50/70 whitespace-nowrap">{formatMoney(columnTotals.grandNet)}</td>
+              <td className="py-2 sm:py-3 px-2 sm:px-3" />
               <td className="py-3 px-4" />
             </tr>
           </tfoot>
@@ -677,8 +680,8 @@ const YearModal = ({ isOpen, onClose, years, selectedYearId, onSelectYear }) => 
       icon={<Icon size={18} d={IC.cal} />}
       footer={<button onClick={onClose} className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">বন্ধ করুন</button>}
     >
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
+      <div className="space-y-3 sm:space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div>
             <h4 className="text-sm font-bold text-slate-800">বছরসমূহ</h4>
             <p className="text-xs text-slate-500 mt-0.5">মোট {toBengaliDigits(years.length)} টি বছর</p>
@@ -689,9 +692,9 @@ const YearModal = ({ isOpen, onClose, years, selectedYearId, onSelectYear }) => 
         </div>
 
         {formOpen && (
-          <div className="rounded-lg border border-indigo-200 bg-indigo-50/50 p-4">
-            <form onSubmit={handleSave} className="flex flex-wrap items-end gap-3">
-              <div className="flex-1 min-w-[180px]">
+          <div className="rounded-lg border border-indigo-200 bg-indigo-50/50 p-3 sm:p-4">
+            <form onSubmit={handleSave} className="grid grid-cols-1 sm:flex sm:flex-wrap items-stretch sm:items-end gap-3">
+              <div className="w-full sm:flex-1 min-w-0 sm:min-w-[180px]">
                 <label className="block text-xs font-medium text-slate-700 mb-1.5">{editYearId ? 'বছর এডিট করুন' : 'নতুন বছর'}</label>
                 <input
                   type="number"
@@ -701,10 +704,10 @@ const YearModal = ({ isOpen, onClose, years, selectedYearId, onSelectYear }) => 
                   min={2000}
                   max={2100}
                   placeholder="যেমন: 2026"
-                  className="w-full h-10 px-3 text-sm text-slate-900 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  className="w-full h-10 px-3 text-xs sm:text-sm text-slate-900 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                 />
               </div>
-              <div className="flex items-center gap-2">
+              <div className="grid grid-cols-2 sm:flex items-center gap-2">
                 <button type="submit" disabled={isCreatingYear || isUpdatingYear} className="px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-50">
                   {isCreatingYear || isUpdatingYear ? 'সেভ হচ্ছে...' : 'সেভ করুন'}
                 </button>
@@ -719,13 +722,13 @@ const YearModal = ({ isOpen, onClose, years, selectedYearId, onSelectYear }) => 
             <p className="text-sm">কোনো বছর নেই। নতুন বছর তৈরি করুন।</p>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-lg border border-slate-200">
-            <table className="w-full text-sm text-left">
+          <div className="overflow-x-auto rounded-lg border border-slate-200">
+            <table className="w-full min-w-[420px] text-xs sm:text-sm text-left">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-700">
                 <tr>
-                  <th className="py-2.5 px-4 font-semibold text-xs">বছর</th>
-                  <th className="py-2.5 px-4 font-semibold text-xs">স্টেটাস</th>
-                  <th className="py-2.5 px-4 font-semibold text-xs text-right">অ্যাকশন</th>
+                  <th className="py-2 px-2.5 sm:py-2.5 sm:px-4 font-semibold text-[11px] sm:text-xs whitespace-nowrap">বছর</th>
+                  <th className="py-2 px-2.5 sm:py-2.5 sm:px-4 font-semibold text-[11px] sm:text-xs whitespace-nowrap">স্টেটাস</th>
+                  <th className="py-2 px-2.5 sm:py-2.5 sm:px-4 font-semibold text-[11px] sm:text-xs text-right whitespace-nowrap">অ্যাকশন</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -733,16 +736,16 @@ const YearModal = ({ isOpen, onClose, years, selectedYearId, onSelectYear }) => 
                   const selected = Number(selectedYearId) === Number(y.YearID);
                   return (
                     <tr key={y.YearID} className={`hover:bg-slate-50/80 transition-colors ${selected ? 'bg-indigo-50/40' : ''}`}>
-                      <td className="py-2.5 px-4">
+                      <td className="py-2 px-2.5 sm:py-2.5 sm:px-4">
                         <button onClick={() => onSelectYear(Number(y.YearID))} className="text-base font-bold text-slate-800 hover:text-indigo-700" title="এই বছর সিলেক্ট করুন">
                           {toBengaliDigits(y.YearValue)}
                         </button>
                         {selected && <span className="ml-2 text-[10px] font-medium text-indigo-700 bg-indigo-100 px-1.5 py-0.5 rounded">সিলেক্টেড</span>}
                       </td>
-                      <td className="py-2.5 px-4">
+                      <td className="py-2 px-2.5 sm:py-2.5 sm:px-4">
                         <StatusPill active={y.IsActive} />
                       </td>
-                      <td className="py-2.5 px-4">
+                      <td className="py-2 px-2.5 sm:py-2.5 sm:px-4">
                         <RowActions onEdit={() => handleOpenForm(y)} onToggle={() => handleToggleStatus(y)} active={y.IsActive} />
                       </td>
                     </tr>
@@ -765,8 +768,8 @@ const StatusPill = ({ active }) => (
 );
 
 const RowActions = ({ onEdit, onToggle, active }) => (
-  <div className="flex items-center justify-end gap-1.5">
-    <button onClick={onEdit} className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors">
+  <div className="flex flex-wrap items-center justify-end gap-1">
+    <button onClick={onEdit} className="inline-flex items-center gap-1 px-2 py-1 text-[10px] sm:text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors">
       <Icon size={12} d={IC.edit} /> এডিট
     </button>
     <button
@@ -916,7 +919,7 @@ const MonthModal = ({ isOpen, onClose, years, months, selectedYearId, selectedMo
       footer={<button onClick={onClose} className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">বন্ধ করুন</button>}
     >
       <div className="space-y-4">
-        <div className="rounded-lg bg-slate-50 border border-slate-200 p-3 shadow-sm">
+        <div className="rounded-lg bg-slate-50 border border-slate-200 p-2.5 sm:p-3 shadow-sm">
           <label className="block text-xs font-medium text-slate-700 mb-1.5">বছর সিলেক্ট করুন</label>
           <select
             value={selectedYearId || ''}
@@ -925,7 +928,7 @@ const MonthModal = ({ isOpen, onClose, years, months, selectedYearId, selectedMo
               setFormOpen(false);
               setBulkOpen(false);
             }}
-            className="w-full h-9 px-3 text-sm font-medium text-slate-900 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+            className="w-full h-9 px-3 text-xs sm:text-sm font-medium text-slate-900 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
           >
             <option value="">বছর সিলেক্ট করুন</option>
             {years.map((y) => (
@@ -939,7 +942,7 @@ const MonthModal = ({ isOpen, onClose, years, months, selectedYearId, selectedMo
             <h4 className="text-sm font-bold text-slate-800">মাসসমূহ</h4>
             <p className="text-xs text-slate-500 mt-0.5">{selectedYearId ? `মোট ${toBengaliDigits(months.length)} টি মাস` : 'আগে বছর সিলেক্ট করুন'}</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="grid grid-cols-1 sm:flex items-center gap-2 w-full sm:w-auto">
             <button onClick={handleOpenBulk} disabled={!selectedYearId} className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
               <Icon d={IC.grid} /> একসাথে ১২ মাস
             </button>
@@ -950,8 +953,8 @@ const MonthModal = ({ isOpen, onClose, years, months, selectedYearId, selectedMo
         </div>
 
         {formOpen && (
-          <div className="rounded-lg border border-indigo-200 bg-indigo-50/50 p-4">
-            <form onSubmit={handleSave} className="grid grid-cols-1 sm:grid-cols-[120px_1fr_auto] items-end gap-3">
+          <div className="rounded-lg border border-indigo-200 bg-indigo-50/50 p-3 sm:p-4">
+            <form onSubmit={handleSave} className="grid grid-cols-1 sm:grid-cols-[120px_1fr_auto] items-stretch sm:items-end gap-2.5 sm:gap-3">
               <div>
                 <label className="block text-xs font-medium text-slate-700 mb-1.5">ক্রম</label>
                 <select
@@ -975,10 +978,10 @@ const MonthModal = ({ isOpen, onClose, years, months, selectedYearId, selectedMo
                   onChange={(e) => setMonthName(e.target.value)}
                   required
                   placeholder="যেমন: জানুয়ারি, মুহাররম..."
-                  className="w-full h-10 px-3 text-sm text-slate-900 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  className="w-full h-10 px-3 text-xs sm:text-sm text-slate-900 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                 />
               </div>
-              <div className="flex items-center gap-2">
+              <div className="grid grid-cols-2 sm:flex items-center gap-2">
                 <button type="button" onClick={closeForm} className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">বাতিল</button>
                 <button type="submit" disabled={isCreatingMonth || isUpdatingMonth} className="px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-50">
                   {isCreatingMonth || isUpdatingMonth ? 'সেভ হচ্ছে...' : 'সেভ করুন'}
@@ -989,16 +992,16 @@ const MonthModal = ({ isOpen, onClose, years, months, selectedYearId, selectedMo
         )}
 
         {bulkOpen && (
-          <div className="rounded-lg border-2 border-purple-300 bg-purple-50/40 p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
+          <div className="rounded-lg border-2 border-purple-300 bg-purple-50/40 p-3 sm:p-4 space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div className="min-w-0">
                 <h5 className="text-sm font-bold text-purple-900">একসাথে ১২ মাস</h5>
                 <p className="text-xs text-purple-700 mt-0.5">আগের মাসগুলো অটো ফিলাপ হয়েছে। শুধু নতুন/বদলানো নাম সেভ হবে।</p>
               </div>
               <span className="text-xs font-semibold text-purple-800 bg-purple-100 px-2 py-1 rounded-full">{toBengaliDigits(changedRows.length)} টি পরিবর্তন</span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[340px] overflow-y-auto pr-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[55vh] sm:max-h-[340px] overflow-y-auto pr-1">
               {bulkRows.map((row, idx) => (
                 <div key={idx} className={`flex items-center gap-2 rounded-lg border p-2 ${row.id ? 'bg-slate-50 border-slate-300' : 'bg-white border-slate-200'}`}>
                   <span className={`shrink-0 w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold ${row.id ? 'bg-slate-200 text-slate-600' : 'bg-purple-100 text-purple-700'}`}>
@@ -1028,9 +1031,9 @@ const MonthModal = ({ isOpen, onClose, years, months, selectedYearId, selectedMo
               </div>
             )}
 
-            <div className="flex items-center justify-end gap-2 pt-1">
-              <button type="button" onClick={() => { setBulkOpen(false); setBulkRows([]); }} disabled={bulkSaving} className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50">বাতিল</button>
-              <button type="button" onClick={handleBulkSave} disabled={bulkSaving || changedRows.length === 0} className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed">
+            <div className="grid grid-cols-2 sm:flex items-center justify-end gap-2 pt-1">
+              <button type="button" onClick={() => { setBulkOpen(false); setBulkRows([]); }} disabled={bulkSaving} className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50">বাতিল</button>
+              <button type="button" onClick={handleBulkSave} disabled={bulkSaving || changedRows.length === 0} className="inline-flex justify-center items-center gap-1.5 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed">
                 <Icon d={IC.check} /> {bulkSaving ? 'সেভ হচ্ছে...' : `${toBengaliDigits(changedRows.length)} টি সেভ করুন`}
               </button>
             </div>
@@ -1044,14 +1047,14 @@ const MonthModal = ({ isOpen, onClose, years, months, selectedYearId, selectedMo
             <p className="text-sm">কোনো মাস নেই। নতুন মাস তৈরি করুন।</p>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-lg border border-slate-200">
-            <table className="w-full text-sm text-left">
+          <div className="overflow-x-auto rounded-lg border border-slate-200">
+            <table className="w-full min-w-[420px] text-xs sm:text-sm text-left">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-700">
                 <tr>
-                  <th className="py-2.5 px-4 font-semibold text-xs">ক্রম</th>
-                  <th className="py-2.5 px-4 font-semibold text-xs">মাসের নাম</th>
-                  <th className="py-2.5 px-4 font-semibold text-xs">স্টেটাস</th>
-                  <th className="py-2.5 px-4 font-semibold text-xs text-right">অ্যাকশন</th>
+                  <th className="py-2 px-2.5 sm:py-2.5 sm:px-4 font-semibold text-[11px] sm:text-xs whitespace-nowrap">ক্রম</th>
+                  <th className="py-2 px-2.5 sm:py-2.5 sm:px-4 font-semibold text-[11px] sm:text-xs whitespace-nowrap">মাসের নাম</th>
+                  <th className="py-2 px-2.5 sm:py-2.5 sm:px-4 font-semibold text-[11px] sm:text-xs whitespace-nowrap">স্টেটাস</th>
+                  <th className="py-2 px-2.5 sm:py-2.5 sm:px-4 font-semibold text-[11px] sm:text-xs text-right whitespace-nowrap">অ্যাকশন</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -1059,13 +1062,13 @@ const MonthModal = ({ isOpen, onClose, years, months, selectedYearId, selectedMo
                   const selected = Number(selectedMonthId) === Number(m.MonthID);
                   return (
                     <tr key={m.MonthID} className={`hover:bg-slate-50/80 transition-colors ${selected ? 'bg-indigo-50/40' : ''}`}>
-                      <td className="py-2.5 px-4 text-xs font-medium text-slate-500">{toBengaliDigits(m.MonthValue)}</td>
-                      <td className="py-2.5 px-4">
+                      <td className="py-2 px-2.5 sm:py-2.5 sm:px-4 text-xs font-medium text-slate-500">{toBengaliDigits(m.MonthValue)}</td>
+                      <td className="py-2 px-2.5 sm:py-2.5 sm:px-4">
                         <button onClick={() => onSelectMonth(Number(m.MonthID))} className="text-sm font-bold text-slate-800 hover:text-indigo-700" title="এই মাস সিলেক্ট করুন">{m.MonthName}</button>
                         {selected && <span className="ml-2 text-[10px] font-medium text-indigo-700 bg-indigo-100 px-1.5 py-0.5 rounded">সিলেক্টেড</span>}
                       </td>
-                      <td className="py-2.5 px-4"><StatusPill active={m.IsActive} /></td>
-                      <td className="py-2.5 px-4"><RowActions onEdit={() => handleOpenForm(m)} onToggle={() => handleToggleStatus(m)} active={m.IsActive} /></td>
+                      <td className="py-2 px-2.5 sm:py-2.5 sm:px-4"><StatusPill active={m.IsActive} /></td>
+                      <td className="py-2 px-2.5 sm:py-2.5 sm:px-4"><RowActions onEdit={() => handleOpenForm(m)} onToggle={() => handleToggleStatus(m)} active={m.IsActive} /></td>
                     </tr>
                   );
                 })}

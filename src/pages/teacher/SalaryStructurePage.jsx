@@ -293,43 +293,90 @@ export const SalaryStructurePage = () => {
           </select>
         </div>
 
+
         <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left border-collapse">
+          <table className="w-full text-[11px] sm:text-sm text-left border-collapse">
             <thead className="bg-slate-50 border-b border-slate-200 text-slate-600">
               <tr>
-                <th className="py-3 px-4 font-semibold w-16">ক্রমিক</th>
-                <th className="py-3 px-4 font-semibold">শিক্ষকের নাম</th>
-                <th className="py-3 px-4 font-semibold">পদবি</th>
-                <th className="py-3 px-4 font-semibold text-right">মোট আয়</th>
-                <th className="py-3 px-4 font-semibold text-right">মোট কর্তন</th>
-                <th className="py-3 px-4 font-semibold text-right">নিট বেতন</th>
-                <th className="py-3 px-4 font-semibold text-center w-28">অ্যাকশন</th>
+                <th className="py-2 sm:py-3 px-2 sm:px-4 font-semibold w-12 sm:w-16 whitespace-nowrap">
+                  ক্রমিক
+                </th>
+                <th className="py-2 sm:py-3 px-2 sm:px-4 font-semibold whitespace-nowrap">
+                  শিক্ষকের নাম
+                </th>
+                <th className="py-2 sm:py-3 px-2 sm:px-4 font-semibold whitespace-nowrap">
+                  পদবি
+                </th>
+                <th className="py-2 sm:py-3 px-2 sm:px-4 font-semibold text-right whitespace-nowrap">
+                  মোট আয়
+                </th>
+                <th className="py-2 sm:py-3 px-2 sm:px-4 font-semibold text-right whitespace-nowrap">
+                  মোট কর্তন
+                </th>
+                <th className="py-2 sm:py-3 px-2 sm:px-4 font-semibold text-right whitespace-nowrap">
+                  নিট বেতন
+                </th>
+                <th className="py-2 sm:py-3 px-2 sm:px-4 font-semibold text-center w-20 sm:w-28 whitespace-nowrap">
+                  অ্যাকশন
+                </th>
               </tr>
             </thead>
+
             <tbody className="divide-y divide-slate-100">
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i}><td colSpan="7" className="p-4"><div className="h-8 bg-slate-100 rounded animate-pulse" /></td></tr>
+                  <tr key={i}>
+                    <td colSpan="7" className="p-2 sm:p-4">
+                      <div className="h-7 sm:h-8 bg-slate-100 rounded animate-pulse" />
+                    </td>
+                  </tr>
                 ))
               ) : filteredTeachers.length === 0 ? (
-                <tr><td colSpan="7" className="py-8 text-center text-slate-500">কোনো শিক্ষক পাওয়া যায়নি</td></tr>
+                <tr>
+                  <td colSpan="7" className="py-6 sm:py-8 text-center text-slate-500">
+                    কোনো শিক্ষক পাওয়া যায়নি
+                  </td>
+                </tr>
               ) : (
                 filteredTeachers.map((t, idx) => {
                   const totals = getTeacherTotals(t.userId);
+
                   return (
-                    <tr key={t.userId} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="py-3 px-4 font-mono-num text-slate-500">{toBengaliDigits(idx + 1)}</td>
-                      <td className="py-3 px-4 font-medium text-slate-900">
-                        {t.name} <span className="text-xs text-slate-400 block">{t.userCode}</span>
+                    <tr
+                      key={t.userId}
+                      className="hover:bg-slate-50/80 transition-colors"
+                    >
+                      <td className="py-2 sm:py-3 px-2 sm:px-4 font-mono-num text-slate-500 whitespace-nowrap">
+                        {toBengaliDigits(idx + 1)}
                       </td>
-                      <td className="py-3 px-4 text-slate-600">{t.designation}</td>
-                      <td className="py-3 px-4 text-right font-mono-num text-emerald-600">{formatMoney(totals.gross)}</td>
-                      <td className="py-3 px-4 text-right font-mono-num text-red-500">{formatMoney(totals.deduction)}</td>
-                      <td className="py-3 px-4 text-right font-mono-num font-bold text-slate-800">{formatMoney(totals.net)}</td>
-                      <td className="py-3 px-4 text-center">
+
+                      <td className="py-2 sm:py-3 px-2 sm:px-4 font-medium text-slate-900 min-w-[110px] sm:min-w-0">
+                        <span className="block">{t.name}</span>
+                        <span className="text-[10px] sm:text-xs text-slate-400 block">
+                          {t.userCode}
+                        </span>
+                      </td>
+
+                      <td className="py-2 sm:py-3 px-2 sm:px-4 text-slate-600 whitespace-nowrap">
+                        {t.designation}
+                      </td>
+
+                      <td className="py-2 sm:py-3 px-2 sm:px-4 text-right font-mono-num text-emerald-600 whitespace-nowrap">
+                        {formatMoney(totals.gross)}
+                      </td>
+
+                      <td className="py-2 sm:py-3 px-2 sm:px-4 text-right font-mono-num text-red-500 whitespace-nowrap">
+                        {formatMoney(totals.deduction)}
+                      </td>
+
+                      <td className="py-2 sm:py-3 px-2 sm:px-4 text-right font-mono-num font-bold text-slate-800 whitespace-nowrap">
+                        {formatMoney(totals.net)}
+                      </td>
+
+                      <td className="py-2 sm:py-3 px-2 sm:px-4 text-center">
                         <button
                           onClick={() => handleOpenModal(t.userId)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-teal-700 bg-teal-50 border border-teal-200 rounded-lg hover:bg-teal-100 transition-colors"
+                          className="inline-flex items-center gap-1 px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-medium text-teal-700 bg-teal-50 border border-teal-200 rounded-md sm:rounded-lg hover:bg-teal-100 transition-colors whitespace-nowrap"
                         >
                           <Icon d={['M12 20h9', 'M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z']} />
                           এডিট
@@ -342,42 +389,81 @@ export const SalaryStructurePage = () => {
             </tbody>
           </table>
         </div>
+
       </div>
 
-      {/* ===================== মোডাল */}
+
+      {/* ===================== মোডাল ===================== */}
       <Modal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         title="স্যালারি স্ট্রাকচার"
         size="lg"
         footer={
-          <div className="flex w-full items-center justify-between">
-            <div className="flex gap-4 text-sm font-medium">
-              <span className="text-emerald-600">মোট আয়: {formatMoney(liveTotals.gross)}</span>
-              <span className="text-red-500">মোট কর্তন: {formatMoney(liveTotals.deduction)}</span>
-              <span className="text-slate-800">নিট: {formatMoney(liveTotals.net)}</span>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 w-full">
+
+            {/* Salary Summary */}
+            <div className="grid grid-cols-3 gap-2 w-full sm:w-auto sm:flex sm:items-center sm:gap-4">
+              <div className="bg-emerald-50 sm:bg-transparent rounded-lg p-2 sm:p-0 text-center sm:text-left">
+                <span className="block text-[10px] sm:text-xs text-slate-500 mb-0.5">
+                  মোট আয়
+                </span>
+                <span className="text-xs sm:text-sm font-bold text-emerald-600 whitespace-nowrap">
+                  {formatMoney(liveTotals.gross)}
+                </span>
+              </div>
+
+              <div className="bg-red-50 sm:bg-transparent rounded-lg p-2 sm:p-0 text-center sm:text-left">
+                <span className="block text-[10px] sm:text-xs text-slate-500 mb-0.5">
+                  মোট কর্তন
+                </span>
+                <span className="text-xs sm:text-sm font-bold text-red-500 whitespace-nowrap">
+                  {formatMoney(liveTotals.deduction)}
+                </span>
+              </div>
+
+              <div className="bg-slate-100 sm:bg-transparent rounded-lg p-2 sm:p-0 text-center sm:text-left">
+                <span className="block text-[10px] sm:text-xs text-slate-500 mb-0.5">
+                  নিট বেতন
+                </span>
+                <span className="text-xs sm:text-sm font-bold text-slate-800 whitespace-nowrap">
+                  {formatMoney(liveTotals.net)}
+                </span>
+              </div>
             </div>
-            <div className="flex gap-3">
-              <button type="button" onClick={handleCloseModal} className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <button
+                type="button"
+                onClick={handleCloseModal}
+                className="flex-1 sm:flex-none px-3 sm:px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+              >
                 বাতিল
               </button>
+
               <button
                 type="button"
                 onClick={handleSave}
                 disabled={!selectedUserId || !isDirty || isBusy}
-                className="px-5 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-50"
+                className="flex-1 sm:flex-none px-4 sm:px-5 py-2.5 text-xs sm:text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-50 transition-colors"
               >
                 {isSaving ? 'সেভ হচ্ছে...' : 'সেভ করুন'}
               </button>
             </div>
+
           </div>
         }
       >
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
+          {/* Teacher Select */}
           <div>
-            <label htmlFor="teacher-select" className="block text-sm font-medium text-slate-700 mb-1.5">
+            <label
+              htmlFor="teacher-select"
+              className="block text-xs sm:text-sm font-semibold text-slate-700 mb-1.5"
+            >
               শিক্ষক সিলেক্ট করুন <span className="text-red-500">*</span>
             </label>
+
             <select
               id="teacher-select"
               value={selectedUserId}
@@ -385,7 +471,7 @@ export const SalaryStructurePage = () => {
                 if (isDirty && !window.confirm(LABELS.structurePage.unsavedMessage)) return;
                 setSelectedUserId(e.target.value);
               }}
-              className="w-full h-10 px-3 text-sm bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-600"
+              className="w-full h-10 sm:h-11 px-3 text-xs sm:text-sm bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-600"
             >
               <option value="">-- শিক্ষক বাছাই করুন --</option>
               {teachers.map((t) => (
@@ -397,39 +483,62 @@ export const SalaryStructurePage = () => {
           </div>
 
           {selectedUserId && (
-            <div className="animate-scaleFadeIn space-y-5 border-t border-slate-100 pt-5">
+            <div className="animate-scaleFadeIn space-y-4 sm:space-y-5 border-t border-slate-100 pt-4 sm:pt-5">
+              {/* Apply Designation */}
               {selectedTeacher?.designation && (
-                <div className="flex justify-end">
+                <div className="flex justify-start sm:justify-end">
                   <button
                     type="button"
                     onClick={() => setApplyDesignationOpen(true)}
                     disabled={isBusy}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition-colors"
+                    className="inline-flex items-center justify-center gap-1.5 w-full sm:w-auto px-3 py-2 text-[11px] sm:text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition-colors disabled:opacity-50"
                   >
-                    <Icon d={['M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2', 'M22 21v-2a4 4 0 0 0-3-3.87', 'M16 3.13a4 4 0 0 1 0 7.75']} />
+                    <Icon
+                      d={[
+                        'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2',
+                        'M22 21v-2a4 4 0 0 0-3-3.87',
+                        'M16 3.13a4 4 0 0 1 0 7.75',
+                      ]}
+                    />
                     "{selectedTeacher.designation}" পদবির সবার জন্য প্রয়োগ করুন
                   </button>
                 </div>
               )}
 
+              {/* Earning Section */}
               <div>
-                <h3 className="text-xs font-semibold text-emerald-700 mb-3 uppercase tracking-wider">{LABELS.structurePage.earningSection}</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <h3 className="text-xs sm:text-sm font-bold text-emerald-700 mb-3 uppercase tracking-wide">
+                  {LABELS.structurePage.earningSection}
+                </h3>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   {renderHeadInputs(earningHeads)}
-                  {earningHeads.length === 0 && <p className="text-xs text-slate-500 col-span-full">কোনো আয় খাত নেই</p>}
+
+                  {earningHeads.length === 0 && (
+                    <p className="text-xs text-slate-500 col-span-full py-2">
+                      কোনো আয় খাত নেই
+                    </p>
+                  )}
                 </div>
               </div>
 
+              {/* Deduction Section */}
               {deductionHeads.length > 0 && (
                 <div className="pt-4 border-t border-slate-100">
-                  <h3 className="text-xs font-semibold text-red-700 mb-3 uppercase tracking-wider">{LABELS.structurePage.deductionSection}</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">{renderHeadInputs(deductionHeads)}</div>
+                  <h3 className="text-xs sm:text-sm font-bold text-red-700 mb-3 uppercase tracking-wide">
+                    {LABELS.structurePage.deductionSection}
+                  </h3>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    {renderHeadInputs(deductionHeads)}
+                  </div>
                 </div>
               )}
             </div>
           )}
         </div>
       </Modal>
+
 
       <ConfirmDialog
         isOpen={applyDesignationOpen}

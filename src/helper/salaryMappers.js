@@ -38,21 +38,28 @@ export const mapPayment = (p) => ({
   })),
 });
 
-// /month-status বা report এর months রো → frontend
 export const mapMonthRow = (r) => {
-  const hasSheet = Boolean(r.SheetID);
-  const net = toNum(r.NetAmount);
-  const paid = toNum(r.PaidAmount);
+  const yearValue =
+    r.Year?.YearID ??
+    r.YearID ??
+    r.yearId ??
+    r.yearID ??
+    null;
+
   return {
-    monthId: Number(r.MonthID),
-    monthValue: Number(r.MonthValue),
-    monthName: r.MonthName,
-    hasSheet,
-    sheetStatus: r.SheetStatus ?? null,
-    net,
-    paid,
-    due: hasSheet ? Math.max(0, round2(net - paid)) : 0,
-    status: r.PaymentStatus ?? (hasSheet ? 'UNPAID' : 'NO_SHEET'),
+    monthId: Number(r.MonthID ?? r.monthId ?? 0),
+    monthName: r.MonthName ?? r.monthName ?? '',
+    yearId: Number(yearValue) || 0,       // ✅ কখনো undefined হবে না
+    yearValue: Number(r.Year?.YearValue ?? r.YearValue ?? 0),
+    hasSheet: !!(r.SheetID ?? r.sheetId),
+    sheetId: r.SheetID ?? r.sheetId ?? null,
+    status: r.SheetStatus ?? r.status ?? null,
+    gross: toNum(r.GrossAmount ?? r.gross),
+    deduction: toNum(r.DeductionAmount ?? r.deduction),
+    net: toNum(r.NetAmount ?? r.net),
+    paid: toNum(r.PaidAmount ?? r.paid),
+    due: toNum(r.DueAmount ?? r.due),
+    paymentStatus: r.PaymentStatus ?? 'NO_SHEET',
   };
 };
 

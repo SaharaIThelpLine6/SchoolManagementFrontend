@@ -168,10 +168,11 @@ const UserNamePasswordChangeModal = ({ changeType = "username", id }) => {
     } catch (error) {
       console.error("Update failed:", error);
 
+      // 👇 এখানে পরিবর্তন করা হয়েছে
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: error?.data?.message || "An error occurred. Please try again.",
+        text: error?.data?.error || error?.data?.message || "An error occurred. Please try again.",
       });
     }
   };

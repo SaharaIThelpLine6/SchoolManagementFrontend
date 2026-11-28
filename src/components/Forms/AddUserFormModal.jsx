@@ -190,10 +190,12 @@ const AddUserFormModal = () => {
   const ageValue = calculateAge(DateOfBirth);
 
   // RTK Query hooks
-  const { data: codeSettings = [] } = useGetCodeSettingsQuery(undefined, {
-    refetchOnFocus: true,
-    refetchOnMountOrArgChange: true,
-  });
+  // ✅ isFetching নেওয়া হয়েছে — cache এর পুরনো data যেন ব্যবহার না হয়
+  const { data: codeSettings = [], isFetching: isCodeSettingsFetching } =
+    useGetCodeSettingsQuery(undefined, {
+      refetchOnFocus: true,
+      refetchOnMountOrArgChange: true,
+    });
   const { data: studentRelation = [] } = useGetStudentRelationsQuery(undefined, {
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
@@ -212,11 +214,12 @@ const AddUserFormModal = () => {
     refetchOnMountOrArgChange: true,
   });
 
-  const { data: userCodeCheck = {} } = useGetUserCodeCheckQuery(UserTypeID, {
-    refetchOnFocus: true,
-    refetchOnMountOrArgChange: true,
-    skip: !UserTypeID,
-  });
+  const { data: userCodeCheck = {}, isFetching: isUserCodeFetching } =
+    useGetUserCodeCheckQuery(UserTypeID, {
+      refetchOnFocus: true,
+      refetchOnMountOrArgChange: true,
+      skip: !UserTypeID,
+    });
 
   const { data: divisions = [] } = useGetDivisionsQuery();
   const { data: districts = [] } = useGetDistrictsQuery(DivisionID, {
@@ -292,9 +295,11 @@ const AddUserFormModal = () => {
 
   const isSameAddressRef = useRef(false);
 
+  // ✅ UserCode নির্ধারণ — fetch চলার সময় (stale cache) কিছু ধরা হবে না
   let userCodeData = null;
-  if (UserTypeID && codeSettings?.length) {
-    let existing = codeSettings.find(
+  const isUserCodeLoading = isUserCodeFetching || isCodeSettingsFetching;
+  if (UserTypeID && codeSettings?.length && !isUserCodeLoading) {
+    const existing = codeSettings.find(
       (c) => Number(c.UserTypeID) === Number(UserTypeID)
     );
     const usercode = existing?.IDType === 2 ? null : existing?.Value;
@@ -303,6 +308,61 @@ const AddUserFormModal = () => {
       : usercode;
     userCodeData = existing?.IDType === 2 ? null : usercodeData;
   }
+
+  // ⚠️ গুরুত্বপূর্ণ: এই reset effect সবসময় সব setValue effect এর আগে থাকতে হবে
+  // (না হলে cached data বসার পর reset সেগুলো মুছে দেয়)
+  // dependency শুধু [reset] — dataGender দেরিতে এলে যেন পুরো ফর্ম আবার reset না হয়
+  useEffect(() => {
+    reset({
+      UserName: '',
+      EnglishFullName: '',
+      EnglishFatherName: '',
+      EnglishMotherName: '',
+      ArabicFullName: '',
+      ArabicFatherName: '',
+      ArabicMotherName: '',
+      UserTypeID: 1,
+      UserCode: '',
+      GenderID: dataGender?.Action || '',
+      FatherName: '',
+      MotherName: '',
+      DateOfBirth: '',
+      age: '',
+      NIDNO: '',
+      Mobile1: '',
+      Mobile2: '',
+      Relationship1: '',
+      Relationship2: '',
+      Email: '',
+      BloodGroup: '',
+      DivisionID: '',
+      DistrictID: '',
+      permanentPoliceStationID: '',
+      permanentPost: '',
+      permanentVill: '',
+      sameAddress: false,
+      DivisionID2: '',
+      DistrictID2: '',
+      TransientPoliceStationID: '',
+      TransientPost: '',
+      TransientVill: '',
+      SessionID: '',
+      ClassID: '',
+      SubClassID: '',
+      ResidentialStatusId: '',
+      SFTID: '',
+      AdmissionSerial: '',
+    });
+    setCurrentStep(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reset]);
+
+  // ✅ FIX: UserCode সরাসরি form-এ বসানো হচ্ছে (child এর defaultValue এর উপর নির্ভর না করে)
+  useEffect(() => {
+    if (userCodeData) {
+      setValue('UserCode', String(userCodeData), { shouldValidate: true });
+    }
+  }, [userCodeData, setValue]);
 
   useEffect(() => {
     if (dataGender?.Action && !watch('GenderID')) {
@@ -385,50 +445,6 @@ const AddUserFormModal = () => {
       });
     }
   }, [SerialData, setValue]);
-
-  useEffect(() => {
-    reset({
-      UserName: '',
-      EnglishFullName: '',
-      EnglishFatherName: '',
-      EnglishMotherName: '',
-      ArabicFullName: '',
-      ArabicFatherName: '',
-      ArabicMotherName: '',
-      UserTypeID: 1,
-      UserCode: '',
-      GenderID: dataGender?.Action || '',
-      FatherName: '',
-      MotherName: '',
-      DateOfBirth: '',
-      age: '',
-      NIDNO: '',
-      Mobile1: '',
-      Mobile2: '',
-      Relationship1: '',
-      Relationship2: '',
-      Email: '',
-      BloodGroup: '',
-      DivisionID: '',
-      DistrictID: '',
-      permanentPoliceStationID: '',
-      permanentPost: '',
-      permanentVill: '',
-      sameAddress: false,
-      DivisionID2: '',
-      DistrictID2: '',
-      TransientPoliceStationID: '',
-      TransientPost: '',
-      TransientVill: '',
-      SessionID: '',
-      ClassID: '',
-      SubClassID: '',
-      ResidentialStatusId: '',
-      SFTID: '',
-      AdmissionSerial: '',
-    });
-    setCurrentStep(1);
-  }, [reset, dataGender]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -539,9 +555,20 @@ const AddUserFormModal = () => {
     });
   };
 
+  // ✅ reset করলে UserCode, Session, Gender মুছে যায় — তাই আবার বসানো হলো
   const handleResetForm = () => {
     reset();
     setCurrentStep(1);
+
+    if (userCodeData) {
+      setValue('UserCode', String(userCodeData));
+    }
+    if (activeSession?.SessionID) {
+      setValue('SessionID', activeSession.SessionID);
+    }
+    if (dataGender?.Action) {
+      setValue('GenderID', dataGender.Action);
+    }
   };
 
   const steps = [
@@ -699,6 +726,7 @@ const AddUserFormModal = () => {
                 {...register('UserTypeID', { valueAsNumber: true })}
               />
 
+              {/* ✅ defaultValue সরানো হয়েছে — UserCode এখন parent এর setValue দিয়ে বসে */}
               <DefaultInput
                 label={<span className="text-red-500">দাখেলা</span>}
                 type="number"
@@ -706,7 +734,6 @@ const AddUserFormModal = () => {
                 registerKey="UserCode"
                 require="Dakhela is required!"
                 codeSetting={true}
-                defaultValue={userCodeData ? userCodeData : ''}
                 disable={userCodeData ? true : false}
               />
 
